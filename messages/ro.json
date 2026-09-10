@@ -31,6 +31,19 @@
     "inStock": "In stoc",
     "outOfStock": "Stoc epuizat"
   },
+  "Cart": {
+    "cartLabel": "Cos de cumparaturi",
+    "title": "Cosul tau",
+    "empty": "Cosul tau este gol.",
+    "continueShopping": "Continua cumparaturile",
+    "remove": "Elimina",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "checkout": "Finalizeaza comanda",
+    "checkoutComingSoon": "Finalizarea comenzii va fi disponibila in curand.",
+    "addToCart": "Adauga in cos",
+    "added": "Adaugat in cos"
+  },
   "Footer": {
     "rights": "Toate drepturile rezervate."
   }

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductDetail } from "@/lib/db/products";
 import { formatPrice } from "@/lib/format";
+import AddToCartButton from "@/components/product/AddToCartButton";
 import type { ProductLine } from "@/lib/generated/prisma";
 
 export default async function ProductDetailPage({
@@ -66,6 +67,16 @@ export default async function ProductDetailPage({
           >
             {inStock ? t("inStock") : t("outOfStock")}
           </span>
+          <AddToCartButton
+            productId={product.id}
+            slug={product.slug}
+            categorySlug={subcategory}
+            line={line}
+            name={product.name}
+            priceCents={product.priceCents}
+            currency={product.currency}
+            inStock={inStock}
+          />
         </div>
       </div>
     </div>
