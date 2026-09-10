@@ -1,0 +1,29 @@
+{
+  "Metadata": {
+    "title": "iDesignStudio.ro | Events & Stationary",
+    "description": "iDesignStudio.ro — invitations, stationery, and custom decor for events."
+  },
+  "Nav": {
+    "events": "Events",
+    "stationary": "Stationary"
+  },
+  "Home": {
+    "eyebrow": "iDesignStudio.ro",
+    "title": "Memorable events, stationery made with heart.",
+    "subtitle": "Choose what brought you here today — event decor and planning, or custom invitations and stationery.",
+    "scrollHint": "Haven't decided yet? Scroll down to discover both categories."
+  },
+  "EventsPage": {
+    "eyebrow": "Events",
+    "title": "Event categories coming soon.",
+    "subtitle": "This page will show event categories and products once the database is connected."
+  },
+  "StationaryPage": {
+    "eyebrow": "Stationary",
+    "title": "Stationary categories coming soon.",
+    "subtitle": "This page will show stationary categories and products once the database is connected."
+  },
+  "Footer": {
+    "rights": "All rights reserved."
+  }
+}

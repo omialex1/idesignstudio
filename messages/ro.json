@@ -1,0 +1,29 @@
+{
+  "Metadata": {
+    "title": "iDesignStudio.ro | Evenimente si Papetarie",
+    "description": "iDesignStudio.ro — invitatii, papetarie si decor personalizat pentru evenimente."
+  },
+  "Nav": {
+    "events": "Evenimente",
+    "stationary": "Papetarie"
+  },
+  "Home": {
+    "eyebrow": "iDesignStudio.ro",
+    "title": "Evenimente memorabile, papetarie de suflet.",
+    "subtitle": "Alege ce te aduce aici astazi — decor si organizare de evenimente, sau invitatii si papetarie personalizata.",
+    "scrollHint": "Nu te-ai decis inca? Deruleaza mai jos ca sa descoperi ambele categorii."
+  },
+  "EventsPage": {
+    "eyebrow": "Evenimente",
+    "title": "Categoriile de evenimente vin in curand.",
+    "subtitle": "Aceasta pagina va afisa categoriile si produsele pentru evenimente odata ce baza de date este conectata."
+  },
+  "StationaryPage": {
+    "eyebrow": "Papetarie",
+    "title": "Categoriile de papetarie vin in curand.",
+    "subtitle": "Aceasta pagina va afisa categoriile si produsele de papetarie odata ce baza de date este conectata."
+  },
+  "Footer": {
+    "rights": "Toate drepturile rezervate."
+  }
+}
