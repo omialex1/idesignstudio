@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductLine {
+  EVENTS
+  STATIONARY
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+}
+
+model Category {
+  id           String                @id @default(cuid())
+  line         ProductLine
+  slug         String                @unique
+  sortOrder    Int                   @default(0)
+  heroImageUrl String?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  translations CategoryTranslation[]
+  products     Product[]
+}
+
+model CategoryTranslation {
+  id          String   @id @default(cuid())
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale      String
+  name        String
+  description String?
+
+  @@unique([categoryId, locale])
+  @@index([locale])
+}
+
+model Product {
+  id            String               @id @default(cuid())
+  categoryId    String
+  category      Category             @relation(fields: [categoryId], references: [id])
+  slug          String               @unique
+  priceCents    Int
+  currency      String               @default("RON")
+  stripePriceId String?
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  translations  ProductTranslation[]
+  images        ProductImage[]
+  inventory     Inventory?
+  orderItems    OrderItem[]
+}
+
+model ProductTranslation {
+  id          String  @id @default(cuid())
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale      String
+  name        String
+  description String?
+
+  @@unique([productId, locale])
+  @@index([locale])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  altText   String?
+  sortOrder Int     @default(0)
+}
+
+model Inventory {
+  id             String  @id @default(cuid())
+  productId      String  @unique
+  product        Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantityOnHand Int     @default(0)
+  reservedQty    Int     @default(0)
+}
+
+model Order {
+  id                      String      @id @default(cuid())
+  stripeCheckoutSessionId String      @unique
+  stripePaymentIntentId   String?
+  customerEmail           String
+  status                  OrderStatus @default(PENDING)
+  totalCents              Int
+  currency                String      @default("RON")
+  locale                  String
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  items                   OrderItem[]
+}
+
+model OrderItem {
+  id                  String  @id @default(cuid())
+  orderId             String
+  order               Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId           String
+  product             Product @relation(fields: [productId], references: [id])
+  productNameSnapshot String
+  unitPriceCents      Int
+  quantity            Int
+}
