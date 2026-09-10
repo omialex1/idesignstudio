@@ -16,13 +16,20 @@
   },
   "EventsPage": {
     "eyebrow": "Evenimente",
-    "title": "Categoriile de evenimente vin in curand.",
-    "subtitle": "Aceasta pagina va afisa categoriile si produsele pentru evenimente odata ce baza de date este conectata."
+    "title": "Alege categoria potrivita pentru evenimentul tau.",
+    "subtitle": "Descopera colectiile noastre de decor si organizare pentru evenimente memorabile."
   },
   "StationaryPage": {
     "eyebrow": "Papetarie",
-    "title": "Categoriile de papetarie vin in curand.",
-    "subtitle": "Aceasta pagina va afisa categoriile si produsele de papetarie odata ce baza de date este conectata."
+    "title": "Papetarie personalizata pentru fiecare ocazie.",
+    "subtitle": "Descopera colectiile noastre de invitatii, meniuri si accesorii de hartie."
+  },
+  "Shop": {
+    "backToEvents": "Inapoi la Evenimente",
+    "backToStationary": "Inapoi la Papetarie",
+    "noProducts": "Nu exista inca produse in aceasta categorie.",
+    "inStock": "In stoc",
+    "outOfStock": "Stoc epuizat"
   },
   "Footer": {
     "rights": "Toate drepturile rezervate."

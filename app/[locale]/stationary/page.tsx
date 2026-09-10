@@ -1,17 +1,10 @@
-import { getTranslations } from "next-intl/server";
+import CategoryIndexPage from "@/components/shop/CategoryIndexPage";
 
-export default async function StationaryPage() {
-  const t = await getTranslations("StationaryPage");
-
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
-      <p className="text-sm font-semibold tracking-[0.2em] text-brown-600 uppercase">
-        {t("eyebrow")}
-      </p>
-      <h1 className="max-w-2xl font-display text-4xl text-brown-800">
-        {t("title")}
-      </h1>
-      <p className="max-w-lg text-brown-600">{t("subtitle")}</p>
-    </div>
-  );
+export default async function StationaryPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  return <CategoryIndexPage line="STATIONARY" locale={locale} />;
 }

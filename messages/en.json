@@ -16,13 +16,20 @@
   },
   "EventsPage": {
     "eyebrow": "Events",
-    "title": "Event categories coming soon.",
-    "subtitle": "This page will show event categories and products once the database is connected."
+    "title": "Find the right category for your event.",
+    "subtitle": "Explore our collections of decor and planning for memorable events."
   },
   "StationaryPage": {
     "eyebrow": "Stationary",
-    "title": "Stationary categories coming soon.",
-    "subtitle": "This page will show stationary categories and products once the database is connected."
+    "title": "Custom stationery for every occasion.",
+    "subtitle": "Explore our collections of invitations, menus, and paper goods."
+  },
+  "Shop": {
+    "backToEvents": "Back to Events",
+    "backToStationary": "Back to Stationary",
+    "noProducts": "No products in this category yet.",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock"
   },
   "Footer": {
     "rights": "All rights reserved."

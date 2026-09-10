@@ -10,7 +10,9 @@ export default async function CategoryCard({
   const tNav = await getTranslations("Nav");
   const tHome = await getTranslations("Home");
   const isEvents = category.line === "EVENTS";
-  const href = isEvents ? "/events" : "/stationary";
+  const href = isEvents
+    ? `/events/${category.slug}`
+    : `/stationary/${category.slug}`;
 
   return (
     <Link
