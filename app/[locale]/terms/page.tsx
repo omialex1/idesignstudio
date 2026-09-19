@@ -31,7 +31,6 @@ export default async function TermsPage() {
         <Section
           heading={t("termsDeliveryHeading")}
           body={t("termsDeliveryBody")}
-          placeholder
         />
         <Section
           heading={t("termsReturnsHeading")}
@@ -80,27 +79,17 @@ export default async function TermsPage() {
 function Section({
   heading,
   body,
-  placeholder,
   children,
 }: {
   heading: string;
   body?: string;
-  placeholder?: boolean;
   children?: React.ReactNode;
 }) {
   return (
     <section>
       <h2 className="font-display text-xl text-brown-800">{heading}</h2>
       <div className="mt-2">
-        {body && (
-          <p
-            className={
-              placeholder ? "italic text-brown-400" : "text-brown-600"
-            }
-          >
-            {body}
-          </p>
-        )}
+        {body && <p className="text-brown-600">{body}</p>}
         {children}
       </div>
     </section>
