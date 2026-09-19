@@ -21,7 +21,7 @@ export default async function CategoryIndexPage({
   return (
     <div className="flex flex-1 flex-col">
       <div className="px-6 py-16 text-center">
-        <p className="text-sm font-semibold tracking-[0.2em] text-terracotta-600 uppercase">
+        <p className="text-sm font-semibold tracking-[0.2em] text-salamander-600 uppercase">
           {t("eyebrow")}
         </p>
         <h1 className="mt-2 font-display text-4xl text-taupe-800">

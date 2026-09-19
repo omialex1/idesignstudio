@@ -10,7 +10,7 @@ export default async function AdminCategoriesPage() {
         <h1 className="font-display text-2xl text-taupe-800">Categorii</h1>
         <Link
           href="/admin/categories/new"
-          className="rounded-full bg-terracotta-500 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-terracotta-600"
+          className="rounded-full bg-salamander-500 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-salamander-600"
         >
           + Adaugă categorie
         </Link>
@@ -42,7 +42,7 @@ export default async function AdminCategoriesPage() {
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/categories/${c.id}/edit`}
-                      className="text-terracotta-600 hover:underline"
+                      className="text-salamander-600 hover:underline"
                     >
                       Editează
                     </Link>

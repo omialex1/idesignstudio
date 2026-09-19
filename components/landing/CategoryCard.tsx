@@ -22,7 +22,7 @@ export default async function CategoryCard({
       <div
         className={`flex h-36 items-center justify-center font-display text-4xl transition-colors ${
           isEvents
-            ? "bg-terracotta-400 text-cream-50"
+            ? "bg-salamander-400 text-cream-50"
             : "bg-cream-200 text-taupe-800 group-hover:bg-cream-100"
         }`}
       >
@@ -31,7 +31,7 @@ export default async function CategoryCard({
       <div className="flex flex-1 flex-col gap-2 p-5">
         <span
           className={`text-xs font-semibold tracking-wide uppercase ${
-            isEvents ? "text-terracotta-600" : "text-taupe-600"
+            isEvents ? "text-salamander-600" : "text-taupe-600"
           }`}
         >
           {isEvents ? tNav("events") : tNav("stationary")}
@@ -42,7 +42,7 @@ export default async function CategoryCard({
         {category.description && (
           <p className="text-sm text-taupe-600">{category.description}</p>
         )}
-        <span className="mt-auto pt-2 text-sm font-medium text-terracotta-600 group-hover:underline">
+        <span className="mt-auto pt-2 text-sm font-medium text-salamander-600 group-hover:underline">
           {tHome("viewCollection")}
         </span>
       </div>

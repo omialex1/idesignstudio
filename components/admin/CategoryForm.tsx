@@ -80,7 +80,7 @@ export default function CategoryForm({
 
       <button
         type="submit"
-        className="w-fit rounded-full bg-terracotta-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-terracotta-600"
+        className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
       >
         {submitLabel}
       </button>
@@ -107,5 +107,5 @@ function Field({
 }
 
 const inputClass =
-  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400";
+  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400";
 const selectClass = inputClass + " bg-white";

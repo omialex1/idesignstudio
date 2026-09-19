@@ -29,7 +29,7 @@ export default async function AccountOrdersPage({
           </h1>
           <Link
             href="/account"
-            className="text-sm font-medium text-terracotta-600 hover:underline"
+            className="text-sm font-medium text-salamander-600 hover:underline"
           >
             {t("dashboardTitle")}
           </Link>

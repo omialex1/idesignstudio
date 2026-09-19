@@ -41,13 +41,13 @@ export default function ForgotPasswordPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400"
+                className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400"
               />
             </label>
             <button
               type="submit"
               disabled={loading}
-              className="rounded-full bg-terracotta-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-terracotta-600 disabled:opacity-60"
+              className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
             >
               {t("sendResetLink")}
             </button>
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
         <p className="mt-5 text-sm">
           <Link
             href="/account/login"
-            className="text-terracotta-600 hover:underline"
+            className="text-salamander-600 hover:underline"
           >
             {t("backToLogin")}
           </Link>

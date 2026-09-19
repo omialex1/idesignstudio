@@ -64,7 +64,7 @@ export default function AccountLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-terracotta-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-terracotta-600 disabled:opacity-60"
+            className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
           >
             {loading ? t("loggingIn") : t("login")}
           </button>
@@ -73,7 +73,7 @@ export default function AccountLoginPage() {
         <div className="mt-5 flex flex-col gap-2 text-sm text-taupe-600">
           <Link
             href="/account/forgot-password"
-            className="text-terracotta-600 hover:underline"
+            className="text-salamander-600 hover:underline"
           >
             {t("forgotPassword")}
           </Link>
@@ -81,7 +81,7 @@ export default function AccountLoginPage() {
             {t("noAccount")}{" "}
             <Link
               href="/account/register"
-              className="text-terracotta-600 hover:underline"
+              className="text-salamander-600 hover:underline"
             >
               {t("registerLink")}
             </Link>
@@ -102,4 +102,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputClass =
-  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400";
+  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400";

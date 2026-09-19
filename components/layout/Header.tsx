@@ -33,7 +33,7 @@ export default function Header() {
           className="font-display text-xl tracking-tight text-taupe-800"
         >
           iDesignStudio
-          <span className="text-terracotta-500">.ro</span>
+          <span className="text-salamander-500">.ro</span>
         </Link>
 
         {!isHome && (
@@ -42,7 +42,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="transition-colors hover:text-terracotta-600"
+                className="transition-colors hover:text-salamander-600"
               >
                 {link.label}
               </Link>
@@ -59,8 +59,8 @@ export default function Header() {
                 locale={loc}
                 className={`rounded-full px-2 py-1 transition-colors ${
                   locale === loc
-                    ? "bg-terracotta-50 text-terracotta-600"
-                    : "hover:text-terracotta-600"
+                    ? "bg-salamander-50 text-salamander-600"
+                    : "hover:text-salamander-600"
                 }`}
               >
                 {loc.toUpperCase()}
@@ -71,7 +71,7 @@ export default function Header() {
           <Link
             href="/account"
             aria-label={tAccount("accountLabel")}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-taupe-700 transition-colors hover:text-terracotta-600"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-taupe-700 transition-colors hover:text-salamander-600"
           >
             <svg
               viewBox="0 0 24 24"
@@ -89,7 +89,7 @@ export default function Header() {
           <Link
             href="/cart"
             aria-label={tCart("cartLabel")}
-            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-taupe-700 transition-colors hover:text-terracotta-600"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-taupe-700 transition-colors hover:text-salamander-600"
           >
             <svg
               viewBox="0 0 24 24"
@@ -104,7 +104,7 @@ export default function Header() {
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
             {itemCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta-500 px-1 text-[10px] font-semibold text-cream-50">
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-salamander-500 px-1 text-[10px] font-semibold text-cream-50">
                 {itemCount}
               </span>
             )}

@@ -9,15 +9,14 @@
   --color-cream-200: #efe4d0;
   --color-cream-300: #e6d5b8;
 
-  --color-terracotta-50: #fbf1ec;
-  --color-terracotta-100: #f3ddd0;
-  --color-terracotta-200: #e6bda3;
-  --color-terracotta-400: #d1875a;
-  --color-terracotta-500: #c1663f;
-  --color-terracotta-600: #a8532f;
-  --color-terracotta-700: #8a4326;
-
+  --color-salamander-50: #fdece5;
+  --color-salamander-100: #fad0c0;
+  --color-salamander-200: #f4a689;
+  --color-salamander-400: #ee7f52;
   --color-salamander-500: #e85627;
+  --color-salamander-600: #c33f16;
+  --color-salamander-700: #9c3212;
+
   --color-tangerine-400: #e9821b;
 
   --color-taupe-400: #9c8f85;
@@ -36,15 +35,14 @@
   --color-cream-200: var(--color-cream-200);
   --color-cream-300: var(--color-cream-300);
 
-  --color-terracotta-50: var(--color-terracotta-50);
-  --color-terracotta-100: var(--color-terracotta-100);
-  --color-terracotta-200: var(--color-terracotta-200);
-  --color-terracotta-400: var(--color-terracotta-400);
-  --color-terracotta-500: var(--color-terracotta-500);
-  --color-terracotta-600: var(--color-terracotta-600);
-  --color-terracotta-700: var(--color-terracotta-700);
-
+  --color-salamander-50: var(--color-salamander-50);
+  --color-salamander-100: var(--color-salamander-100);
+  --color-salamander-200: var(--color-salamander-200);
+  --color-salamander-400: var(--color-salamander-400);
   --color-salamander-500: var(--color-salamander-500);
+  --color-salamander-600: var(--color-salamander-600);
+  --color-salamander-700: var(--color-salamander-700);
+
   --color-tangerine-400: var(--color-tangerine-400);
 
   --color-taupe-400: var(--color-taupe-400);

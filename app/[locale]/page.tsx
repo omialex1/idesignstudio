@@ -19,7 +19,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
     <div className="flex flex-1 flex-col">
       <div className="flex flex-col items-center justify-center gap-10 px-6 py-24 text-center">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-sm font-semibold tracking-[0.2em] text-terracotta-600 uppercase">
+          <p className="text-sm font-semibold tracking-[0.2em] text-salamander-600 uppercase">
             {t("eyebrow")}
           </p>
           <h1 className="max-w-2xl font-display text-4xl leading-tight text-taupe-800 sm:text-5xl">

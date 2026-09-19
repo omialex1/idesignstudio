@@ -12,7 +12,7 @@ export default async function Footer() {
         <div className="flex flex-col gap-6 sm:flex-row sm:justify-between">
           <div>
             <p className="font-display text-taupe-800">
-              iDesignStudio<span className="text-terracotta-500">.ro</span>
+              iDesignStudio<span className="text-salamander-500">.ro</span>
             </p>
             <p className="mt-3 text-xs text-taupe-500">
               Visa &middot; Mastercard &middot; NETOPIA Payments
@@ -24,13 +24,13 @@ export default async function Footer() {
           <div className="flex flex-col gap-2 text-sm">
             <Link
               href="/terms"
-              className="text-taupe-600 hover:text-terracotta-600 hover:underline"
+              className="text-taupe-600 hover:text-salamander-600 hover:underline"
             >
               {tLegal("termsLink")}
             </Link>
             <Link
               href="/privacy"
-              className="text-taupe-600 hover:text-terracotta-600 hover:underline"
+              className="text-taupe-600 hover:text-salamander-600 hover:underline"
             >
               {tLegal("privacyLink")}
             </Link>

@@ -48,7 +48,7 @@ export default async function TermsPage() {
               href="https://anpc.ro"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-terracotta-600 hover:underline"
+              className="text-salamander-600 hover:underline"
             >
               anpc.ro
             </a>
@@ -60,7 +60,7 @@ export default async function TermsPage() {
               href="https://consumer-redress.ec.europa.eu/dispute-resolution-bodies"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-terracotta-600 hover:underline"
+              className="text-salamander-600 hover:underline"
             >
               consumer-redress.ec.europa.eu
             </a>

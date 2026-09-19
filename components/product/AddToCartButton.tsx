@@ -48,7 +48,7 @@ export default function AddToCartButton({
     <button
       type="button"
       onClick={handleAdd}
-      className="w-fit rounded-full bg-terracotta-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-terracotta-600"
+      className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
     >
       {justAdded ? t("added") : t("addToCart")}
     </button>

@@ -27,7 +27,7 @@ export default async function ProductCard({
     >
       <div
         className={`flex h-40 items-center justify-center font-display text-3xl text-cream-50 ${
-          isEvents ? "bg-terracotta-400" : "bg-taupe-500"
+          isEvents ? "bg-salamander-400" : "bg-taupe-500"
         }`}
       >
         {product.name.charAt(0).toUpperCase()}

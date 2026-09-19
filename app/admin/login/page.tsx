@@ -33,7 +33,7 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-cream-50 px-6">
       <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8 shadow-sm">
         <p className="font-display text-xl text-taupe-800">
-          iDesignStudio<span className="text-terracotta-500">.ro</span>
+          iDesignStudio<span className="text-salamander-500">.ro</span>
         </p>
         <p className="mt-1 text-sm text-taupe-600">Admin</p>
 
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
               autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400"
+              className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400"
             />
           </div>
 
@@ -57,7 +57,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-terracotta-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-terracotta-600 disabled:opacity-60"
+            className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
           >
             {loading ? "Se conectează..." : "Conectare"}
           </button>

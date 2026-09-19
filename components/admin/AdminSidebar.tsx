@@ -24,7 +24,7 @@ export default function AdminSidebar() {
     <aside className="flex w-56 shrink-0 flex-col border-r border-cream-200 bg-white">
       <div className="border-b border-cream-200 px-5 py-5">
         <p className="font-display text-lg text-taupe-800">
-          iDesignStudio<span className="text-terracotta-500">.ro</span>
+          iDesignStudio<span className="text-salamander-500">.ro</span>
         </p>
         <p className="text-xs text-taupe-400">Admin</p>
       </div>
@@ -40,7 +40,7 @@ export default function AdminSidebar() {
               href={link.href}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-terracotta-50 text-terracotta-600"
+                  ? "bg-salamander-50 text-salamander-600"
                   : "text-taupe-600 hover:bg-cream-100"
               }`}
             >

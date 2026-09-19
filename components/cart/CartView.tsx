@@ -24,7 +24,7 @@ export default function CartView() {
         <p className="text-taupe-600">{t("empty")}</p>
         <Link
           href="/"
-          className="text-sm font-medium text-terracotta-600 hover:underline"
+          className="text-sm font-medium text-salamander-600 hover:underline"
         >
           {t("continueShopping")}
         </Link>
@@ -57,7 +57,7 @@ export default function CartView() {
               >
                 <div
                   className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl font-display text-xl text-cream-50 ${
-                    item.line === "EVENTS" ? "bg-terracotta-400" : "bg-taupe-500"
+                    item.line === "EVENTS" ? "bg-salamander-400" : "bg-taupe-500"
                   }`}
                 >
                   {item.nameSnapshot.charAt(0).toUpperCase()}

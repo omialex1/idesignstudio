@@ -37,7 +37,7 @@ export default async function ProductDetailPage({
       <div className="mx-auto grid w-full max-w-4xl gap-10 sm:grid-cols-2">
         <div
           className={`flex h-80 items-center justify-center rounded-2xl font-display text-6xl text-cream-50 ${
-            isEvents ? "bg-terracotta-400" : "bg-taupe-500"
+            isEvents ? "bg-salamander-400" : "bg-taupe-500"
           }`}
         >
           {product.name.charAt(0).toUpperCase()}
@@ -45,7 +45,7 @@ export default async function ProductDetailPage({
         <div className="flex flex-col gap-4">
           <Link
             href={`${basePath}/${subcategory}`}
-            className="text-sm font-medium text-terracotta-600 hover:underline"
+            className="text-sm font-medium text-salamander-600 hover:underline"
           >
             {product.category.name}
           </Link>

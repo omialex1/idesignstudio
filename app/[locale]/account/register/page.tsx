@@ -79,7 +79,7 @@ export default function AccountRegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-terracotta-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-terracotta-600 disabled:opacity-60"
+            className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
           >
             {loading ? t("registering") : t("register")}
           </button>
@@ -89,7 +89,7 @@ export default function AccountRegisterPage() {
           {t("haveAccount")}{" "}
           <Link
             href="/account/login"
-            className="text-terracotta-600 hover:underline"
+            className="text-salamander-600 hover:underline"
           >
             {t("loginLink")}
           </Link>
@@ -109,4 +109,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputClass =
-  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400";
+  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400";
