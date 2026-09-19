@@ -18,6 +18,8 @@ export default function Header() {
     ? items.reduce((sum, item) => sum + item.quantity, 0)
     : 0;
 
+  const isHome = pathname === "/";
+
   const navLinks = [
     { href: "/events" as const, label: t("events") },
     { href: "/stationary" as const, label: t("stationary") },
@@ -34,17 +36,19 @@ export default function Header() {
           <span className="text-terracotta-500">.ro</span>
         </Link>
 
-        <nav className="hidden items-center gap-8 text-sm font-medium text-brown-700 sm:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="transition-colors hover:text-terracotta-600"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {!isHome && (
+          <nav className="hidden items-center gap-8 text-sm font-medium text-brown-700 sm:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="transition-colors hover:text-terracotta-600"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1 rounded-full border border-cream-200 p-1 text-xs font-semibold text-brown-600">
