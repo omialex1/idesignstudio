@@ -20,8 +20,10 @@ export default async function CategoryCard({
       className="group flex flex-col overflow-hidden rounded-2xl border border-cream-200 bg-white transition-shadow hover:shadow-lg"
     >
       <div
-        className={`flex h-36 items-center justify-center font-display text-4xl text-cream-50 ${
-          isEvents ? "bg-terracotta-400" : "bg-taupe-500"
+        className={`flex h-36 items-center justify-center font-display text-4xl transition-colors ${
+          isEvents
+            ? "bg-terracotta-400 text-cream-50"
+            : "bg-cream-200 text-taupe-800 group-hover:bg-cream-100"
         }`}
       >
         {category.name.charAt(0).toUpperCase()}

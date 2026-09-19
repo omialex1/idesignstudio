@@ -17,7 +17,8 @@
   --color-terracotta-600: #a8532f;
   --color-terracotta-700: #8a4326;
 
-  --color-blush-400: #e2937f;
+  --color-pumpkin-500: #ff7518;
+  --color-mango-400: #ffa62b;
 
   --color-taupe-400: #9c8f85;
   --color-taupe-500: #85766a;
@@ -43,7 +44,8 @@
   --color-terracotta-600: var(--color-terracotta-600);
   --color-terracotta-700: var(--color-terracotta-700);
 
-  --color-blush-400: var(--color-blush-400);
+  --color-pumpkin-500: var(--color-pumpkin-500);
+  --color-mango-400: var(--color-mango-400);
 
   --color-taupe-400: var(--color-taupe-400);
   --color-taupe-500: var(--color-taupe-500);

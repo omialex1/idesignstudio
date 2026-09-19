@@ -31,7 +31,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         <div className="flex w-full max-w-md flex-col gap-4 sm:flex-row">
           <Link
             href="/events"
-            className="flex-1 rounded-full bg-terracotta-500 px-8 py-4 text-sm font-semibold text-cream-50 transition-colors hover:bg-blush-400"
+            className="flex-1 rounded-full bg-pumpkin-500 px-8 py-4 text-sm font-semibold text-cream-50 transition-colors hover:bg-mango-400"
           >
             {tNav("events")}
           </Link>
