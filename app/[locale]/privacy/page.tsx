@@ -8,14 +8,14 @@ export default async function PrivacyPage() {
     <div className="flex flex-1 flex-col px-6 py-16">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
         <div>
-          <h1 className="font-display text-3xl text-brown-800">
+          <h1 className="font-display text-3xl text-taupe-800">
             {t("privacyTitle")}
           </h1>
-          <p className="mt-3 text-brown-600">{t("privacyIntro")}</p>
+          <p className="mt-3 text-taupe-600">{t("privacyIntro")}</p>
         </div>
 
         <Section heading={t("privacyControllerHeading")}>
-          <p className="mb-3 text-brown-600">{t("privacyControllerBody")}</p>
+          <p className="mb-3 text-taupe-600">{t("privacyControllerBody")}</p>
           <CompanyInfoBlock />
         </Section>
 
@@ -48,9 +48,9 @@ function Section({
 }) {
   return (
     <section>
-      <h2 className="font-display text-xl text-brown-800">{heading}</h2>
+      <h2 className="font-display text-xl text-taupe-800">{heading}</h2>
       <div className="mt-2">
-        {body && <p className="text-brown-600">{body}</p>}
+        {body && <p className="text-taupe-600">{body}</p>}
         {children}
       </div>
     </section>

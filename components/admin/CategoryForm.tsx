@@ -99,13 +99,13 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium text-brown-700">{label}</span>
+      <span className="font-medium text-taupe-700">{label}</span>
       {children}
-      {hint && <span className="text-xs text-brown-400">{hint}</span>}
+      {hint && <span className="text-xs text-taupe-400">{hint}</span>}
     </label>
   );
 }
 
 const inputClass =
-  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-brown-800 outline-none focus:border-terracotta-400";
+  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400";
 const selectClass = inputClass + " bg-white";

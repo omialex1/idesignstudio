@@ -18,17 +18,17 @@ export default async function AccountDashboardPage() {
     <div className="flex flex-1 flex-col items-center px-6 py-24">
       <div className="w-full max-w-md rounded-2xl border border-cream-200 bg-white p-8">
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-2xl text-brown-800">
+          <h1 className="font-display text-2xl text-taupe-800">
             {t("welcomeBack")}, {customer.name}
           </h1>
           <LogoutButton />
         </div>
 
-        <p className="mt-2 text-sm text-brown-600">{customer.email}</p>
+        <p className="mt-2 text-sm text-taupe-600">{customer.email}</p>
 
         <Link
           href="/account/orders"
-          className="mt-6 inline-block rounded-full border border-brown-500 px-6 py-2.5 text-sm font-semibold text-brown-700 transition-colors hover:bg-brown-500 hover:text-cream-50"
+          className="mt-6 inline-block rounded-full border border-taupe-500 px-6 py-2.5 text-sm font-semibold text-taupe-700 transition-colors hover:bg-taupe-500 hover:text-cream-50"
         >
           {t("viewOrders")}
         </Link>

@@ -20,8 +20,8 @@ export default function CartView() {
   if (items.length === 0) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
-        <h1 className="font-display text-3xl text-brown-800">{t("title")}</h1>
-        <p className="text-brown-600">{t("empty")}</p>
+        <h1 className="font-display text-3xl text-taupe-800">{t("title")}</h1>
+        <p className="text-taupe-600">{t("empty")}</p>
         <Link
           href="/"
           className="text-sm font-medium text-terracotta-600 hover:underline"
@@ -41,7 +41,7 @@ export default function CartView() {
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
       <div className="mx-auto w-full max-w-3xl">
-        <h1 className="font-display text-3xl text-brown-800">{t("title")}</h1>
+        <h1 className="font-display text-3xl text-taupe-800">{t("title")}</h1>
 
         <div className="mt-8 flex flex-col gap-4">
           {items.map((item) => {
@@ -57,7 +57,7 @@ export default function CartView() {
               >
                 <div
                   className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl font-display text-xl text-cream-50 ${
-                    item.line === "EVENTS" ? "bg-terracotta-400" : "bg-brown-500"
+                    item.line === "EVENTS" ? "bg-terracotta-400" : "bg-taupe-500"
                   }`}
                 >
                   {item.nameSnapshot.charAt(0).toUpperCase()}
@@ -66,11 +66,11 @@ export default function CartView() {
                 <div className="flex min-w-[8rem] flex-1 flex-col gap-1">
                   <Link
                     href={href}
-                    className="font-medium text-brown-800 hover:underline"
+                    className="font-medium text-taupe-800 hover:underline"
                   >
                     {item.nameSnapshot}
                   </Link>
-                  <span className="text-sm text-brown-600">
+                  <span className="text-sm text-taupe-600">
                     {formatPrice(item.priceCents, item.currency, locale)}
                   </span>
                 </div>
@@ -81,7 +81,7 @@ export default function CartView() {
                     onClick={() =>
                       updateQuantity(item.productId, item.quantity - 1)
                     }
-                    className="h-7 w-7 rounded-full border border-cream-200 text-brown-700 hover:bg-cream-100"
+                    className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
                   >
                     −
                   </button>
@@ -93,13 +93,13 @@ export default function CartView() {
                     onClick={() =>
                       updateQuantity(item.productId, item.quantity + 1)
                     }
-                    className="h-7 w-7 rounded-full border border-cream-200 text-brown-700 hover:bg-cream-100"
+                    className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
                   >
                     +
                   </button>
                 </div>
 
-                <span className="w-24 text-right font-medium text-brown-800">
+                <span className="w-24 text-right font-medium text-taupe-800">
                   {formatPrice(
                     item.priceCents * item.quantity,
                     item.currency,
@@ -110,7 +110,7 @@ export default function CartView() {
                 <button
                   type="button"
                   onClick={() => removeItem(item.productId)}
-                  className="text-xs font-medium text-brown-400 hover:text-red-600"
+                  className="text-xs font-medium text-taupe-400 hover:text-red-600"
                 >
                   {t("remove")}
                 </button>
@@ -120,18 +120,18 @@ export default function CartView() {
         </div>
 
         <div className="mt-8 flex flex-col items-end gap-2 border-t border-cream-200 pt-6">
-          <div className="flex items-center gap-4 text-lg font-semibold text-brown-800">
+          <div className="flex items-center gap-4 text-lg font-semibold text-taupe-800">
             <span>{t("total")}</span>
             <span>{formatPrice(total, currency, locale)}</span>
           </div>
           <button
             type="button"
             disabled
-            className="cursor-not-allowed rounded-full bg-brown-300 px-8 py-3 text-sm font-semibold text-cream-50 opacity-70"
+            className="cursor-not-allowed rounded-full bg-taupe-300 px-8 py-3 text-sm font-semibold text-cream-50 opacity-70"
           >
             {t("checkout")}
           </button>
-          <p className="text-xs text-brown-400">{t("checkoutComingSoon")}</p>
+          <p className="text-xs text-taupe-400">{t("checkoutComingSoon")}</p>
         </div>
       </div>
     </div>

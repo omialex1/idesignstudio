@@ -8,14 +8,14 @@ export default async function TermsPage() {
     <div className="flex flex-1 flex-col px-6 py-16">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
         <div>
-          <h1 className="font-display text-3xl text-brown-800">
+          <h1 className="font-display text-3xl text-taupe-800">
             {t("termsTitle")}
           </h1>
-          <p className="mt-3 text-brown-600">{t("termsIntro")}</p>
+          <p className="mt-3 text-taupe-600">{t("termsIntro")}</p>
         </div>
 
         <Section heading={t("termsCompanyHeading")}>
-          <p className="mb-3 text-brown-600">{t("termsCompanyBody")}</p>
+          <p className="mb-3 text-taupe-600">{t("termsCompanyBody")}</p>
           <CompanyInfoBlock />
         </Section>
 
@@ -42,7 +42,7 @@ export default async function TermsPage() {
         />
 
         <Section heading={t("termsDisputesHeading")}>
-          <p className="text-brown-600">
+          <p className="text-taupe-600">
             {t("termsDisputesBody")}{" "}
             <a
               href="https://anpc.ro"
@@ -54,7 +54,7 @@ export default async function TermsPage() {
             </a>
             .
           </p>
-          <p className="mt-2 text-brown-600">
+          <p className="mt-2 text-taupe-600">
             {t("termsDisputesBodyContinued")}{" "}
             <a
               href="https://consumer-redress.ec.europa.eu/dispute-resolution-bodies"
@@ -87,9 +87,9 @@ function Section({
 }) {
   return (
     <section>
-      <h2 className="font-display text-xl text-brown-800">{heading}</h2>
+      <h2 className="font-display text-xl text-taupe-800">{heading}</h2>
       <div className="mt-2">
-        {body && <p className="text-brown-600">{body}</p>}
+        {body && <p className="text-taupe-600">{body}</p>}
         {children}
       </div>
     </section>

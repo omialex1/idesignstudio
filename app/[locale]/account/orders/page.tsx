@@ -24,7 +24,7 @@ export default async function AccountOrdersPage({
     <div className="flex flex-1 flex-col px-6 py-24">
       <div className="mx-auto w-full max-w-2xl">
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-2xl text-brown-800">
+          <h1 className="font-display text-2xl text-taupe-800">
             {t("ordersTitle")}
           </h1>
           <Link
@@ -36,7 +36,7 @@ export default async function AccountOrdersPage({
         </div>
 
         {orders.length === 0 ? (
-          <p className="mt-6 text-sm text-brown-500">{t("noOrders")}</p>
+          <p className="mt-6 text-sm text-taupe-500">{t("noOrders")}</p>
         ) : (
           <div className="mt-6 flex flex-col gap-3">
             {orders.map((order) => (
@@ -45,16 +45,16 @@ export default async function AccountOrdersPage({
                 className="flex items-center justify-between rounded-xl border border-cream-200 bg-white px-4 py-3"
               >
                 <div>
-                  <p className="font-mono text-xs text-brown-500">
+                  <p className="font-mono text-xs text-taupe-500">
                     #{order.id.slice(0, 8)}
                   </p>
-                  <p className="text-sm text-brown-600">
+                  <p className="text-sm text-taupe-600">
                     {order.createdAt.toLocaleDateString(
                       locale === "en" ? "en-US" : "ro-RO",
                     )}
                   </p>
                 </div>
-                <span className="font-semibold text-brown-800">
+                <span className="font-semibold text-taupe-800">
                   {formatPrice(order.totalCents, order.currency, locale)}
                 </span>
                 <OrderStatusBadge status={order.status} />

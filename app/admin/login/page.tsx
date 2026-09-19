@@ -32,14 +32,14 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-cream-50 px-6">
       <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8 shadow-sm">
-        <p className="font-display text-xl text-brown-800">
+        <p className="font-display text-xl text-taupe-800">
           iDesignStudio<span className="text-terracotta-500">.ro</span>
         </p>
-        <p className="mt-1 text-sm text-brown-600">Admin</p>
+        <p className="mt-1 text-sm text-taupe-600">Admin</p>
 
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-sm font-medium text-brown-700">
+            <label htmlFor="password" className="text-sm font-medium text-taupe-700">
               Parolă
             </label>
             <input
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
               autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-brown-800 outline-none focus:border-terracotta-400"
+              className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400"
             />
           </div>
 

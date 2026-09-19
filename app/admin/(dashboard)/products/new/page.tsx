@@ -7,7 +7,7 @@ export default async function NewProductPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl text-brown-800">Adaugă produs</h1>
+      <h1 className="font-display text-2xl text-taupe-800">Adaugă produs</h1>
       <ProductForm
         action={createProduct}
         categories={categories}

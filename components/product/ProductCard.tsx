@@ -27,22 +27,22 @@ export default async function ProductCard({
     >
       <div
         className={`flex h-40 items-center justify-center font-display text-3xl text-cream-50 ${
-          isEvents ? "bg-terracotta-400" : "bg-brown-500"
+          isEvents ? "bg-terracotta-400" : "bg-taupe-500"
         }`}
       >
         {product.name.charAt(0).toUpperCase()}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5">
-        <h3 className="font-display text-lg text-brown-800">
+        <h3 className="font-display text-lg text-taupe-800">
           {product.name}
         </h3>
         {product.description && (
-          <p className="line-clamp-2 text-sm text-brown-600">
+          <p className="line-clamp-2 text-sm text-taupe-600">
             {product.description}
           </p>
         )}
         <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="font-semibold text-brown-800">
+          <span className="font-semibold text-taupe-800">
             {formatPrice(product.priceCents, product.currency, locale)}
           </span>
           <span

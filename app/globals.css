@@ -2,7 +2,7 @@
 
 :root {
   --background: #fdfaf5;
-  --foreground: #3a271d;
+  --foreground: #3d332e;
 
   --color-cream-50: #fdfaf5;
   --color-cream-100: #f7f0e4;
@@ -17,11 +17,13 @@
   --color-terracotta-600: #a8532f;
   --color-terracotta-700: #8a4326;
 
-  --color-brown-400: #8a6a54;
-  --color-brown-500: #6b4a37;
-  --color-brown-600: #56392a;
-  --color-brown-700: #4f3527;
-  --color-brown-800: #3a271d;
+  --color-blush-400: #e2937f;
+
+  --color-taupe-400: #9c8f85;
+  --color-taupe-500: #85766a;
+  --color-taupe-600: #6b5d54;
+  --color-taupe-700: #55483f;
+  --color-taupe-800: #3d332e;
 }
 
 @theme inline {
@@ -41,11 +43,13 @@
   --color-terracotta-600: var(--color-terracotta-600);
   --color-terracotta-700: var(--color-terracotta-700);
 
-  --color-brown-400: var(--color-brown-400);
-  --color-brown-500: var(--color-brown-500);
-  --color-brown-600: var(--color-brown-600);
-  --color-brown-700: var(--color-brown-700);
-  --color-brown-800: var(--color-brown-800);
+  --color-blush-400: var(--color-blush-400);
+
+  --color-taupe-400: var(--color-taupe-400);
+  --color-taupe-500: var(--color-taupe-500);
+  --color-taupe-600: var(--color-taupe-600);
+  --color-taupe-700: var(--color-taupe-700);
+  --color-taupe-800: var(--color-taupe-800);
 
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-manrope);

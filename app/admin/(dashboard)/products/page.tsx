@@ -9,7 +9,7 @@ export default async function AdminProductsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl text-brown-800">Produse</h1>
+        <h1 className="font-display text-2xl text-taupe-800">Produse</h1>
         <Link
           href="/admin/products/new"
           className="rounded-full bg-terracotta-500 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-terracotta-600"
@@ -20,7 +20,7 @@ export default async function AdminProductsPage() {
 
       <div className="overflow-x-auto rounded-2xl border border-cream-200 bg-white">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-cream-200 text-brown-500">
+          <thead className="border-b border-cream-200 text-taupe-500">
             <tr>
               <th className="px-4 py-3 font-medium">Produs</th>
               <th className="px-4 py-3 font-medium">Categorie</th>
@@ -39,9 +39,9 @@ export default async function AdminProductsPage() {
                 p.category.slug;
               return (
                 <tr key={p.id} className="border-b border-cream-100 last:border-0">
-                  <td className="px-4 py-3 font-medium text-brown-800">{name}</td>
-                  <td className="px-4 py-3 text-brown-600">{categoryName}</td>
-                  <td className="px-4 py-3 text-brown-800">
+                  <td className="px-4 py-3 font-medium text-taupe-800">{name}</td>
+                  <td className="px-4 py-3 text-taupe-600">{categoryName}</td>
+                  <td className="px-4 py-3 text-taupe-800">
                     {formatPrice(p.priceCents, p.currency, "ro")}
                   </td>
                   <td className="px-4 py-3">
@@ -50,7 +50,7 @@ export default async function AdminProductsPage() {
                       lowStockThreshold={p.inventory?.lowStockThreshold ?? 5}
                     />
                   </td>
-                  <td className="px-4 py-3 text-brown-600">
+                  <td className="px-4 py-3 text-taupe-600">
                     {p.isActive ? "Da" : "Nu"}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -66,7 +66,7 @@ export default async function AdminProductsPage() {
             })}
             {products.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-brown-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-taupe-400">
                   Niciun produs încă.
                 </td>
               </tr>

@@ -24,10 +24,10 @@ export default async function CategoryIndexPage({
         <p className="text-sm font-semibold tracking-[0.2em] text-terracotta-600 uppercase">
           {t("eyebrow")}
         </p>
-        <h1 className="mt-2 font-display text-4xl text-brown-800">
+        <h1 className="mt-2 font-display text-4xl text-taupe-800">
           {t("title")}
         </h1>
-        <p className="mx-auto mt-3 max-w-lg text-brown-600">
+        <p className="mx-auto mt-3 max-w-lg text-taupe-600">
           {t("subtitle")}
         </p>
       </div>

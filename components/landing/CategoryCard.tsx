@@ -21,7 +21,7 @@ export default async function CategoryCard({
     >
       <div
         className={`flex h-36 items-center justify-center font-display text-4xl text-cream-50 ${
-          isEvents ? "bg-terracotta-400" : "bg-brown-500"
+          isEvents ? "bg-terracotta-400" : "bg-taupe-500"
         }`}
       >
         {category.name.charAt(0).toUpperCase()}
@@ -29,16 +29,16 @@ export default async function CategoryCard({
       <div className="flex flex-1 flex-col gap-2 p-5">
         <span
           className={`text-xs font-semibold tracking-wide uppercase ${
-            isEvents ? "text-terracotta-600" : "text-brown-600"
+            isEvents ? "text-terracotta-600" : "text-taupe-600"
           }`}
         >
           {isEvents ? tNav("events") : tNav("stationary")}
         </span>
-        <h3 className="font-display text-lg text-brown-800">
+        <h3 className="font-display text-lg text-taupe-800">
           {category.name}
         </h3>
         {category.description && (
-          <p className="text-sm text-brown-600">{category.description}</p>
+          <p className="text-sm text-taupe-600">{category.description}</p>
         )}
         <span className="mt-auto pt-2 text-sm font-medium text-terracotta-600 group-hover:underline">
           {tHome("viewCollection")}

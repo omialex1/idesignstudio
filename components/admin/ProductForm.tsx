@@ -42,7 +42,7 @@ export default function ProductForm({
   return (
     <form action={action} className="flex max-w-2xl flex-col gap-8">
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
-        <h2 className="font-display text-lg text-brown-800">General</h2>
+        <h2 className="font-display text-lg text-taupe-800">General</h2>
 
         <Field label="Categorie">
           <select
@@ -106,7 +106,7 @@ export default function ProductForm({
           />
         </Field>
 
-        <label className="flex items-center gap-2 text-sm text-brown-700">
+        <label className="flex items-center gap-2 text-sm text-taupe-700">
           <input
             type="checkbox"
             name="isActive"
@@ -118,7 +118,7 @@ export default function ProductForm({
       </section>
 
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
-        <h2 className="font-display text-lg text-brown-800">Inventar</h2>
+        <h2 className="font-display text-lg text-taupe-800">Inventar</h2>
 
         <Field label="Cantitate în stoc">
           <input
@@ -167,13 +167,13 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium text-brown-700">{label}</span>
+      <span className="font-medium text-taupe-700">{label}</span>
       {children}
-      {hint && <span className="text-xs text-brown-400">{hint}</span>}
+      {hint && <span className="text-xs text-taupe-400">{hint}</span>}
     </label>
   );
 }
 
 const inputClass =
-  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-brown-800 outline-none focus:border-terracotta-400";
+  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400";
 const selectClass = inputClass + " bg-white";

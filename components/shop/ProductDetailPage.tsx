@@ -37,7 +37,7 @@ export default async function ProductDetailPage({
       <div className="mx-auto grid w-full max-w-4xl gap-10 sm:grid-cols-2">
         <div
           className={`flex h-80 items-center justify-center rounded-2xl font-display text-6xl text-cream-50 ${
-            isEvents ? "bg-terracotta-400" : "bg-brown-500"
+            isEvents ? "bg-terracotta-400" : "bg-taupe-500"
           }`}
         >
           {product.name.charAt(0).toUpperCase()}
@@ -49,13 +49,13 @@ export default async function ProductDetailPage({
           >
             {product.category.name}
           </Link>
-          <h1 className="font-display text-3xl text-brown-800">
+          <h1 className="font-display text-3xl text-taupe-800">
             {product.name}
           </h1>
           {product.description && (
-            <p className="text-brown-600">{product.description}</p>
+            <p className="text-taupe-600">{product.description}</p>
           )}
-          <p className="font-display text-2xl text-brown-800">
+          <p className="font-display text-2xl text-taupe-800">
             {formatPrice(product.priceCents, product.currency, locale)}
           </p>
           <span

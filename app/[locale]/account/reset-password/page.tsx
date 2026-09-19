@@ -49,7 +49,7 @@ function ResetPasswordForm() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
       <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8">
-        <h1 className="font-display text-2xl text-brown-800">
+        <h1 className="font-display text-2xl text-taupe-800">
           {t("resetPasswordTitle")}
         </h1>
 
@@ -64,7 +64,7 @@ function ResetPasswordForm() {
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
             <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium text-brown-700">
+              <span className="font-medium text-taupe-700">
                 {t("newPassword")}
               </span>
               <input
@@ -73,7 +73,7 @@ function ResetPasswordForm() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-brown-800 outline-none focus:border-terracotta-400"
+                className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400"
               />
             </label>
 

@@ -7,7 +7,7 @@ export default async function AdminCategoriesPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl text-brown-800">Categorii</h1>
+        <h1 className="font-display text-2xl text-taupe-800">Categorii</h1>
         <Link
           href="/admin/categories/new"
           className="rounded-full bg-terracotta-500 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-terracotta-600"
@@ -18,7 +18,7 @@ export default async function AdminCategoriesPage() {
 
       <div className="overflow-x-auto rounded-2xl border border-cream-200 bg-white">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-cream-200 text-brown-500">
+          <thead className="border-b border-cream-200 text-taupe-500">
             <tr>
               <th className="px-4 py-3 font-medium">Categorie</th>
               <th className="px-4 py-3 font-medium">Linie</th>
@@ -33,12 +33,12 @@ export default async function AdminCategoriesPage() {
                 c.translations.find((t) => t.locale === "ro")?.name ?? c.slug;
               return (
                 <tr key={c.id} className="border-b border-cream-100 last:border-0">
-                  <td className="px-4 py-3 font-medium text-brown-800">{name}</td>
-                  <td className="px-4 py-3 text-brown-600">
+                  <td className="px-4 py-3 font-medium text-taupe-800">{name}</td>
+                  <td className="px-4 py-3 text-taupe-600">
                     {c.line === "EVENTS" ? "Evenimente" : "Papetărie"}
                   </td>
-                  <td className="px-4 py-3 text-brown-600">{c.sortOrder}</td>
-                  <td className="px-4 py-3 text-brown-600">{c._count.products}</td>
+                  <td className="px-4 py-3 text-taupe-600">{c.sortOrder}</td>
+                  <td className="px-4 py-3 text-taupe-600">{c._count.products}</td>
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/categories/${c.id}/edit`}
@@ -52,7 +52,7 @@ export default async function AdminCategoriesPage() {
             })}
             {categories.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-brown-400">
+                <td colSpan={5} className="px-4 py-6 text-center text-taupe-400">
                   Nicio categorie încă.
                 </td>
               </tr>

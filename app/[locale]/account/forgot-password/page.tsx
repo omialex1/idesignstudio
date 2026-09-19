@@ -26,22 +26,22 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
       <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8">
-        <h1 className="font-display text-2xl text-brown-800">
+        <h1 className="font-display text-2xl text-taupe-800">
           {t("forgotPasswordTitle")}
         </h1>
 
         {sent ? (
-          <p className="mt-4 text-sm text-brown-600">{t("resetLinkSent")}</p>
+          <p className="mt-4 text-sm text-taupe-600">{t("resetLinkSent")}</p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
             <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium text-brown-700">{t("email")}</span>
+              <span className="font-medium text-taupe-700">{t("email")}</span>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-brown-800 outline-none focus:border-terracotta-400"
+                className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400"
               />
             </label>
             <button

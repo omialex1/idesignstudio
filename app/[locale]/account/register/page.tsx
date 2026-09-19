@@ -41,7 +41,7 @@ export default function AccountRegisterPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
       <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8">
-        <h1 className="font-display text-2xl text-brown-800">
+        <h1 className="font-display text-2xl text-taupe-800">
           {t("registerTitle")}
         </h1>
 
@@ -85,7 +85,7 @@ export default function AccountRegisterPage() {
           </button>
         </form>
 
-        <p className="mt-5 text-sm text-brown-600">
+        <p className="mt-5 text-sm text-taupe-600">
           {t("haveAccount")}{" "}
           <Link
             href="/account/login"
@@ -102,11 +102,11 @@ export default function AccountRegisterPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium text-brown-700">{label}</span>
+      <span className="font-medium text-taupe-700">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputClass =
-  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-brown-800 outline-none focus:border-terracotta-400";
+  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-terracotta-400";

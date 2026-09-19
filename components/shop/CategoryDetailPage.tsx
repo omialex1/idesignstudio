@@ -38,11 +38,11 @@ export default async function CategoryDetailPage({
         >
           {t(backKey[line])}
         </Link>
-        <h1 className="mt-4 font-display text-3xl text-brown-800">
+        <h1 className="mt-4 font-display text-3xl text-taupe-800">
           {category.name}
         </h1>
         {category.description && (
-          <p className="mt-2 max-w-xl text-brown-600">
+          <p className="mt-2 max-w-xl text-taupe-600">
             {category.description}
           </p>
         )}
@@ -56,7 +56,7 @@ export default async function CategoryDetailPage({
               locale={locale}
             />
           ) : (
-            <p className="text-brown-500">{t("noProducts")}</p>
+            <p className="text-taupe-500">{t("noProducts")}</p>
           )}
         </div>
       </div>

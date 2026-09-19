@@ -30,14 +30,14 @@ export default function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link
           href="/"
-          className="font-display text-xl tracking-tight text-brown-800"
+          className="font-display text-xl tracking-tight text-taupe-800"
         >
           iDesignStudio
           <span className="text-terracotta-500">.ro</span>
         </Link>
 
         {!isHome && (
-          <nav className="hidden items-center gap-8 text-sm font-medium text-brown-700 sm:flex">
+          <nav className="hidden items-center gap-8 text-sm font-medium text-taupe-700 sm:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -51,7 +51,7 @@ export default function Header() {
         )}
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 rounded-full border border-cream-200 p-1 text-xs font-semibold text-brown-600">
+          <div className="flex items-center gap-1 rounded-full border border-cream-200 p-1 text-xs font-semibold text-taupe-600">
             {routing.locales.map((loc) => (
               <Link
                 key={loc}
@@ -71,7 +71,7 @@ export default function Header() {
           <Link
             href="/account"
             aria-label={tAccount("accountLabel")}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-brown-700 transition-colors hover:text-terracotta-600"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-taupe-700 transition-colors hover:text-terracotta-600"
           >
             <svg
               viewBox="0 0 24 24"
@@ -89,7 +89,7 @@ export default function Header() {
           <Link
             href="/cart"
             aria-label={tCart("cartLabel")}
-            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-brown-700 transition-colors hover:text-terracotta-600"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-taupe-700 transition-colors hover:text-terracotta-600"
           >
             <svg
               viewBox="0 0 24 24"
