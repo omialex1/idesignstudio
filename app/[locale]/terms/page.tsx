@@ -36,7 +36,6 @@ export default async function TermsPage() {
         <Section
           heading={t("termsReturnsHeading")}
           body={t("termsReturnsBody")}
-          placeholder
         />
         <Section
           heading={t("termsWithdrawalHeading")}
