@@ -95,6 +95,8 @@ model Order {
   stripeCheckoutSessionId String      @unique
   stripePaymentIntentId   String?
   customerEmail           String
+  customerId              String?
+  customer                Customer?   @relation(fields: [customerId], references: [id])
   status                  OrderStatus @default(PENDING)
   totalCents              Int
   currency                String      @default("RON")
@@ -102,6 +104,28 @@ model Order {
   createdAt               DateTime    @default(now())
   updatedAt               DateTime    @updatedAt
   items                   OrderItem[]
+}
+
+model Customer {
+  id           String               @id @default(cuid())
+  email        String               @unique
+  passwordHash String
+  name         String
+  locale       String               @default("ro")
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  orders       Order[]
+  resetTokens  PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model OrderItem {

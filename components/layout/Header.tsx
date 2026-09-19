@@ -8,6 +8,7 @@ import { useCartStore } from "@/lib/cart/store";
 export default function Header() {
   const t = useTranslations("Nav");
   const tCart = useTranslations("Cart");
+  const tAccount = useTranslations("Account");
   const locale = useLocale();
   const pathname = usePathname();
 
@@ -62,6 +63,24 @@ export default function Header() {
               </Link>
             ))}
           </div>
+
+          <Link
+            href="/account"
+            aria-label={tAccount("accountLabel")}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-brown-700 transition-colors hover:text-terracotta-600"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              className="h-4 w-4"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+            </svg>
+          </Link>
 
           <Link
             href="/cart"
