@@ -53,12 +53,12 @@ export default async function TermsPage() {
           <p className="text-taupe-600">
             {t("termsDisputesBody")}{" "}
             <a
-              href="https://anpc.ro"
+              href="https://reclamatiisal.anpc.ro/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-salamander-600 hover:underline"
             >
-              anpc.ro
+              reclamatiisal.anpc.ro
             </a>
             .
           </p>

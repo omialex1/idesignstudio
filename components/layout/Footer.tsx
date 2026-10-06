@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import CompanyInfoBlock from "@/components/legal/CompanyInfoBlock";
@@ -14,9 +15,27 @@ export default async function Footer() {
             <p className="font-display text-taupe-800">
               iDesignStudio<span className="text-salamander-500">.ro</span>
             </p>
-            <p className="mt-3 text-xs text-taupe-500">
-              Visa &middot; Mastercard &middot; NETOPIA Payments
-            </p>
+            <Image
+              src="/legal/netopia-visa-mastercard.png"
+              alt="NETOPIA Payments, Mastercard, Visa"
+              width={1852}
+              height={349}
+              className="mt-4 h-8 w-auto rounded bg-white px-2 py-1"
+            />
+            <a
+              href="https://reclamatiisal.anpc.ro/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 block w-fit"
+            >
+              <Image
+                src="/legal/anpc-sal.png"
+                alt={tLegal("anpcSalAlt")}
+                width={201}
+                height={50}
+                unoptimized
+              />
+            </a>
           </div>
 
           <CompanyInfoBlock />
