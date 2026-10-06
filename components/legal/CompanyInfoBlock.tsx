@@ -11,7 +11,13 @@ export default async function CompanyInfoBlock() {
       <p>{t("companyAddress")}</p>
       <p>{t("companyPhone")}</p>
       <p>
-        {t("companyEmailLabel")} {t("companyEmailPlaceholder")}
+        {t("companyEmailLabel")}{" "}
+        <a
+          href={`mailto:${t("companyEmail")}`}
+          className="text-salamander-600 hover:underline"
+        >
+          {t("companyEmail")}
+        </a>
       </p>
     </div>
   );
