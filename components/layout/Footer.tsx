@@ -34,6 +34,12 @@ export default async function Footer() {
             >
               {tLegal("privacyLink")}
             </Link>
+            <Link
+              href="/withdrawal"
+              className="text-taupe-600 hover:text-salamander-600 hover:underline"
+            >
+              {tLegal("withdrawalLink")}
+            </Link>
           </div>
         </div>
 

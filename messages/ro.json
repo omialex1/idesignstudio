@@ -95,7 +95,9 @@
     "termsCompanyHeading": "Date de identificare",
     "termsCompanyBody": "Site-ul iDesignStudio.ro este operat de:",
     "termsRoleHeading": "Rolul nostru",
-    "termsRoleBody": "IDESIGN STUDIO S.R.L. acționează în calitate de comerciant, vânzând direct produsele proprii de decor pentru evenimente și papetărie personalizată prezentate pe acest site.",
+    "termsRoleBody": "IDESIGN STUDIO S.R.L. acționează în calitate de comerciant, vânzând direct produsele proprii de decor pentru evenimente și papetărie personalizată prezentate pe acest site. Aceeași societate este entitatea juridică care comercializează produsele și emite factura pentru fiecare comandă.",
+    "withdrawalLink": "Retragere din contract",
+    "termsWithdrawalFormLink": "Folosește formularul online de retragere",
     "termsProductsHeading": "Produse și prețuri",
     "termsProductsBody": "Toate prețurile afișate pe site sunt exprimate în RON (lei românești) și includ TVA, acolo unde este cazul. Ne rezervăm dreptul de a modifica prețurile și disponibilitatea produselor fără notificare prealabilă, modificările neafectând comenzile deja confirmate.",
     "termsPaymentHeading": "Metode de plată",
@@ -121,6 +123,21 @@
     "privacyRightsHeading": "Drepturile tale",
     "privacyRightsBody": "Conform GDPR, ai dreptul de acces, rectificare, ștergere și portabilitate a datelor tale, precum și dreptul de a te opune prelucrării acestora. Pentru a-ți exercita oricare dintre aceste drepturi, te rugăm să ne contactezi la adresa de mai jos.",
     "privacyContactHeading": "Contact pentru solicitări GDPR"
+  },
+  "Withdrawal": {
+    "title": "Retragere din contract",
+    "intro": "Folosește acest formular ca să anunți că te retragi dintr-un contract încheiat la distanță, în termen de 14 zile calendaristice de la primirea produselor. Vei primi pe email o confirmare de primire. Produsele personalizate conform specificațiilor tale nu pot face obiectul dreptului de retragere.",
+    "name": "Nume complet",
+    "email": "Email",
+    "orderNumber": "Număr comandă",
+    "products": "Produsele vizate",
+    "message": "Mesaj (opțional)",
+    "submit": "Trimite cererea de retragere",
+    "sending": "Se trimite...",
+    "successTitle": "Cererea ta a fost trimisă",
+    "successBody": "Ți-am trimis pe email o confirmare de primire. Te vom contacta în curând cu pașii următori.",
+    "error": "Nu am putut trimite cererea. Te rugăm să încerci din nou sau să ne contactezi direct la datele din Termeni și Condiții.",
+    "backToTerms": "Înapoi la Termeni și Condiții"
   },
   "Footer": {
     "rights": "Toate drepturile rezervate."

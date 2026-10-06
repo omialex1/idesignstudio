@@ -34,12 +34,12 @@ export function orderConfirmationEmail(
     .join("");
 
   const body = isRo
-    ? `<h1 style="font-size:20px;color:#4F3527;margin:0 0 12px;">Multumim pentru comanda!</h1>
+    ? `<h1 style="font-size:20px;color:#3D332E;margin:0 0 12px;">Multumim pentru comanda!</h1>
        <p style="margin:0 0 16px;">Comanda #${orderId.slice(0, 8)} a fost confirmata.</p>
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">${rows}
          <tr><td style="padding-top:12px;font-weight:600;">Total</td><td style="padding-top:12px;font-weight:600;text-align:right;">${formatPrice(totalCents, currency, locale)}</td></tr>
        </table>`
-    : `<h1 style="font-size:20px;color:#4F3527;margin:0 0 12px;">Thank you for your order!</h1>
+    : `<h1 style="font-size:20px;color:#3D332E;margin:0 0 12px;">Thank you for your order!</h1>
        <p style="margin:0 0 16px;">Order #${orderId.slice(0, 8)} is confirmed.</p>
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">${rows}
          <tr><td style="padding-top:12px;font-weight:600;">Total</td><td style="padding-top:12px;font-weight:600;text-align:right;">${formatPrice(totalCents, currency, locale)}</td></tr>

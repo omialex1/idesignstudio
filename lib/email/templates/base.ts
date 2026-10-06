@@ -8,16 +8,16 @@ export function baseEmailHtml(bodyHtml: string): string {
         <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #EFE4D0;">
           <tr>
             <td style="padding:24px 32px;border-bottom:1px solid #EFE4D0;">
-              <span style="font-size:20px;font-weight:600;color:#4F3527;">iDesignStudio<span style="color:#C1663F;">.ro</span></span>
+              <span style="font-size:20px;font-weight:600;color:#3D332E;">iDesignStudio<span style="color:#E85627;">.ro</span></span>
             </td>
           </tr>
           <tr>
-            <td style="padding:32px;color:#2B1D14;font-size:15px;line-height:1.6;">
+            <td style="padding:32px;color:#3D332E;font-size:15px;line-height:1.6;">
               ${bodyHtml}
             </td>
           </tr>
           <tr>
-            <td style="padding:20px 32px;border-top:1px solid #EFE4D0;color:#8A6A54;font-size:12px;">
+            <td style="padding:20px 32px;border-top:1px solid #EFE4D0;color:#9C8F85;font-size:12px;">
               iDesignStudio.ro
             </td>
           </tr>
@@ -30,5 +30,5 @@ export function baseEmailHtml(bodyHtml: string): string {
 }
 
 export function buttonHtml(href: string, label: string): string {
-  return `<a href="${href}" style="display:inline-block;margin-top:16px;padding:12px 28px;background-color:#C1663F;color:#FDFAF5;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px;">${label}</a>`;
+  return `<a href="${href}" style="display:inline-block;margin-top:16px;padding:12px 28px;background-color:#E85627;color:#FDFAF5;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px;">${label}</a>`;
 }

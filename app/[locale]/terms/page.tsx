@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import CompanyInfoBlock from "@/components/legal/CompanyInfoBlock";
 
 export default async function TermsPage() {
@@ -39,7 +40,14 @@ export default async function TermsPage() {
         <Section
           heading={t("termsWithdrawalHeading")}
           body={t("termsWithdrawalBody")}
-        />
+        >
+          <Link
+            href="/withdrawal"
+            className="mt-3 inline-block text-salamander-600 hover:underline"
+          >
+            {t("termsWithdrawalFormLink")}
+          </Link>
+        </Section>
 
         <Section heading={t("termsDisputesHeading")}>
           <p className="text-taupe-600">

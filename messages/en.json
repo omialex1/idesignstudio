@@ -95,7 +95,9 @@
     "termsCompanyHeading": "Company details",
     "termsCompanyBody": "iDesignStudio.ro is operated by:",
     "termsRoleHeading": "Our role",
-    "termsRoleBody": "IDESIGN STUDIO S.R.L. acts as the merchant, selling its own event decor and custom stationery products shown on this site directly.",
+    "termsRoleBody": "IDESIGN STUDIO S.R.L. acts as the merchant, selling its own event decor and custom stationery products shown on this site directly. The same company is the legal entity that sells the products and issues the invoice for every order.",
+    "withdrawalLink": "Withdraw from a contract",
+    "termsWithdrawalFormLink": "Use the online withdrawal form",
     "termsProductsHeading": "Products & pricing",
     "termsProductsBody": "All prices shown on the site are in RON (Romanian lei) and include VAT where applicable. We reserve the right to change prices and product availability without prior notice; such changes do not affect already-confirmed orders.",
     "termsPaymentHeading": "Payment methods",
@@ -121,6 +123,21 @@
     "privacyRightsHeading": "Your rights",
     "privacyRightsBody": "Under GDPR, you have the right to access, rectify, erase, and port your data, as well as the right to object to its processing. To exercise any of these rights, please contact us at the address below.",
     "privacyContactHeading": "Contact for GDPR requests"
+  },
+  "Withdrawal": {
+    "title": "Withdraw from a contract",
+    "intro": "Use this form to let us know you are withdrawing from a distance contract, within 14 calendar days of receiving the products. You will receive an acknowledgement of receipt by email. Products personalized to your specifications are exempt from the right of withdrawal.",
+    "name": "Full name",
+    "email": "Email",
+    "orderNumber": "Order number",
+    "products": "Products concerned",
+    "message": "Message (optional)",
+    "submit": "Send withdrawal request",
+    "sending": "Sending...",
+    "successTitle": "Your request has been sent",
+    "successBody": "We have sent you an acknowledgement of receipt by email. We will contact you shortly with the next steps.",
+    "error": "We couldn't send your request. Please try again or contact us directly using the details in the Terms & Conditions.",
+    "backToTerms": "Back to Terms & Conditions"
   },
   "Footer": {
     "rights": "All rights reserved."
