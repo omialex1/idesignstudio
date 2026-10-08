@@ -31,7 +31,7 @@ export default async function ProductCard({
           src={product.imageUrl}
           alt={product.name}
           loading="lazy"
-          className="h-56 w-full object-cover"
+          className="aspect-square w-full object-cover"
         />
       ) : (
         <div
