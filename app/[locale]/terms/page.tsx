@@ -26,6 +26,14 @@ export default async function TermsPage() {
           body={t("termsProductsBody")}
         />
         <Section
+          heading={t("termsContractHeading")}
+          body={t("termsContractBody")}
+        />
+        <Section
+          heading={t("termsRefusalHeading")}
+          body={t("termsRefusalBody")}
+        />
+        <Section
           heading={t("termsPaymentHeading")}
           body={t("termsPaymentBody")}
         />
@@ -48,6 +56,24 @@ export default async function TermsPage() {
             {t("termsWithdrawalFormLink")}
           </Link>
         </Section>
+
+        <Section heading={t("termsConformityHeading")}>
+          <div className="flex flex-col gap-2 text-taupe-600">
+            <p>{t("termsConformityBody1")}</p>
+            <p>{t("termsConformityBody2")}</p>
+            <p>{t("termsConformityBody3")}</p>
+          </div>
+        </Section>
+
+        <Section
+          heading={t("termsAccountHeading")}
+          body={t("termsAccountBody")}
+        />
+        <Section heading={t("termsIpHeading")} body={t("termsIpBody")} />
+        <Section
+          heading={t("termsLiabilityHeading")}
+          body={t("termsLiabilityBody")}
+        />
 
         <Section heading={t("termsDisputesHeading")}>
           <p className="text-taupe-600">
@@ -76,7 +102,10 @@ export default async function TermsPage() {
           </p>
         </Section>
 
+        <Section heading={t("termsLawHeading")} body={t("termsLawBody")} />
+
         <Section heading={t("termsContactHeading")}>
+          <p className="mb-3 text-taupe-600">{t("termsContactBody")}</p>
           <CompanyInfoBlock />
         </Section>
       </div>

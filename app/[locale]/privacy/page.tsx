@@ -24,6 +24,15 @@ export default async function PrivacyPage() {
           body={t("privacyDataBody")}
         />
         <Section heading={t("privacyUseHeading")} body={t("privacyUseBody")} />
+        <Section heading={t("privacyCookiesHeading")}>
+          <p className="text-taupe-600">{t("privacyCookiesIntro")}</p>
+          <ul className="mt-2 list-disc pl-5 text-taupe-600">
+            <li>{t("privacyCookiesItem1")}</li>
+            <li>{t("privacyCookiesItem2")}</li>
+            <li>{t("privacyCookiesItem3")}</li>
+          </ul>
+          <p className="mt-2 text-taupe-600">{t("privacyCookiesOutro")}</p>
+        </Section>
         <Section
           heading={t("privacyRightsHeading")}
           body={t("privacyRightsBody")}
