@@ -84,6 +84,15 @@ model ProductImage {
   url       String
   altText   String?
   sortOrder Int     @default(0)
+  data      ProductImageData?
+}
+
+model ProductImageData {
+  id          String       @id @default(cuid())
+  imageId     String       @unique
+  image       ProductImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  contentType String
+  data        Bytes
 }
 
 model Inventory {

@@ -55,13 +55,22 @@ export default function CartView() {
                 key={item.productId}
                 className="flex flex-wrap items-center gap-4 rounded-2xl border border-cream-200 bg-white p-4"
               >
-                <div
-                  className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl font-display text-xl text-cream-50 ${
-                    item.line === "EVENTS" ? "bg-salamander-400" : "bg-taupe-500"
-                  }`}
-                >
-                  {item.nameSnapshot.charAt(0).toUpperCase()}
-                </div>
+                {item.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.imageUrl}
+                    alt={item.nameSnapshot}
+                    className="h-16 w-16 shrink-0 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl font-display text-xl text-cream-50 ${
+                      item.line === "EVENTS" ? "bg-salamander-400" : "bg-taupe-500"
+                    }`}
+                  >
+                    {item.nameSnapshot.charAt(0).toUpperCase()}
+                  </div>
+                )}
 
                 <div className="flex min-w-[8rem] flex-1 flex-col gap-1">
                   <Link

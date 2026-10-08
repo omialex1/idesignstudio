@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getCategoryOptions, getProductForEdit } from "@/lib/admin/queries";
 import { updateProduct, deleteProduct } from "@/lib/admin/product-actions";
 import ProductForm from "@/components/admin/ProductForm";
+import ProductImageManager from "@/components/admin/ProductImageManager";
 
 export default async function EditProductPage({
   params,
@@ -41,6 +42,8 @@ export default async function EditProductPage({
           isActive: product.isActive,
         }}
       />
+
+      <ProductImageManager productId={product.id} images={product.images} />
 
       <form action={deleteProduct} className="w-fit">
         <input type="hidden" name="productId" value={product.id} />

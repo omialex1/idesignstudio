@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { getProductDetail } from "@/lib/db/products";
 import { formatPrice } from "@/lib/format";
 import AddToCartButton from "@/components/product/AddToCartButton";
+import ProductGallery from "@/components/product/ProductGallery";
 import type { ProductLine } from "@/lib/generated/prisma";
 
 export default async function ProductDetailPage({
@@ -35,13 +36,20 @@ export default async function ProductDetailPage({
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
       <div className="mx-auto grid w-full max-w-4xl gap-10 sm:grid-cols-2">
-        <div
-          className={`flex h-80 items-center justify-center rounded-2xl font-display text-6xl text-cream-50 ${
-            isEvents ? "bg-salamander-400" : "bg-taupe-500"
-          }`}
-        >
-          {product.name.charAt(0).toUpperCase()}
-        </div>
+        {product.images.length > 0 ? (
+          <ProductGallery
+            images={product.images.map((i) => i.url)}
+            alt={product.name}
+          />
+        ) : (
+          <div
+            className={`flex h-80 items-center justify-center rounded-2xl font-display text-6xl text-cream-50 ${
+              isEvents ? "bg-salamander-400" : "bg-taupe-500"
+            }`}
+          >
+            {product.name.charAt(0).toUpperCase()}
+          </div>
+        )}
         <div className="flex flex-col gap-4">
           <Link
             href={`${basePath}/${subcategory}`}
@@ -76,6 +84,7 @@ export default async function ProductDetailPage({
             priceCents={product.priceCents}
             currency={product.currency}
             inStock={inStock}
+            imageUrl={product.images[0]?.url ?? null}
           />
         </div>
       </div>

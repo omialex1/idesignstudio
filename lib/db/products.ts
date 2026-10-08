@@ -9,6 +9,7 @@ export type ProductWithTranslation = {
   name: string;
   description: string | null;
   quantityOnHand: number;
+  imageUrl: string | null;
 };
 
 function translateProduct(
@@ -19,6 +20,7 @@ function translateProduct(
     currency: string;
     translations: { locale: string; name: string; description: string | null }[];
     inventory: { quantityOnHand: number } | null;
+    images?: { url: string }[];
   },
   locale: string,
 ): ProductWithTranslation {
@@ -34,6 +36,7 @@ function translateProduct(
     name: translation?.name ?? product.slug,
     description: translation?.description ?? null,
     quantityOnHand: product.inventory?.quantityOnHand ?? 0,
+    imageUrl: product.images?.[0]?.url ?? null,
   };
 }
 
@@ -48,7 +51,11 @@ export async function getProductsByCategorySlug(
       translations: true,
       products: {
         where: { isActive: true },
-        include: { translations: true, inventory: true },
+        include: {
+          translations: true,
+          inventory: true,
+          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+        },
       },
     },
   });

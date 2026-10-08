@@ -35,7 +35,11 @@ export async function getProductsForAdmin() {
 export async function getProductForEdit(id: string) {
   return prisma.product.findUnique({
     where: { id },
-    include: { translations: true, inventory: true },
+    include: {
+      translations: true,
+      inventory: true,
+      images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true } },
+    },
   });
 }
 

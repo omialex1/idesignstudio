@@ -11,6 +11,7 @@ export type CartItem = {
   priceCents: number;
   currency: string;
   quantity: number;
+  imageUrl?: string | null;
 };
 
 type CartState = {

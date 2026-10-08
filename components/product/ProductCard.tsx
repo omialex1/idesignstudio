@@ -25,13 +25,23 @@ export default async function ProductCard({
       href={`${basePath}/${categorySlug}/${product.slug}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-cream-200 bg-white transition-shadow hover:shadow-lg"
     >
-      <div
-        className={`flex h-40 items-center justify-center font-display text-3xl text-cream-50 ${
-          isEvents ? "bg-salamander-400" : "bg-taupe-500"
-        }`}
-      >
-        {product.name.charAt(0).toUpperCase()}
-      </div>
+      {product.imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={product.imageUrl}
+          alt={product.name}
+          loading="lazy"
+          className="h-56 w-full object-cover"
+        />
+      ) : (
+        <div
+          className={`flex h-40 items-center justify-center font-display text-3xl text-cream-50 ${
+            isEvents ? "bg-salamander-400" : "bg-taupe-500"
+          }`}
+        >
+          {product.name.charAt(0).toUpperCase()}
+        </div>
+      )}
       <div className="flex flex-1 flex-col gap-2 p-5">
         <h3 className="font-display text-lg text-taupe-800">
           {product.name}

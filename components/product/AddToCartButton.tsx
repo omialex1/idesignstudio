@@ -14,6 +14,7 @@ export default function AddToCartButton({
   priceCents,
   currency,
   inStock,
+  imageUrl,
 }: {
   productId: string;
   slug: string;
@@ -23,6 +24,7 @@ export default function AddToCartButton({
   priceCents: number;
   currency: string;
   inStock: boolean;
+  imageUrl?: string | null;
 }) {
   const t = useTranslations("Cart");
   const addItem = useCartStore((state) => state.addItem);
@@ -39,6 +41,7 @@ export default function AddToCartButton({
       nameSnapshot: name,
       priceCents,
       currency,
+      imageUrl,
     });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
