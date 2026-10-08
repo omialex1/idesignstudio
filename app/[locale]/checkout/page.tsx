@@ -7,6 +7,8 @@ import { useCartStore } from "@/lib/cart/store";
 import { formatPrice } from "@/lib/format";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 
+const MAX_QUANTITY_PER_ITEM = 20;
+
 const emptyForm = {
   firstName: "",
   lastName: "",
@@ -27,6 +29,8 @@ export default function CheckoutPage() {
   const locale = useLocale();
   const hasHydrated = useCartStore((s) => s.hasHydrated);
   const items = useCartStore((s) => s.items);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
 
   const [form, setForm] = useState(emptyForm);
   const [isCompany, setIsCompany] = useState(false);
@@ -303,19 +307,52 @@ export default function CheckoutPage() {
             <h2 className="font-display text-xl text-taupe-800">
               {t("summaryHeading")}
             </h2>
-            <ul className="flex flex-col gap-2 text-sm text-taupe-600">
+            <ul className="flex flex-col gap-4 text-sm text-taupe-600">
               {items.map((item) => (
-                <li key={item.productId} className="flex justify-between gap-3">
-                  <span>
-                    {item.nameSnapshot} &times; {item.quantity}
-                  </span>
-                  <span className="whitespace-nowrap">
-                    {formatPrice(
-                      item.priceCents * item.quantity,
-                      item.currency,
-                      locale,
-                    )}
-                  </span>
+                <li key={item.productId} className="flex flex-col gap-2">
+                  <div className="flex justify-between gap-3">
+                    <span className="text-taupe-800">{item.nameSnapshot}</span>
+                    <span className="whitespace-nowrap">
+                      {formatPrice(
+                        item.priceCents * item.quantity,
+                        item.currency,
+                        locale,
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label={t("decreaseQuantity")}
+                        onClick={() =>
+                          updateQuantity(item.productId, item.quantity - 1)
+                        }
+                        className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
+                      >
+                        −
+                      </button>
+                      <span className="w-6 text-center">{item.quantity}</span>
+                      <button
+                        type="button"
+                        aria-label={t("increaseQuantity")}
+                        disabled={item.quantity >= MAX_QUANTITY_PER_ITEM}
+                        onClick={() =>
+                          updateQuantity(item.productId, item.quantity + 1)
+                        }
+                        className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100 disabled:opacity-40"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(item.productId)}
+                      className="text-xs font-medium text-taupe-400 hover:text-red-600"
+                    >
+                      {t("remove")}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

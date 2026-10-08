@@ -176,7 +176,10 @@
     "codFee": "Cash on delivery fee",
     "placeOrderCod": "Place order (cash on delivery)",
     "returnCodTitle": "Your order has been received!",
-    "returnCodBody": "You pay the courier in cash on delivery. We've sent you a confirmation email. Items are made to order and we'll let you know when they ship."
+    "returnCodBody": "You pay the courier in cash on delivery. We've sent you a confirmation email. Items are made to order and we'll let you know when they ship.",
+    "remove": "Remove",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity"
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",

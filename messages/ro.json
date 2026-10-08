@@ -176,7 +176,10 @@
     "codFee": "Taxă ramburs",
     "placeOrderCod": "Plasează comanda (ramburs)",
     "returnCodTitle": "Comanda a fost înregistrată!",
-    "returnCodBody": "Plătești curierului, în numerar, la livrare. Ți-am trimis un email de confirmare. Produsele sunt făcute la comandă și te vom anunța când pleacă spre tine."
+    "returnCodBody": "Plătești curierului, în numerar, la livrare. Ți-am trimis un email de confirmare. Produsele sunt făcute la comandă și te vom anunța când pleacă spre tine.",
+    "remove": "Elimină",
+    "decreaseQuantity": "Scade cantitatea",
+    "increaseQuantity": "Crește cantitatea"
   },
   "Withdrawal": {
     "title": "Retragere din contract",
