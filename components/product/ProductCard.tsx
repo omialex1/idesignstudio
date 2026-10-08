@@ -32,11 +32,11 @@ export default async function ProductCard({
           src={product.imageUrl}
           alt={product.name}
           loading="lazy"
-          className="aspect-square w-full object-cover"
+          className="aspect-[4/5] w-full object-cover"
         />
       ) : (
         <div
-          className={`flex aspect-square items-center justify-center font-display text-3xl ${config.placeholderClass}`}
+          className={`flex aspect-[4/5] items-center justify-center font-display text-3xl ${config.placeholderClass}`}
         >
           {product.name.charAt(0).toUpperCase()}
         </div>

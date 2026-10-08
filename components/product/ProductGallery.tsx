@@ -17,7 +17,7 @@ export default function ProductGallery({
       <img
         src={images[active]}
         alt={alt}
-        className="aspect-square w-full rounded-2xl object-cover"
+        className="aspect-[4/5] w-full rounded-2xl object-cover"
       />
       {images.length > 1 && (
         <div className="grid grid-cols-6 gap-2">

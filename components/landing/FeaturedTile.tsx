@@ -31,11 +31,11 @@ export default function FeaturedTile({
           src={product.imageUrl}
           alt={product.name}
           loading="lazy"
-          className="aspect-square w-full rounded-xl border border-salamander-200 object-cover"
+          className="aspect-[4/5] w-full rounded-xl border border-salamander-200 object-cover"
         />
       ) : (
         <div
-          className={`flex aspect-square w-full items-center justify-center rounded-xl font-display text-3xl ${config.placeholderClass}`}
+          className={`flex aspect-[4/5] w-full items-center justify-center rounded-xl font-display text-3xl ${config.placeholderClass}`}
         >
           {product.name.charAt(0).toUpperCase()}
         </div>
