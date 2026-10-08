@@ -146,8 +146,6 @@ async function sendOrderEmails(order: PaidOrder) {
       notes: order.notes,
       companyName: order.companyName,
       companyCui: order.companyCui,
-      companyRegCom: order.companyRegCom,
-      companyAddress: order.companyAddress,
       items,
       shippingCents: order.shippingCents,
       totalCents: order.totalCents,

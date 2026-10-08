@@ -19,8 +19,6 @@ const emptyForm = {
   notes: "",
   companyName: "",
   companyCui: "",
-  companyRegCom: "",
-  companyAddress: "",
 };
 
 export default function CheckoutPage() {
@@ -194,28 +192,6 @@ export default function CheckoutPage() {
                         maxLength={20}
                         value={form.companyCui}
                         onChange={(e) => update("companyCui", e.target.value)}
-                        className={inputClass}
-                      />
-                    </Field>
-                    <Field label={t("companyRegCom")}>
-                      <input
-                        required
-                        maxLength={40}
-                        value={form.companyRegCom}
-                        onChange={(e) =>
-                          update("companyRegCom", e.target.value)
-                        }
-                        className={inputClass}
-                      />
-                    </Field>
-                    <Field label={t("companyAddress")}>
-                      <input
-                        required
-                        maxLength={250}
-                        value={form.companyAddress}
-                        onChange={(e) =>
-                          update("companyAddress", e.target.value)
-                        }
                         className={inputClass}
                       />
                     </Field>

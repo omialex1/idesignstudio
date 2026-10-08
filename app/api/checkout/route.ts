@@ -46,25 +46,13 @@ export async function POST(request: NextRequest) {
   };
   const notes = clean(body.customer?.notes, 500) || null;
 
-  let company: {
-    name: string;
-    cui: string;
-    regCom: string;
-    address: string;
-  } | null = null;
+  let company: { name: string; cui: string } | null = null;
   if (body.customer?.isCompany === true) {
     company = {
       name: clean(body.customer?.companyName, 150),
       cui: clean(body.customer?.companyCui, 20).replace(/\s/g, "").toUpperCase(),
-      regCom: clean(body.customer?.companyRegCom, 40).toUpperCase(),
-      address: clean(body.customer?.companyAddress, 250),
     };
-    if (
-      !company.name ||
-      !company.regCom ||
-      !company.address ||
-      !CUI_PATTERN.test(company.cui)
-    ) {
+    if (!company.name || !CUI_PATTERN.test(company.cui)) {
       return NextResponse.json({ error: "invalid_company" }, { status: 400 });
     }
   }
@@ -166,8 +154,6 @@ export async function POST(request: NextRequest) {
       notes,
       companyName: company?.name ?? null,
       companyCui: company?.cui ?? null,
-      companyRegCom: company?.regCom ?? null,
-      companyAddress: company?.address ?? null,
       subtotalCents,
       shippingCents,
       totalCents,

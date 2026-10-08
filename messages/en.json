@@ -167,8 +167,6 @@
     "companyHeading": "Company details (for the invoice)",
     "companyName": "Company name",
     "companyCui": "Tax ID (CUI / CIF)",
-    "companyRegCom": "Trade Register number",
-    "companyAddress": "Registered office address",
     "errorCompany": "Please check the company details (a valid CUI, for example RO12345678 or 12345678)."
   },
   "Withdrawal": {

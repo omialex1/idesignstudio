@@ -167,8 +167,6 @@
     "companyHeading": "Date firmă (pentru factură)",
     "companyName": "Denumire firmă",
     "companyCui": "CUI / CIF",
-    "companyRegCom": "Nr. înregistrare Registrul Comerțului",
-    "companyAddress": "Adresa sediului social",
     "errorCompany": "Verifică datele firmei (CUI valid, de exemplu RO12345678 sau 12345678)."
   },
   "Withdrawal": {

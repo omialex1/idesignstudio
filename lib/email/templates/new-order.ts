@@ -15,8 +15,6 @@ type NewOrderEmailInput = {
   notes: string | null;
   companyName: string | null;
   companyCui: string | null;
-  companyRegCom: string | null;
-  companyAddress: string | null;
   items: { nameSnapshot: string; quantity: number; unitPriceCents: number }[];
   shippingCents: number;
   totalCents: number;
@@ -63,8 +61,6 @@ export function newOrderBusinessEmail(order: NewOrderEmailInput) {
     <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;">
       ${row("Denumire", order.companyName)}
       ${row("CUI", order.companyCui ?? "")}
-      ${row("Reg. Com.", order.companyRegCom ?? "")}
-      ${row("Sediu", order.companyAddress ?? "")}
     </table>`
         : ""
     }`;

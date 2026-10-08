@@ -39,8 +39,7 @@ export default async function AdminOrdersPage() {
                   </div>
                   {o.companyName && (
                     <div className="mt-1 text-xs font-medium text-taupe-700">
-                      Firmă: {o.companyName}, CUI {o.companyCui}, Reg. Com.{" "}
-                      {o.companyRegCom}, {o.companyAddress}
+                      Firmă: {o.companyName}, CUI {o.companyCui}
                     </div>
                   )}
                   {o.notes && (
