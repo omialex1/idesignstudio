@@ -5,13 +5,14 @@
   },
   "Nav": {
     "events": "Events",
-    "stationary": "Stationary"
+    "handmade": "Handmade",
+    "stationary": "Stationery",
+    "homeLifestyle": "Home & lifestyle"
   },
   "Home": {
-    "eyebrow": "iDesignStudio.ro",
-    "title": "Memorable events, stationery made with heart.",
-    "subtitle": "Choose what brought you here today — event decor and planning, or custom invitations and stationery.",
-    "scrollHint": "Haven't decided yet? Scroll down to discover both categories.",
+    "tagline": "Objects with soul for home, office and special days",
+    "discover": "Discover our categories",
+    "viewMore": "See more",
     "viewCollection": "View collection"
   },
   "EventsPage": {
@@ -25,11 +26,10 @@
     "subtitle": "Explore our collections of invitations, menus, and paper goods."
   },
   "Shop": {
-    "backToEvents": "Back to Events",
-    "backToStationary": "Back to Stationary",
     "noProducts": "No products in this category yet.",
     "inStock": "In stock",
-    "outOfStock": "Out of stock"
+    "outOfStock": "Out of stock",
+    "backTo": "Back to {name}"
   },
   "Cart": {
     "cartLabel": "Shopping cart",
@@ -221,5 +221,15 @@
   },
   "Footer": {
     "rights": "All rights reserved."
+  },
+  "HandmadePage": {
+    "eyebrow": "Handmade",
+    "title": "Handmade objects, made with care for detail.",
+    "subtitle": "Explore our collections of handcrafted objects."
+  },
+  "HomeLifestylePage": {
+    "eyebrow": "Home & lifestyle",
+    "title": "Objects that make a home more welcoming.",
+    "subtitle": "Explore our collections for home and lifestyle."
   }
 }

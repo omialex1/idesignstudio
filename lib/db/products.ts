@@ -104,3 +104,56 @@ export async function getProductDetail(productSlug: string, locale: string) {
     },
   };
 }
+
+export type FeaturedProduct = {
+  id: string;
+  slug: string;
+  categorySlug: string;
+  name: string;
+  priceCents: number;
+  currency: string;
+  imageUrl: string | null;
+};
+
+// Newest active products of a line, for the homepage sections.
+export async function getFeaturedProductsByLine(
+  line: ProductLine,
+  locale: string,
+  take = 4,
+): Promise<FeaturedProduct[]> {
+  const products = await prisma.product.findMany({
+    where: { isActive: true, category: { line } },
+    orderBy: { createdAt: "desc" },
+    take,
+    include: {
+      translations: true,
+      category: { select: { slug: true } },
+      images: { orderBy: { sortOrder: "asc" }, take: 1 },
+    },
+  });
+
+  return products.map((p) => {
+    const translation =
+      p.translations.find((t) => t.locale === locale) ??
+      p.translations.find((t) => t.locale === "ro");
+    return {
+      id: p.id,
+      slug: p.slug,
+      categorySlug: p.category.slug,
+      name: translation?.name ?? p.slug,
+      priceCents: p.priceCents,
+      currency: p.currency,
+      imageUrl: p.images[0]?.url ?? null,
+    };
+  });
+}
+
+// First product photo found in a line, used as the line's tile image.
+export async function getLineImageUrl(line: ProductLine) {
+  const image = await prisma.productImage.findFirst({
+    where: { product: { isActive: true, category: { line } } },
+    orderBy: { sortOrder: "asc" },
+    select: { url: true },
+  });
+  return image?.url ?? null;
+}

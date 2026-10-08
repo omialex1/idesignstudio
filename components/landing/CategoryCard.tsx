@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { lineConfig } from "@/lib/lines";
 import type { CategoryWithTranslation } from "@/lib/db/categories";
 
 export default async function CategoryCard({
@@ -9,10 +10,8 @@ export default async function CategoryCard({
 }) {
   const tNav = await getTranslations("Nav");
   const tHome = await getTranslations("Home");
-  const isEvents = category.line === "EVENTS";
-  const href = isEvents
-    ? `/events/${category.slug}`
-    : `/stationary/${category.slug}`;
+  const config = lineConfig(category.line);
+  const href = `/${config.slug}/${category.slug}`;
 
   return (
     <Link
@@ -20,21 +19,13 @@ export default async function CategoryCard({
       className="group flex flex-col overflow-hidden rounded-2xl border border-cream-200 bg-white transition-shadow hover:shadow-lg"
     >
       <div
-        className={`flex h-36 items-center justify-center font-display text-4xl transition-colors ${
-          isEvents
-            ? "bg-salamander-400 text-cream-50"
-            : "bg-cream-200 text-taupe-800 group-hover:bg-cream-100"
-        }`}
+        className={`flex h-36 items-center justify-center font-display text-4xl ${config.placeholderClass}`}
       >
         {category.name.charAt(0).toUpperCase()}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5">
-        <span
-          className={`text-xs font-semibold tracking-wide uppercase ${
-            isEvents ? "text-salamander-600" : "text-taupe-600"
-          }`}
-        >
-          {isEvents ? tNav("events") : tNav("stationary")}
+        <span className="text-xs font-semibold tracking-wide text-salamander-600 uppercase">
+          {tNav(config.navKey)}
         </span>
         <h3 className="font-display text-lg text-taupe-800">
           {category.name}

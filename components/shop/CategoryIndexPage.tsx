@@ -3,10 +3,12 @@ import { getCategoriesByLine } from "@/lib/db/categories";
 import CategoryFeed from "@/components/landing/CategoryFeed";
 import type { ProductLine } from "@/lib/generated/prisma";
 
-const messageKey: Record<ProductLine, "EventsPage" | "StationaryPage"> = {
+const messageKey = {
   EVENTS: "EventsPage",
+  HANDMADE: "HandmadePage",
   STATIONARY: "StationaryPage",
-};
+  HOME_LIFESTYLE: "HomeLifestylePage",
+} as const satisfies Record<ProductLine, string>;
 
 export default async function CategoryIndexPage({
   line,

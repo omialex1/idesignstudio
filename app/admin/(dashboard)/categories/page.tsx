@@ -1,3 +1,4 @@
+import { lineConfig } from "@/lib/lines";
 import Link from "next/link";
 import { getCategoriesForAdmin } from "@/lib/admin/queries";
 
@@ -35,7 +36,7 @@ export default async function AdminCategoriesPage() {
                 <tr key={c.id} className="border-b border-cream-100 last:border-0">
                   <td className="px-4 py-3 font-medium text-taupe-800">{name}</td>
                   <td className="px-4 py-3 text-taupe-600">
-                    {c.line === "EVENTS" ? "Evenimente" : "Papetărie"}
+                    {lineConfig(c.line).adminLabel}
                   </td>
                   <td className="px-4 py-3 text-taupe-600">{c.sortOrder}</td>
                   <td className="px-4 py-3 text-taupe-600">{c._count.products}</td>

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
+import { lineConfig } from "@/lib/lines";
 import type { ProductWithTranslation } from "@/lib/db/products";
 import type { ProductLine } from "@/lib/generated/prisma";
 
@@ -16,8 +17,8 @@ export default async function ProductCard({
   locale: string;
 }) {
   const t = await getTranslations("Shop");
-  const isEvents = line === "EVENTS";
-  const basePath = isEvents ? "/events" : "/stationary";
+  const config = lineConfig(line);
+  const basePath = `/${config.slug}`;
   const inStock = product.quantityOnHand > 0;
 
   return (
@@ -35,9 +36,7 @@ export default async function ProductCard({
         />
       ) : (
         <div
-          className={`flex h-40 items-center justify-center font-display text-3xl text-cream-50 ${
-            isEvents ? "bg-salamander-400" : "bg-taupe-500"
-          }`}
+          className={`flex aspect-square items-center justify-center font-display text-3xl ${config.placeholderClass}`}
         >
           {product.name.charAt(0).toUpperCase()}
         </div>

@@ -9,7 +9,9 @@ datasource db {
 
 enum ProductLine {
   EVENTS
+  HANDMADE
   STATIONARY
+  HOME_LIFESTYLE
 }
 
 enum OrderStatus {

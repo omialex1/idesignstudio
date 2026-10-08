@@ -1,5 +1,8 @@
+import { LINES } from "@/lib/lines";
+import type { ProductLine } from "@/lib/generated/prisma";
+
 export type CategoryFormDefaults = {
-  line: "EVENTS" | "STATIONARY";
+  line: ProductLine;
   slug: string;
   roName: string;
   roDescription: string;
@@ -34,8 +37,11 @@ export default function CategoryForm({
     >
       <Field label="Linie">
         <select name="line" defaultValue={d.line} required className={selectClass}>
-          <option value="EVENTS">Evenimente</option>
-          <option value="STATIONARY">Papetărie</option>
+          {LINES.map((l) => (
+            <option key={l.line} value={l.line}>
+              {l.adminLabel}
+            </option>
+          ))}
         </select>
       </Field>
 

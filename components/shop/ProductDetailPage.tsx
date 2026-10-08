@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductDetail } from "@/lib/db/products";
 import { formatPrice } from "@/lib/format";
+import { lineConfig } from "@/lib/lines";
 import AddToCartButton from "@/components/product/AddToCartButton";
 import ProductGallery from "@/components/product/ProductGallery";
 import type { ProductLine } from "@/lib/generated/prisma";
@@ -30,8 +31,8 @@ export default async function ProductDetailPage({
 
   const t = await getTranslations("Shop");
   const inStock = product.quantityOnHand > 0;
-  const isEvents = line === "EVENTS";
-  const basePath = isEvents ? "/events" : "/stationary";
+  const config = lineConfig(line);
+  const basePath = `/${config.slug}`;
 
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
@@ -43,9 +44,7 @@ export default async function ProductDetailPage({
           />
         ) : (
           <div
-            className={`flex h-80 items-center justify-center rounded-2xl font-display text-6xl text-cream-50 ${
-              isEvents ? "bg-salamander-400" : "bg-taupe-500"
-            }`}
+            className={`flex h-80 items-center justify-center rounded-2xl font-display text-6xl ${config.placeholderClass}`}
           >
             {product.name.charAt(0).toUpperCase()}
           </div>

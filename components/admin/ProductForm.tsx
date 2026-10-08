@@ -1,3 +1,4 @@
+import { lineConfig } from "@/lib/lines";
 import type { ProductLine } from "@/lib/generated/prisma";
 
 type CategoryOption = { id: string; name: string; line: ProductLine };
@@ -53,7 +54,7 @@ export default function ProductForm({
           >
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name} ({c.line === "EVENTS" ? "Evenimente" : "Papetărie"})
+                {c.name} ({lineConfig(c.line).adminLabel})
               </option>
             ))}
           </select>

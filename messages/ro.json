@@ -5,14 +5,15 @@
   },
   "Nav": {
     "events": "Evenimente",
-    "stationary": "Papetarie"
+    "handmade": "Handmade",
+    "stationary": "Papetărie",
+    "homeLifestyle": "Casă și stil de viață"
   },
   "Home": {
-    "eyebrow": "iDesignStudio.ro",
-    "title": "Evenimente memorabile, papetarie de suflet.",
-    "subtitle": "Alege ce te aduce aici astazi — decor si organizare de evenimente, sau invitatii si papetarie personalizata.",
-    "scrollHint": "Nu te-ai decis inca? Deruleaza mai jos ca sa descoperi ambele categorii.",
-    "viewCollection": "Vezi colectia"
+    "tagline": "Obiecte cu suflet pentru casă, birou și zile speciale",
+    "discover": "Descoperă categoriile noastre",
+    "viewMore": "Vezi mai multe",
+    "viewCollection": "Vezi colecția"
   },
   "EventsPage": {
     "eyebrow": "Evenimente",
@@ -25,11 +26,10 @@
     "subtitle": "Descopera colectiile noastre de invitatii, meniuri si accesorii de hartie."
   },
   "Shop": {
-    "backToEvents": "Inapoi la Evenimente",
-    "backToStationary": "Inapoi la Papetarie",
     "noProducts": "Nu exista inca produse in aceasta categorie.",
     "inStock": "In stoc",
-    "outOfStock": "Stoc epuizat"
+    "outOfStock": "Stoc epuizat",
+    "backTo": "Înapoi la {name}"
   },
   "Cart": {
     "cartLabel": "Cos de cumparaturi",
@@ -221,5 +221,15 @@
   },
   "Footer": {
     "rights": "Toate drepturile rezervate."
+  },
+  "HandmadePage": {
+    "eyebrow": "Handmade",
+    "title": "Obiecte făcute manual, cu grijă pentru detalii.",
+    "subtitle": "Descoperă colecțiile noastre de obiecte lucrate manual."
+  },
+  "HomeLifestylePage": {
+    "eyebrow": "Casă și stil de viață",
+    "title": "Obiecte care fac casa mai primitoare.",
+    "subtitle": "Descoperă colecțiile noastre pentru casă și stil de viață."
   }
 }

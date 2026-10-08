@@ -3,17 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductsByCategorySlug } from "@/lib/db/products";
 import ProductGrid from "@/components/product/ProductGrid";
+import { lineConfig } from "@/lib/lines";
 import type { ProductLine } from "@/lib/generated/prisma";
-
-const basePath: Record<ProductLine, "/events" | "/stationary"> = {
-  EVENTS: "/events",
-  STATIONARY: "/stationary",
-};
-
-const backKey: Record<ProductLine, "backToEvents" | "backToStationary"> = {
-  EVENTS: "backToEvents",
-  STATIONARY: "backToStationary",
-};
 
 export default async function CategoryDetailPage({
   line,
@@ -28,15 +19,17 @@ export default async function CategoryDetailPage({
   if (!category) notFound();
 
   const t = await getTranslations("Shop");
+  const tNav = await getTranslations("Nav");
+  const config = lineConfig(line);
 
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
       <div className="mx-auto w-full max-w-5xl">
         <Link
-          href={basePath[line]}
+          href={`/${config.slug}`}
           className="text-sm font-medium text-salamander-600 hover:underline"
         >
-          {t(backKey[line])}
+          {t("backTo", { name: tNav(config.navKey) })}
         </Link>
         <h1 className="mt-4 font-display text-3xl text-taupe-800">
           {category.name}

@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useCartStore } from "@/lib/cart/store";
 import { formatPrice } from "@/lib/format";
+import { lineConfig } from "@/lib/lines";
 
 export default function CartView() {
   const t = useTranslations("Cart");
@@ -45,10 +46,8 @@ export default function CartView() {
 
         <div className="mt-8 flex flex-col gap-4">
           {items.map((item) => {
-            const href =
-              item.line === "EVENTS"
-                ? `/events/${item.categorySlug}/${item.slug}`
-                : `/stationary/${item.categorySlug}/${item.slug}`;
+            const config = lineConfig(item.line);
+            const href = `/${config.slug}/${item.categorySlug}/${item.slug}`;
 
             return (
               <div
@@ -64,9 +63,7 @@ export default function CartView() {
                   />
                 ) : (
                   <div
-                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl font-display text-xl text-cream-50 ${
-                      item.line === "EVENTS" ? "bg-salamander-400" : "bg-taupe-500"
-                    }`}
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl font-display text-xl ${config.placeholderClass}`}
                   >
                     {item.nameSnapshot.charAt(0).toUpperCase()}
                   </div>
