@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { startNetopiaPayment } from "@/lib/netopia";
-import { calculateShippingCents } from "@/lib/shipping";
+import { sendOrderEmails } from "@/lib/orders/emails";
+import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CUI_PATTERN = /^(RO)?\d{2,10}$/;
 const MAX_QUANTITY_PER_ITEM = 20;
 const MAX_DISTINCT_ITEMS = 50;
+
+class OutOfStockError extends Error {
+  constructor(public productId: string) {
+    super("out_of_stock");
+  }
+}
 
 function clean(value: unknown, maxLength: number): string {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -103,7 +110,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "unavailable" }, { status: 409 });
   }
 
-  const lines = [];
+  const lines: {
+    productId: string;
+    name: string;
+    code: string;
+    category: string;
+    unitPriceCents: number;
+    quantity: number;
+  }[] = [];
   for (const product of products) {
     const quantity = quantities.get(product.id)!;
     const available =
@@ -135,41 +149,76 @@ export async function POST(request: NextRequest) {
     (sum, line) => sum + line.unitPriceCents * line.quantity,
     0,
   );
+  const isCod = body.paymentMethod === "cod";
   const shippingCents = calculateShippingCents(subtotalCents);
-  const totalCents = subtotalCents + shippingCents;
+  const codFeeCents = isCod ? COD_FEE_CENTS : 0;
+  const totalCents = subtotalCents + shippingCents + codFeeCents;
 
   const customerId = await getCurrentCustomerId().catch(() => null);
 
-  const order = await prisma.order.create({
-    data: {
-      customerEmail: customer.email,
-      customerId,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-      phone: customer.phone,
-      addressLine: customer.addressLine,
-      city: customer.city,
-      county: customer.county,
-      postalCode: customer.postalCode,
-      notes,
-      companyName: company?.name ?? null,
-      companyCui: company?.cui ?? null,
-      subtotalCents,
-      shippingCents,
-      totalCents,
-      currency: "RON",
-      locale,
-      termsAcceptedAt: new Date(),
-      items: {
-        create: lines.map((line) => ({
-          productId: line.productId,
-          productNameSnapshot: line.name,
-          unitPriceCents: line.unitPriceCents,
-          quantity: line.quantity,
-        })),
-      },
+  const orderData = {
+    customerEmail: customer.email,
+    customerId,
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    phone: customer.phone,
+    addressLine: customer.addressLine,
+    city: customer.city,
+    county: customer.county,
+    postalCode: customer.postalCode,
+    notes,
+    companyName: company?.name ?? null,
+    companyCui: company?.cui ?? null,
+    paymentMethod: isCod ? ("COD" as const) : ("CARD" as const),
+    status: isCod ? ("COD" as const) : ("PENDING" as const),
+    subtotalCents,
+    shippingCents,
+    codFeeCents,
+    totalCents,
+    currency: "RON",
+    locale,
+    termsAcceptedAt: new Date(),
+    items: {
+      create: lines.map((line) => ({
+        productId: line.productId,
+        productNameSnapshot: line.name,
+        unitPriceCents: line.unitPriceCents,
+        quantity: line.quantity,
+      })),
     },
-  });
+  };
+
+  if (isCod) {
+    try {
+      const order = await prisma.$transaction(async (tx) => {
+        for (const line of lines) {
+          const result = await tx.inventory.updateMany({
+            where: {
+              productId: line.productId,
+              quantityOnHand: { gte: line.quantity },
+            },
+            data: { quantityOnHand: { decrement: line.quantity } },
+          });
+          if (result.count === 0) throw new OutOfStockError(line.productId);
+        }
+        return tx.order.create({ data: orderData, include: { items: true } });
+      });
+      await sendOrderEmails(order);
+      return NextResponse.json({
+        redirectUrl: `/${locale}/checkout/return?order=${order.id}`,
+      });
+    } catch (err) {
+      if (err instanceof OutOfStockError) {
+        return NextResponse.json(
+          { error: "out_of_stock", productId: err.productId },
+          { status: 409 },
+        );
+      }
+      throw err;
+    }
+  }
+
+  const order = await prisma.order.create({ data: orderData });
 
   try {
     const paymentLines = lines.map((line) => ({

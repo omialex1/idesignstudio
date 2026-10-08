@@ -42,7 +42,7 @@
     "checkout": "Finalizeaza comanda",
     "addToCart": "Adauga in cos",
     "added": "Adaugat in cos",
-    "shippingNote": "Livrare 20 lei, gratuită pentru comenzi de peste 250 lei."
+    "shippingNote": "Livrare 20 lei, gratuită pentru comenzi de peste 250 lei. Ramburs: +3,99 lei."
   },
   "Account": {
     "accountLabel": "Cont",
@@ -102,7 +102,7 @@
     "termsProductsHeading": "Produse și prețuri",
     "termsProductsBody": "Toate prețurile afișate pe site sunt exprimate în RON (lei românești). IDESIGN STUDIO S.R.L. nu este plătitoare de TVA, astfel că prețurile nu includ TVA. Ne rezervăm dreptul de a modifica prețurile și disponibilitatea produselor fără notificare prealabilă, modificările neafectând comenzile deja confirmate.",
     "termsPaymentHeading": "Metode de plată",
-    "termsPaymentBody": "Plățile online cu cardul (Visa, Mastercard) sunt procesate în siguranță prin NETOPIA Payments, un procesator autorizat de plăți. Datele cardului tău nu sunt niciodată stocate pe serverele noastre.",
+    "termsPaymentBody": "Poți plăti online cu cardul (Visa, Mastercard), procesat în siguranță prin NETOPIA Payments, un procesator autorizat de plăți; datele cardului tău nu sunt niciodată stocate pe serverele noastre. Alternativ, poți plăti ramburs, în numerar, curierului, la primirea coletului, cu o taxă suplimentară de ramburs de 3,99 lei.",
     "termsDeliveryHeading": "Politica de livrare",
     "termsDeliveryBody": "Produsele personalizate (invitații, papetărie, decor 3D printat) sunt confecționate la comandă. Timpul de livrare estimat este format din timpul de procesare/producție, de 1–2 zile lucrătoare, la care se adaugă timpul de transport prin curier. Livrăm în prezent doar pe teritoriul României, prin curier rapid, cu livrare estimată în 1–2 zile lucrătoare de la expediere. Costul de livrare este o taxă fixă de 20 lei, care include ambalarea de protecție pentru produsele fragile, și este gratuit pentru comenzile de peste 250 lei. Vei primi un cod de urmărire (AWB) de îndată ce comanda ta este expediată.",
     "termsReturnsHeading": "Politica de retur și anulare",
@@ -167,7 +167,16 @@
     "companyHeading": "Date firmă (pentru factură)",
     "companyName": "Denumire firmă",
     "companyCui": "CUI / CIF",
-    "errorCompany": "Verifică datele firmei (CUI valid, de exemplu RO12345678 sau 12345678)."
+    "errorCompany": "Verifică datele firmei (CUI valid, de exemplu RO12345678 sau 12345678).",
+    "paymentHeading": "Metodă de plată",
+    "payCard": "Card online (Visa / Mastercard)",
+    "payCardNote": "Plătești acum, în siguranță, pe pagina NETOPIA Payments.",
+    "payCod": "Ramburs la livrare",
+    "payCodNote": "Plătești curierului, în numerar, la primirea coletului. Se adaugă o taxă de ramburs.",
+    "codFee": "Taxă ramburs",
+    "placeOrderCod": "Plasează comanda (ramburs)",
+    "returnCodTitle": "Comanda a fost înregistrată!",
+    "returnCodBody": "Plătești curierului, în numerar, la livrare. Ți-am trimis un email de confirmare. Produsele sunt făcute la comandă și te vom anunța când pleacă spre tine."
   },
   "Withdrawal": {
     "title": "Retragere din contract",

@@ -32,13 +32,15 @@ export default async function CheckoutReturnPage({
   const state =
     order.status === "PAID"
       ? "Paid"
-      : order.status === "PENDING"
-        ? "Pending"
-        : "Failed";
+      : order.status === "COD"
+        ? "Cod"
+        : order.status === "PENDING"
+          ? "Pending"
+          : "Failed";
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
-      {state === "Paid" && <ClearCartOnMount />}
+      {(state === "Paid" || state === "Cod") && <ClearCartOnMount />}
       {state === "Pending" && <AutoRefresh />}
 
       <div className="w-full max-w-md rounded-2xl border border-cream-200 bg-white p-8 text-center">

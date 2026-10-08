@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useCartStore } from "@/lib/cart/store";
 import { formatPrice } from "@/lib/format";
-import { calculateShippingCents } from "@/lib/shipping";
+import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 
 const emptyForm = {
   firstName: "",
@@ -30,6 +30,7 @@ export default function CheckoutPage() {
 
   const [form, setForm] = useState(emptyForm);
   const [isCompany, setIsCompany] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "cod">("card");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +64,8 @@ export default function CheckoutPage() {
     0,
   );
   const shipping = calculateShippingCents(subtotal);
-  const total = subtotal + shipping;
+  const codFee = paymentMethod === "cod" ? COD_FEE_CENTS : 0;
+  const total = subtotal + shipping + codFee;
 
   const errorMessages: Record<string, string> = {
     out_of_stock: t("errorOutOfStock"),
@@ -83,6 +85,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           locale,
           termsAccepted,
+          paymentMethod,
           customer: { ...form, isCompany },
           items: items.map((item) => ({
             productId: item.productId,
@@ -91,8 +94,8 @@ export default function CheckoutPage() {
         }),
       });
       const data = await res.json().catch(() => null);
-      if (res.ok && data?.paymentUrl) {
-        window.location.href = data.paymentUrl;
+      if (res.ok && (data?.paymentUrl || data?.redirectUrl)) {
+        window.location.href = data.paymentUrl ?? data.redirectUrl;
         return;
       }
       setError(errorMessages[data?.error] ?? t("errorGeneric"));
@@ -256,6 +259,44 @@ export default function CheckoutPage() {
                 />
               </Field>
             </section>
+
+            <section className="flex flex-col gap-3 rounded-2xl border border-cream-200 bg-white p-6">
+              <h2 className="font-display text-xl text-taupe-800">
+                {t("paymentHeading")}
+              </h2>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-cream-200 p-4 text-sm text-taupe-700">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={paymentMethod === "card"}
+                  onChange={() => setPaymentMethod("card")}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-medium">{t("payCard")}</span>
+                  <span className="block text-xs text-taupe-500">
+                    {t("payCardNote")}
+                  </span>
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-cream-200 p-4 text-sm text-taupe-700">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={paymentMethod === "cod"}
+                  onChange={() => setPaymentMethod("cod")}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-medium">
+                    {t("payCod")} (+{formatPrice(COD_FEE_CENTS, currency, locale)})
+                  </span>
+                  <span className="block text-xs text-taupe-500">
+                    {t("payCodNote")}
+                  </span>
+                </span>
+              </label>
+            </section>
           </div>
 
           <aside className="flex h-fit flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
@@ -291,6 +332,12 @@ export default function CheckoutPage() {
                     : formatPrice(shipping, currency, locale)}
                 </span>
               </div>
+              {codFee > 0 && (
+                <div className="flex justify-between">
+                  <span>{t("codFee")}</span>
+                  <span>{formatPrice(codFee, currency, locale)}</span>
+                </div>
+              )}
               <div className="mt-2 flex justify-between text-base font-semibold text-taupe-800">
                 <span>{t("total")}</span>
                 <span>{formatPrice(total, currency, locale)}</span>
@@ -333,9 +380,15 @@ export default function CheckoutPage() {
               disabled={submitting}
               className="rounded-full bg-salamander-500 px-6 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-tangerine-400 disabled:opacity-60"
             >
-              {submitting ? t("redirecting") : t("payButton")}
+              {submitting
+                ? t("redirecting")
+                : paymentMethod === "cod"
+                  ? t("placeOrderCod")
+                  : t("payButton")}
             </button>
-            <p className="text-xs text-taupe-400">{t("secureNote")}</p>
+            {paymentMethod === "card" && (
+              <p className="text-xs text-taupe-400">{t("secureNote")}</p>
+            )}
             <Link
               href="/cart"
               className="text-sm text-salamander-600 hover:underline"

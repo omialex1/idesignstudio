@@ -14,9 +14,15 @@ enum ProductLine {
 
 enum OrderStatus {
   PENDING
+  COD
   PAID
   FAILED
   CANCELED
+}
+
+enum PaymentMethod {
+  CARD
+  COD
 }
 
 model Category {
@@ -44,19 +50,19 @@ model CategoryTranslation {
 }
 
 model Product {
-  id            String               @id @default(cuid())
-  categoryId    String
-  category      Category             @relation(fields: [categoryId], references: [id])
-  slug          String               @unique
-  priceCents    Int
-  currency      String               @default("RON")
-  isActive      Boolean              @default(true)
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  translations  ProductTranslation[]
-  images        ProductImage[]
-  inventory     Inventory?
-  orderItems    OrderItem[]
+  id           String               @id @default(cuid())
+  categoryId   String
+  category     Category             @relation(fields: [categoryId], references: [id])
+  slug         String               @unique
+  priceCents   Int
+  currency     String               @default("RON")
+  isActive     Boolean              @default(true)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  translations ProductTranslation[]
+  images       ProductImage[]
+  inventory    Inventory?
+  orderItems   OrderItem[]
 }
 
 model ProductTranslation {
@@ -90,11 +96,11 @@ model Inventory {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  ntpId           String?     @unique
+  id              String        @id @default(cuid())
+  ntpId           String?       @unique
   customerEmail   String
   customerId      String?
-  customer        Customer?   @relation(fields: [customerId], references: [id])
+  customer        Customer?     @relation(fields: [customerId], references: [id])
   firstName       String
   lastName        String
   phone           String
@@ -102,20 +108,22 @@ model Order {
   city            String
   county          String
   postalCode      String
-  country         String      @default("RO")
+  country         String        @default("RO")
   notes           String?
   companyName     String?
   companyCui      String?
-  status          OrderStatus @default(PENDING)
+  paymentMethod   PaymentMethod @default(CARD)
+  status          OrderStatus   @default(PENDING)
   subtotalCents   Int
   shippingCents   Int
+  codFeeCents     Int           @default(0)
   totalCents      Int
-  currency        String      @default("RON")
+  currency        String        @default("RON")
   locale          String
   termsAcceptedAt DateTime
   paidAt          DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   items           OrderItem[]
 }
 

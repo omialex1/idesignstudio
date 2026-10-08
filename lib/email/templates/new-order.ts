@@ -17,6 +17,8 @@ type NewOrderEmailInput = {
   companyCui: string | null;
   items: { nameSnapshot: string; quantity: number; unitPriceCents: number }[];
   shippingCents: number;
+  codFeeCents: number;
+  paymentMethod: "CARD" | "COD";
   totalCents: number;
   currency: string;
 };
@@ -30,7 +32,10 @@ function row(label: string, value: string): string {
 
 export function newOrderBusinessEmail(order: NewOrderEmailInput) {
   const shortId = order.orderId.slice(0, 8);
-  const subject = `Comandă nouă plătită #${shortId} — ${formatPrice(order.totalCents, order.currency, "ro")}`;
+  const isCod = order.paymentMethod === "COD";
+  const subject = isCod
+    ? `Comandă nouă RAMBURS #${shortId} — de încasat ${formatPrice(order.totalCents, order.currency, "ro")}`
+    : `Comandă nouă plătită #${shortId} — ${formatPrice(order.totalCents, order.currency, "ro")}`;
 
   const itemRows = order.items
     .map(
@@ -39,11 +44,11 @@ export function newOrderBusinessEmail(order: NewOrderEmailInput) {
     )
     .join("");
 
-  const body = `<h1 style="font-size:20px;color:#3D332E;margin:0 0 12px;">Comandă nouă plătită</h1>
-    <p style="margin:0 0 16px;">Comanda <strong>#${shortId}</strong> a fost plătită cu cardul.</p>
+  const body = `<h1 style="font-size:20px;color:#3D332E;margin:0 0 12px;">${isCod ? "Comandă nouă cu ramburs" : "Comandă nouă plătită"}</h1>
+    <p style="margin:0 0 16px;">Comanda <strong>#${shortId}</strong> ${isCod ? `se plătește <strong>ramburs, la livrare</strong>. De încasat de la client prin curier: <strong>${formatPrice(order.totalCents, order.currency, "ro")}</strong>.` : "a fost plătită cu cardul."}</p>
     <h2 style="font-size:15px;color:#3D332E;margin:16px 0 6px;">Produse</h2>
     <ul style="margin:0;padding-left:18px;">${itemRows}</ul>
-    <p style="margin:8px 0 0;">Livrare: ${order.shippingCents === 0 ? "gratuită" : formatPrice(order.shippingCents, order.currency, "ro")}<br><strong>Total: ${formatPrice(order.totalCents, order.currency, "ro")}</strong></p>
+    <p style="margin:8px 0 0;">Livrare: ${order.shippingCents === 0 ? "gratuită" : formatPrice(order.shippingCents, order.currency, "ro")}${order.codFeeCents > 0 ? `<br>Taxă ramburs: ${formatPrice(order.codFeeCents, order.currency, "ro")}` : ""}<br><strong>Total: ${formatPrice(order.totalCents, order.currency, "ro")}</strong></p>
     <h2 style="font-size:15px;color:#3D332E;margin:20px 0 6px;">Client și livrare</h2>
     <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;">
       ${row("Nume", `${order.firstName} ${order.lastName}`)}

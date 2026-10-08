@@ -42,7 +42,7 @@
     "checkout": "Checkout",
     "addToCart": "Add to cart",
     "added": "Added to cart",
-    "shippingNote": "Shipping is 20 RON, free for orders over 250 RON."
+    "shippingNote": "Shipping is 20 RON, free for orders over 250 RON. Cash on delivery: +3.99 RON."
   },
   "Account": {
     "accountLabel": "Account",
@@ -102,7 +102,7 @@
     "termsProductsHeading": "Products & pricing",
     "termsProductsBody": "All prices shown on the site are in RON (Romanian lei). IDESIGN STUDIO S.R.L. is not a VAT payer, so prices do not include VAT. We reserve the right to change prices and product availability without prior notice; such changes do not affect already-confirmed orders.",
     "termsPaymentHeading": "Payment methods",
-    "termsPaymentBody": "Online card payments (Visa, Mastercard) are securely processed by NETOPIA Payments, an authorized payment processor. Your card details are never stored on our servers.",
+    "termsPaymentBody": "You can pay online by card (Visa, Mastercard), securely processed by NETOPIA Payments, an authorized payment processor; your card details are never stored on our servers. Alternatively, you can pay by cash on delivery, in cash to the courier when the parcel arrives, for an additional cash-on-delivery fee of 3.99 RON.",
     "termsDeliveryHeading": "Delivery policy",
     "termsDeliveryBody": "Personalized products (invitations, stationery, 3D-printed decor) are made to order. The estimated delivery time is made up of processing/production time of 1-2 business days, plus courier transit time. We currently ship within Romania only, via courier, with an estimated delivery time of 1-2 business days after dispatch. Shipping is a flat fee of 20 RON, which includes protective packaging for fragile items, and is free for orders over 250 RON. You'll receive a tracking number (AWB) as soon as your order ships.",
     "termsReturnsHeading": "Returns & cancellation policy",
@@ -167,7 +167,16 @@
     "companyHeading": "Company details (for the invoice)",
     "companyName": "Company name",
     "companyCui": "Tax ID (CUI / CIF)",
-    "errorCompany": "Please check the company details (a valid CUI, for example RO12345678 or 12345678)."
+    "errorCompany": "Please check the company details (a valid CUI, for example RO12345678 or 12345678).",
+    "paymentHeading": "Payment method",
+    "payCard": "Pay online by card (Visa / Mastercard)",
+    "payCardNote": "You pay now, securely, on the NETOPIA Payments page.",
+    "payCod": "Cash on delivery",
+    "payCodNote": "You pay the courier in cash when the parcel arrives. A cash-on-delivery fee applies.",
+    "codFee": "Cash on delivery fee",
+    "placeOrderCod": "Place order (cash on delivery)",
+    "returnCodTitle": "Your order has been received!",
+    "returnCodBody": "You pay the courier in cash on delivery. We've sent you a confirmation email. Items are made to order and we'll let you know when they ship."
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",
