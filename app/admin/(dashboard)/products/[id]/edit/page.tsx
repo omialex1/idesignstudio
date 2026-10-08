@@ -34,9 +34,19 @@ export default async function EditProductPage({
           slug: product.slug,
           roName: roTranslation?.name ?? "",
           roDescription: roTranslation?.description ?? "",
+          roLongDescription: roTranslation?.longDescription ?? "",
           enName: enTranslation?.name ?? "",
           enDescription: enTranslation?.description ?? "",
-          priceRon: (product.priceCents / 100).toFixed(2),
+          enLongDescription: enTranslation?.longDescription ?? "",
+          priceRon: product.variants.length
+            ? ""
+            : (product.priceCents / 100).toFixed(2),
+          hasColorOptions: product.hasColorOptions,
+          variants: product.variants.map((v) => ({
+            nameRo: v.nameRo,
+            nameEn: v.nameEn ?? "",
+            priceRon: (v.priceCents / 100).toFixed(2),
+          })),
           quantityOnHand: product.inventory?.quantityOnHand ?? 0,
           lowStockThreshold: product.inventory?.lowStockThreshold ?? 5,
           isActive: product.isActive,

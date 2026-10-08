@@ -1,5 +1,6 @@
 import { getOrdersForAdmin } from "@/lib/admin/queries";
 import { formatPrice } from "@/lib/format";
+import { itemDetails } from "@/lib/orders/item-details";
 import OrderStatusBadge from "@/components/admin/OrderStatusBadge";
 
 export default async function AdminOrdersPage() {
@@ -52,6 +53,11 @@ export default async function AdminOrdersPage() {
                   {o.items.map((item) => (
                     <div key={item.id}>
                       {item.productNameSnapshot} &times; {item.quantity}
+                      {itemDetails(item, "ro") && (
+                        <div className="font-medium text-taupe-800">
+                          {itemDetails(item, "ro")}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </td>

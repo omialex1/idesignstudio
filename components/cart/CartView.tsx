@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { useCartStore } from "@/lib/cart/store";
 import { formatPrice } from "@/lib/format";
 import { lineConfig } from "@/lib/lines";
+import { itemDetails } from "@/lib/orders/item-details";
 
 export default function CartView() {
   const t = useTranslations("Cart");
@@ -51,7 +52,7 @@ export default function CartView() {
 
             return (
               <div
-                key={item.productId}
+                key={item.lineId}
                 className="flex flex-wrap items-center gap-4 rounded-2xl border border-cream-200 bg-white p-4"
               >
                 {item.imageUrl ? (
@@ -76,6 +77,11 @@ export default function CartView() {
                   >
                     {item.nameSnapshot}
                   </Link>
+                  {itemDetails(item, locale) && (
+                    <span className="text-xs text-taupe-500">
+                      {itemDetails(item, locale)}
+                    </span>
+                  )}
                   <span className="text-sm text-taupe-600">
                     {formatPrice(item.priceCents, item.currency, locale)}
                   </span>
@@ -85,7 +91,7 @@ export default function CartView() {
                   <button
                     type="button"
                     onClick={() =>
-                      updateQuantity(item.productId, item.quantity - 1)
+                      updateQuantity(item.lineId, item.quantity - 1)
                     }
                     className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
                   >
@@ -97,7 +103,7 @@ export default function CartView() {
                   <button
                     type="button"
                     onClick={() =>
-                      updateQuantity(item.productId, item.quantity + 1)
+                      updateQuantity(item.lineId, item.quantity + 1)
                     }
                     className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
                   >
@@ -115,7 +121,7 @@ export default function CartView() {
 
                 <button
                   type="button"
-                  onClick={() => removeItem(item.productId)}
+                  onClick={() => removeItem(item.lineId)}
                   className="text-xs font-medium text-taupe-400 hover:text-red-600"
                 >
                   {t("remove")}

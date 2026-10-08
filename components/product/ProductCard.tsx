@@ -52,7 +52,11 @@ export default async function ProductCard({
         )}
         <div className="mt-auto flex items-center justify-between pt-2">
           <span className="font-semibold text-taupe-800">
-            {formatPrice(product.priceCents, product.currency, locale)}
+            {product.hasVariants
+              ? t("fromPrice", {
+                  price: formatPrice(product.priceCents, product.currency, locale),
+                })
+              : formatPrice(product.priceCents, product.currency, locale)}
           </span>
           <span
             className={`text-xs font-medium ${

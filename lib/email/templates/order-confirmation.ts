@@ -5,7 +5,12 @@ import { formatPrice } from "@/lib/format";
 type OrderConfirmationInput = {
   locale: string;
   orderId: string;
-  items: { nameSnapshot: string; quantity: number; unitPriceCents: number }[];
+  items: {
+    nameSnapshot: string;
+    details?: string;
+    quantity: number;
+    unitPriceCents: number;
+  }[];
   shippingCents: number;
   codFeeCents: number;
   totalCents: number;
@@ -34,7 +39,7 @@ export function orderConfirmationEmail(input: OrderConfirmationInput) {
     .map(
       (item) => `
       <tr>
-        <td style="padding:8px 0;border-bottom:1px solid #EFE4D0;">${escapeHtml(item.nameSnapshot)} &times; ${item.quantity}</td>
+        <td style="padding:8px 0;border-bottom:1px solid #EFE4D0;">${escapeHtml(item.nameSnapshot)} &times; ${item.quantity}${item.details ? `<br><span style="font-size:12px;color:#85766A;">${escapeHtml(item.details)}</span>` : ""}</td>
         <td style="padding:8px 0;border-bottom:1px solid #EFE4D0;text-align:right;">${money(item.unitPriceCents * item.quantity)}</td>
       </tr>`,
     )

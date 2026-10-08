@@ -59,12 +59,26 @@ model Product {
   priceCents   Int
   currency     String               @default("RON")
   isActive     Boolean              @default(true)
+  hasColorOptions Boolean           @default(true)
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
+  variants     ProductVariant[]
   translations ProductTranslation[]
   images       ProductImage[]
   inventory    Inventory?
   orderItems   OrderItem[]
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sortOrder  Int     @default(0)
+  nameRo     String
+  nameEn     String?
+  priceCents Int
+
+  @@unique([productId, sortOrder])
 }
 
 model ProductTranslation {
@@ -74,6 +88,7 @@ model ProductTranslation {
   locale      String
   name        String
   description String?
+  longDescription String?
 
   @@unique([productId, locale])
   @@index([locale])
@@ -167,6 +182,9 @@ model OrderItem {
   productId           String
   product             Product @relation(fields: [productId], references: [id])
   productNameSnapshot String
+  variantName         String?
+  colors              String[]
+  colorNote           String?
   unitPriceCents      Int
   quantity            Int
 }

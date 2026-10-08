@@ -29,7 +29,15 @@
     "noProducts": "Nu exista inca produse in aceasta categorie.",
     "inStock": "In stoc",
     "outOfStock": "Stoc epuizat",
-    "backTo": "Înapoi la {name}"
+    "backTo": "Înapoi la {name}",
+    "chooseOption": "Alege varianta",
+    "chooseColors": "Alege culorile",
+    "colorsHint": "Poți alege până la {max} culori. Le combinăm după cum ai ales.",
+    "colorsChosen": "Alese: {names}",
+    "colorNoteLabel": "Detalii despre culori (opțional)",
+    "colorNotePlaceholder": "ex: capacul alb, restul caramel",
+    "pickColorFirst": "Alege cel puțin o culoare ca să poți comanda.",
+    "fromPrice": "de la {price}"
   },
   "Cart": {
     "cartLabel": "Cos de cumparaturi",

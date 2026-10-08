@@ -3,14 +3,22 @@ import type { ProductLine } from "@/lib/generated/prisma";
 
 type CategoryOption = { id: string; name: string; line: ProductLine };
 
+export type VariantDefaults = { nameRo: string; nameEn: string; priceRon: string };
+
+export const VARIANT_SLOTS = 4;
+
 export type ProductFormDefaults = {
   categoryId: string;
   slug: string;
   roName: string;
   roDescription: string;
+  roLongDescription: string;
   enName: string;
   enDescription: string;
+  enLongDescription: string;
   priceRon: string;
+  hasColorOptions: boolean;
+  variants: VariantDefaults[];
   quantityOnHand: number;
   lowStockThreshold: number;
   isActive: boolean;
@@ -32,9 +40,13 @@ export default function ProductForm({
     slug: "",
     roName: "",
     roDescription: "",
+    roLongDescription: "",
     enName: "",
     enDescription: "",
+    enLongDescription: "",
     priceRon: "",
+    hasColorOptions: true,
+    variants: [],
     quantityOnHand: 0,
     lowStockThreshold: 5,
     isActive: true,
@@ -73,7 +85,10 @@ export default function ProductForm({
           />
         </Field>
 
-        <Field label="Descriere (Română)">
+        <Field
+          label="Descriere scurtă (Română)"
+          hint="Apare pe card și în Google."
+        >
           <textarea
             name="roDescription"
             defaultValue={d.roDescription}
@@ -82,11 +97,23 @@ export default function ProductForm({
           />
         </Field>
 
+        <Field
+          label="Descriere detaliată (Română)"
+          hint="Apare pe pagina produsului. Rândurile noi se păstrează."
+        >
+          <textarea
+            name="roLongDescription"
+            defaultValue={d.roLongDescription}
+            rows={10}
+            className={inputClass}
+          />
+        </Field>
+
         <Field label="Nume (Engleză)" hint="Opțional — dacă lipsește, se afișează numele în română.">
           <input name="enName" defaultValue={d.enName} className={inputClass} />
         </Field>
 
-        <Field label="Descriere (Engleză)">
+        <Field label="Descriere scurtă (Engleză)">
           <textarea
             name="enDescription"
             defaultValue={d.enDescription}
@@ -95,17 +122,38 @@ export default function ProductForm({
           />
         </Field>
 
-        <Field label="Preț (RON)">
+        <Field label="Descriere detaliată (Engleză)">
+          <textarea
+            name="enLongDescription"
+            defaultValue={d.enLongDescription}
+            rows={10}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field
+          label="Preț (RON)"
+          hint="Lasă gol dacă produsul are variante cu preț propriu (mai jos)."
+        >
           <input
             name="priceRon"
             type="number"
             step="0.01"
             min="0"
             defaultValue={d.priceRon}
-            required
             className={inputClass}
           />
         </Field>
+
+        <label className="flex items-center gap-2 text-sm text-taupe-700">
+          <input
+            type="checkbox"
+            name="hasColorOptions"
+            defaultChecked={d.hasColorOptions}
+            className="h-4 w-4 rounded border-cream-200"
+          />
+          Clientul alege culorile (produs făcut la comandă)
+        </label>
 
         <label className="flex items-center gap-2 text-sm text-taupe-700">
           <input
@@ -116,6 +164,44 @@ export default function ProductForm({
           />
           Vizibil pe site
         </label>
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
+        <div>
+          <h2 className="font-display text-lg text-taupe-800">Variante</h2>
+          <p className="mt-1 text-xs text-taupe-400">
+            Opțional. Ex: Mare / Mic / Set, fiecare cu prețul lui. Un rând gol
+            nu se folosește. Dacă ai variante, prețul de mai sus se ignoră.
+          </p>
+        </div>
+        {Array.from({ length: VARIANT_SLOTS }, (_, i) => {
+          const v = d.variants[i];
+          return (
+            <div key={i} className="grid grid-cols-3 gap-3">
+              <input
+                name={`variantNameRo${i}`}
+                defaultValue={v?.nameRo ?? ""}
+                placeholder={`Variantă ${i + 1} (Română)`}
+                className={inputClass}
+              />
+              <input
+                name={`variantNameEn${i}`}
+                defaultValue={v?.nameEn ?? ""}
+                placeholder="(Engleză)"
+                className={inputClass}
+              />
+              <input
+                name={`variantPriceRon${i}`}
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={v?.priceRon ?? ""}
+                placeholder="Preț RON"
+                className={inputClass}
+              />
+            </div>
+          );
+        })}
       </section>
 
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">

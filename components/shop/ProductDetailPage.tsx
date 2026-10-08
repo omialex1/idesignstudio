@@ -2,9 +2,8 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductDetail } from "@/lib/db/products";
-import { formatPrice } from "@/lib/format";
 import { lineConfig } from "@/lib/lines";
-import AddToCartButton from "@/components/product/AddToCartButton";
+import ProductPurchase from "@/components/product/ProductPurchase";
 import ProductGallery from "@/components/product/ProductGallery";
 import type { ProductLine } from "@/lib/generated/prisma";
 
@@ -62,9 +61,6 @@ export default async function ProductDetailPage({
           {product.description && (
             <p className="text-taupe-600">{product.description}</p>
           )}
-          <p className="font-display text-2xl text-taupe-800">
-            {formatPrice(product.priceCents, product.currency, locale)}
-          </p>
           <span
             className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
               inStock
@@ -74,7 +70,7 @@ export default async function ProductDetailPage({
           >
             {inStock ? t("inStock") : t("outOfStock")}
           </span>
-          <AddToCartButton
+          <ProductPurchase
             productId={product.id}
             slug={product.slug}
             categorySlug={subcategory}
@@ -84,9 +80,18 @@ export default async function ProductDetailPage({
             currency={product.currency}
             inStock={inStock}
             imageUrl={product.images[0]?.url ?? null}
+            variants={product.variants}
+            hasColorOptions={product.hasColorOptions}
           />
         </div>
       </div>
+      {product.longDescription && (
+        <div className="mx-auto mt-12 w-full max-w-4xl border-t border-cream-200 pt-10">
+          <p className="max-w-2xl leading-relaxed whitespace-pre-line text-taupe-600">
+            {product.longDescription}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

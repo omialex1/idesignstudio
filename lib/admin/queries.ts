@@ -39,6 +39,7 @@ export async function getProductForEdit(id: string) {
       translations: true,
       inventory: true,
       images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true } },
+      variants: { orderBy: { sortOrder: "asc" } },
     },
   });
 }

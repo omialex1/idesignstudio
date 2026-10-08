@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { PENDING_ORDER_KEY } from "@/lib/cart/pending-order";
 import { useCartStore } from "@/lib/cart/store";
+import { itemDetails } from "@/lib/orders/item-details";
 import { formatPrice } from "@/lib/format";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 
@@ -94,6 +95,9 @@ export default function CheckoutPage() {
           customer: { ...form, isCompany },
           items: items.map((item) => ({
             productId: item.productId,
+            variantId: item.variantId ?? null,
+            colors: item.colors,
+            colorNote: item.colorNote ?? null,
             quantity: item.quantity,
           })),
         }),
@@ -316,9 +320,16 @@ export default function CheckoutPage() {
             </h2>
             <ul className="flex flex-col gap-4 text-sm text-taupe-600">
               {items.map((item) => (
-                <li key={item.productId} className="flex flex-col gap-2">
+                <li key={item.lineId} className="flex flex-col gap-2">
                   <div className="flex justify-between gap-3">
-                    <span className="text-taupe-800">{item.nameSnapshot}</span>
+                    <span className="text-taupe-800">
+                      {item.nameSnapshot}
+                      {itemDetails(item, locale) && (
+                        <span className="block text-xs text-taupe-500">
+                          {itemDetails(item, locale)}
+                        </span>
+                      )}
+                    </span>
                     <span className="whitespace-nowrap">
                       {formatPrice(
                         item.priceCents * item.quantity,
@@ -333,7 +344,7 @@ export default function CheckoutPage() {
                         type="button"
                         aria-label={t("decreaseQuantity")}
                         onClick={() =>
-                          updateQuantity(item.productId, item.quantity - 1)
+                          updateQuantity(item.lineId, item.quantity - 1)
                         }
                         className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
                       >
@@ -345,7 +356,7 @@ export default function CheckoutPage() {
                         aria-label={t("increaseQuantity")}
                         disabled={item.quantity >= MAX_QUANTITY_PER_ITEM}
                         onClick={() =>
-                          updateQuantity(item.productId, item.quantity + 1)
+                          updateQuantity(item.lineId, item.quantity + 1)
                         }
                         className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100 disabled:opacity-40"
                       >
@@ -354,7 +365,7 @@ export default function CheckoutPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item.lineId)}
                       className="text-xs font-medium text-taupe-400 hover:text-red-600"
                     >
                       {t("remove")}

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import { lineConfig } from "@/lib/lines";
@@ -13,6 +14,7 @@ export default function FeaturedTile({
   line: ProductLine;
   locale: string;
 }) {
+  const t = useTranslations("Shop");
   const config = lineConfig(line);
 
   return (
@@ -39,7 +41,11 @@ export default function FeaturedTile({
         </div>
       )}
       <span className="text-sm text-taupe-600">
-        {formatPrice(product.priceCents, product.currency, locale)}
+        {product.hasVariants
+          ? t("fromPrice", {
+              price: formatPrice(product.priceCents, product.currency, locale),
+            })
+          : formatPrice(product.priceCents, product.currency, locale)}
       </span>
     </Link>
   );

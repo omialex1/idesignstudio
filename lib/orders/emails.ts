@@ -1,16 +1,20 @@
 import { sendEmail } from "@/lib/email/client";
 import { orderConfirmationEmail } from "@/lib/email/templates/order-confirmation";
 import { newOrderBusinessEmail } from "@/lib/email/templates/new-order";
+import { itemDetails } from "@/lib/orders/item-details";
 import type { Order, OrderItem } from "@/lib/generated/prisma";
 
 export type OrderWithItems = Order & { items: OrderItem[] };
 
 export async function sendOrderEmails(order: OrderWithItems) {
-  const items = order.items.map((item) => ({
-    nameSnapshot: item.productNameSnapshot,
-    quantity: item.quantity,
-    unitPriceCents: item.unitPriceCents,
-  }));
+  const toEmailItems = (locale: string) =>
+    order.items.map((item) => ({
+      nameSnapshot: item.productNameSnapshot,
+      details: itemDetails(item, locale),
+      quantity: item.quantity,
+      unitPriceCents: item.unitPriceCents,
+    }));
+  const items = toEmailItems(order.locale);
 
   try {
     const confirmation = orderConfirmationEmail({
@@ -46,7 +50,7 @@ export async function sendOrderEmails(order: OrderWithItems) {
       notes: order.notes,
       companyName: order.companyName,
       companyCui: order.companyCui,
-      items,
+      items: toEmailItems("ro"),
       shippingCents: order.shippingCents,
       codFeeCents: order.codFeeCents,
       paymentMethod: order.paymentMethod,

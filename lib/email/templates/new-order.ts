@@ -15,7 +15,12 @@ type NewOrderEmailInput = {
   notes: string | null;
   companyName: string | null;
   companyCui: string | null;
-  items: { nameSnapshot: string; quantity: number; unitPriceCents: number }[];
+  items: {
+    nameSnapshot: string;
+    details?: string;
+    quantity: number;
+    unitPriceCents: number;
+  }[];
   shippingCents: number;
   codFeeCents: number;
   paymentMethod: "CARD" | "COD";
@@ -40,7 +45,7 @@ export function newOrderBusinessEmail(order: NewOrderEmailInput) {
   const itemRows = order.items
     .map(
       (item) =>
-        `<li style="margin:2px 0;">${escapeHtml(item.nameSnapshot)} &times; ${item.quantity} — ${formatPrice(item.unitPriceCents * item.quantity, order.currency, "ro")}</li>`,
+        `<li style="margin:2px 0;">${escapeHtml(item.nameSnapshot)} &times; ${item.quantity} — ${formatPrice(item.unitPriceCents * item.quantity, order.currency, "ro")}${item.details ? `<br><strong>${escapeHtml(item.details)}</strong>` : ""}</li>`,
     )
     .join("");
 

@@ -29,7 +29,15 @@
     "noProducts": "No products in this category yet.",
     "inStock": "In stock",
     "outOfStock": "Out of stock",
-    "backTo": "Back to {name}"
+    "backTo": "Back to {name}",
+    "chooseOption": "Choose an option",
+    "chooseColors": "Choose your colours",
+    "colorsHint": "You can pick up to {max} colours. We combine them as you choose.",
+    "colorsChosen": "Selected: {names}",
+    "colorNoteLabel": "Colour details (optional)",
+    "colorNotePlaceholder": "e.g. white lid, the rest caramel",
+    "pickColorFirst": "Pick at least one colour to order.",
+    "fromPrice": "from {price}"
   },
   "Cart": {
     "cartLabel": "Shopping cart",

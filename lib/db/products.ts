@@ -8,8 +8,11 @@ export type ProductWithTranslation = {
   currency: string;
   name: string;
   description: string | null;
+  longDescription: string | null;
   quantityOnHand: number;
   imageUrl: string | null;
+  // True when the price is the cheapest of several variants.
+  hasVariants: boolean;
 };
 
 function translateProduct(
@@ -18,9 +21,15 @@ function translateProduct(
     slug: string;
     priceCents: number;
     currency: string;
-    translations: { locale: string; name: string; description: string | null }[];
+    translations: {
+      locale: string;
+      name: string;
+      description: string | null;
+      longDescription: string | null;
+    }[];
     inventory: { quantityOnHand: number } | null;
     images?: { url: string }[];
+    variants?: { id: string }[];
   },
   locale: string,
 ): ProductWithTranslation {
@@ -35,8 +44,10 @@ function translateProduct(
     currency: product.currency,
     name: translation?.name ?? product.slug,
     description: translation?.description ?? null,
+    longDescription: translation?.longDescription ?? null,
     quantityOnHand: product.inventory?.quantityOnHand ?? 0,
     imageUrl: product.images?.[0]?.url ?? null,
+    hasVariants: (product.variants?.length ?? 0) > 0,
   };
 }
 
@@ -55,6 +66,7 @@ export async function getProductsByCategorySlug(
           translations: true,
           inventory: true,
           images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          variants: { select: { id: true } },
         },
       },
     },
@@ -83,6 +95,7 @@ export async function getProductDetail(productSlug: string, locale: string) {
       translations: true,
       inventory: true,
       images: { orderBy: { sortOrder: "asc" } },
+      variants: { orderBy: { sortOrder: "asc" } },
       category: { include: { translations: true } },
     },
   });
@@ -96,6 +109,12 @@ export async function getProductDetail(productSlug: string, locale: string) {
   return {
     ...translateProduct(product, locale),
     images: product.images,
+    hasColorOptions: product.hasColorOptions,
+    variants: product.variants.map((v) => ({
+      id: v.id,
+      name: locale === "en" ? (v.nameEn ?? v.nameRo) : v.nameRo,
+      priceCents: v.priceCents,
+    })),
     category: {
       id: product.category.id,
       slug: product.category.slug,
@@ -113,6 +132,7 @@ export type FeaturedProduct = {
   priceCents: number;
   currency: string;
   imageUrl: string | null;
+  hasVariants: boolean;
 };
 
 // Newest active products of a line, for the homepage sections.
@@ -129,6 +149,7 @@ export async function getFeaturedProductsByLine(
       translations: true,
       category: { select: { slug: true } },
       images: { orderBy: { sortOrder: "asc" }, take: 1 },
+      variants: { select: { id: true } },
     },
   });
 
@@ -144,6 +165,7 @@ export async function getFeaturedProductsByLine(
       priceCents: p.priceCents,
       currency: p.currency,
       imageUrl: p.images[0]?.url ?? null,
+      hasVariants: p.variants.length > 0,
     };
   });
 }

@@ -4,6 +4,11 @@ import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { startNetopiaPayment } from "@/lib/netopia";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
+import {
+  MAX_COLORS,
+  MAX_COLOR_NOTE_LENGTH,
+  isColorId,
+} from "@/lib/colors";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CUI_PATTERN = /^(RO)?\d{2,10}$/;
@@ -87,43 +92,61 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "empty_cart" }, { status: 400 });
   }
 
+  type RequestedLine = {
+    productId: string;
+    variantId: string | null;
+    colors: string[];
+    colorNote: string | null;
+    quantity: number;
+  };
+
+  const requested = new Map<string, RequestedLine>();
   const quantities = new Map<string, number>();
   for (const item of rawItems) {
     const productId = clean(item?.productId, 60);
+    const variantId = clean(item?.variantId, 60) || null;
     const quantity = Number(item?.quantity);
+    const rawColors: unknown = item?.colors;
+    const colors = Array.isArray(rawColors) ? rawColors : [];
+    const colorNote = clean(item?.colorNote, MAX_COLOR_NOTE_LENGTH) || null;
     if (
       !productId ||
       !Number.isInteger(quantity) ||
       quantity < 1 ||
-      quantity > MAX_QUANTITY_PER_ITEM
+      quantity > MAX_QUANTITY_PER_ITEM ||
+      colors.length > MAX_COLORS ||
+      !colors.every(isColorId) ||
+      new Set(colors).size !== colors.length
     ) {
       return NextResponse.json({ error: "invalid_items" }, { status: 400 });
     }
+
+    const key = [productId, variantId ?? "", [...colors].sort().join("+"), colorNote ?? ""].join("|");
+    const existing = requested.get(key);
+    if (existing) existing.quantity += quantity;
+    else requested.set(key, { productId, variantId, colors: colors as string[], colorNote, quantity });
     quantities.set(productId, (quantities.get(productId) ?? 0) + quantity);
   }
 
   const products = await prisma.product.findMany({
     where: { id: { in: [...quantities.keys()] }, isActive: true },
-    include: { translations: true, inventory: true, category: true },
+    include: {
+      translations: true,
+      inventory: true,
+      category: true,
+      variants: true,
+    },
   });
   if (products.length !== quantities.size) {
     return NextResponse.json({ error: "unavailable" }, { status: 409 });
   }
+  const productById = new Map(products.map((p) => [p.id, p]));
 
-  const lines: {
-    productId: string;
-    name: string;
-    code: string;
-    category: string;
-    unitPriceCents: number;
-    quantity: number;
-  }[] = [];
   for (const product of products) {
-    const quantity = quantities.get(product.id)!;
     const available =
       (product.inventory?.quantityOnHand ?? 0) -
       (product.inventory?.reservedQty ?? 0);
-    if (quantity > available) {
+    if (quantities.get(product.id)! > available) {
       return NextResponse.json(
         { error: "out_of_stock", productId: product.id },
         { status: 409 },
@@ -132,6 +155,41 @@ export async function POST(request: NextRequest) {
     if (product.currency !== "RON") {
       return NextResponse.json({ error: "invalid_items" }, { status: 400 });
     }
+  }
+
+  const lines: {
+    productId: string;
+    name: string;
+    code: string;
+    category: string;
+    variantName: string | null;
+    colors: string[];
+    colorNote: string | null;
+    unitPriceCents: number;
+    quantity: number;
+  }[] = [];
+  for (const line of requested.values()) {
+    const product = productById.get(line.productId)!;
+
+    const variant = line.variantId
+      ? product.variants.find((v) => v.id === line.variantId)
+      : null;
+    // A product with variants needs one of them; one without must not get any.
+    if (
+      (product.variants.length > 0 && !variant) ||
+      (product.variants.length === 0 && line.variantId)
+    ) {
+      return NextResponse.json({ error: "unavailable" }, { status: 409 });
+    }
+    // Made-to-order colours are required where the product offers them.
+    if (
+      product.hasColorOptions
+        ? line.colors.length === 0
+        : line.colors.length > 0 || line.colorNote
+    ) {
+      return NextResponse.json({ error: "invalid_items" }, { status: 400 });
+    }
+
     const translation =
       product.translations.find((t) => t.locale === locale) ??
       product.translations.find((t) => t.locale === "ro");
@@ -140,8 +198,15 @@ export async function POST(request: NextRequest) {
       name: translation?.name ?? product.slug,
       code: product.slug,
       category: product.category.slug,
-      unitPriceCents: product.priceCents,
-      quantity,
+      variantName: variant
+        ? locale === "en"
+          ? (variant.nameEn ?? variant.nameRo)
+          : variant.nameRo
+        : null,
+      colors: line.colors,
+      colorNote: line.colorNote,
+      unitPriceCents: variant?.priceCents ?? product.priceCents,
+      quantity: line.quantity,
     });
   }
 
@@ -182,6 +247,9 @@ export async function POST(request: NextRequest) {
       create: lines.map((line) => ({
         productId: line.productId,
         productNameSnapshot: line.name,
+        variantName: line.variantName,
+        colors: line.colors,
+        colorNote: line.colorNote,
         unitPriceCents: line.unitPriceCents,
         quantity: line.quantity,
       })),
@@ -222,7 +290,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const paymentLines = lines.map((line) => ({
-      name: line.name,
+      name: line.variantName ? `${line.name} – ${line.variantName}` : line.name,
       code: line.code,
       category: line.category,
       priceCents: line.unitPriceCents * line.quantity,
