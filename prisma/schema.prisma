@@ -104,6 +104,10 @@ model Order {
   postalCode      String
   country         String      @default("RO")
   notes           String?
+  companyName     String?
+  companyCui      String?
+  companyRegCom   String?
+  companyAddress  String?
   status          OrderStatus @default(PENDING)
   subtotalCents   Int
   shippingCents   Int

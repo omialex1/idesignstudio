@@ -37,6 +37,12 @@ export default async function AdminOrdersPage() {
                   <div className="text-xs text-taupe-600">
                     {o.addressLine}, {o.city}, {o.county} {o.postalCode}
                   </div>
+                  {o.companyName && (
+                    <div className="mt-1 text-xs font-medium text-taupe-700">
+                      Firmă: {o.companyName}, CUI {o.companyCui}, Reg. Com.{" "}
+                      {o.companyRegCom}, {o.companyAddress}
+                    </div>
+                  )}
                   {o.notes && (
                     <div className="mt-1 text-xs italic text-taupe-500">
                       {o.notes}

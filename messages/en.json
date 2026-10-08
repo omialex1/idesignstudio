@@ -100,7 +100,7 @@
     "anpcSalAlt": "ANPC — Alternative Dispute Resolution (SAL)",
     "termsWithdrawalFormLink": "Use the online withdrawal form",
     "termsProductsHeading": "Products & pricing",
-    "termsProductsBody": "All prices shown on the site are in RON (Romanian lei) and include VAT where applicable. We reserve the right to change prices and product availability without prior notice; such changes do not affect already-confirmed orders.",
+    "termsProductsBody": "All prices shown on the site are in RON (Romanian lei). IDESIGN STUDIO S.R.L. is not a VAT payer, so prices do not include VAT. We reserve the right to change prices and product availability without prior notice; such changes do not affect already-confirmed orders.",
     "termsPaymentHeading": "Payment methods",
     "termsPaymentBody": "Online card payments (Visa, Mastercard) are securely processed by NETOPIA Payments, an authorized payment processor. Your card details are never stored on our servers.",
     "termsDeliveryHeading": "Delivery policy",
@@ -161,7 +161,15 @@
     "returnFailedTitle": "Payment didn't go through",
     "returnFailedBody": "No money was charged. You can go back to your cart and try again.",
     "orderNumber": "Order number",
-    "continueShopping": "Continue shopping"
+    "continueShopping": "Continue shopping",
+    "companyToggleOn": "I'm ordering as a company (legal entity)",
+    "companyToggleOff": "I'm ordering as an individual",
+    "companyHeading": "Company details (for the invoice)",
+    "companyName": "Company name",
+    "companyCui": "Tax ID (CUI / CIF)",
+    "companyRegCom": "Trade Register number",
+    "companyAddress": "Registered office address",
+    "errorCompany": "Please check the company details (a valid CUI, for example RO12345678 or 12345678)."
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",

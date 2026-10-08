@@ -5,7 +5,7 @@ const BASE_URLS = {
   live: "https://secure.netopia-payments.com",
 };
 
-const PRODUCT_VAT_PERCENT = 19;
+const PRODUCT_VAT_PERCENT = 0;
 const ROMANIA_ISO_NUMERIC = 642;
 
 const JWT_ALGORITHMS: Record<string, string> = {

@@ -13,6 +13,10 @@ type NewOrderEmailInput = {
   county: string;
   postalCode: string;
   notes: string | null;
+  companyName: string | null;
+  companyCui: string | null;
+  companyRegCom: string | null;
+  companyAddress: string | null;
   items: { nameSnapshot: string; quantity: number; unitPriceCents: number }[];
   shippingCents: number;
   totalCents: number;
@@ -52,7 +56,18 @@ export function newOrderBusinessEmail(order: NewOrderEmailInput) {
       ${row("Județ", order.county)}
       ${row("Cod poștal", order.postalCode)}
       ${order.notes ? row("Observații", order.notes) : ""}
-    </table>`;
+    </table>
+    ${
+      order.companyName
+        ? `<h2 style="font-size:15px;color:#3D332E;margin:20px 0 6px;">Factură pe firmă</h2>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;">
+      ${row("Denumire", order.companyName)}
+      ${row("CUI", order.companyCui ?? "")}
+      ${row("Reg. Com.", order.companyRegCom ?? "")}
+      ${row("Sediu", order.companyAddress ?? "")}
+    </table>`
+        : ""
+    }`;
 
   return { subject, html: baseEmailHtml(body) };
 }

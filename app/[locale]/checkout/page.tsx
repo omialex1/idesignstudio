@@ -17,6 +17,10 @@ const emptyForm = {
   county: "",
   postalCode: "",
   notes: "",
+  companyName: "",
+  companyCui: "",
+  companyRegCom: "",
+  companyAddress: "",
 };
 
 export default function CheckoutPage() {
@@ -27,6 +31,7 @@ export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
 
   const [form, setForm] = useState(emptyForm);
+  const [isCompany, setIsCompany] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +71,7 @@ export default function CheckoutPage() {
     out_of_stock: t("errorOutOfStock"),
     unavailable: t("errorUnavailable"),
     payment_unavailable: t("errorPayment"),
+    invalid_company: t("errorCompany"),
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -79,7 +85,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           locale,
           termsAccepted,
-          customer: form,
+          customer: { ...form, isCompany },
           items: items.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
@@ -156,6 +162,66 @@ export default function CheckoutPage() {
                   />
                 </Field>
               </div>
+
+              <button
+                type="button"
+                aria-pressed={isCompany}
+                onClick={() => setIsCompany((value) => !value)}
+                className="w-fit rounded-full border border-cream-300 bg-cream-200 px-5 py-2 text-sm font-semibold text-taupe-800 transition-colors hover:bg-cream-300"
+              >
+                {isCompany ? t("companyToggleOff") : t("companyToggleOn")}
+              </button>
+
+              {isCompany && (
+                <div className="flex flex-col gap-4 rounded-xl border border-cream-200 bg-cream-50 p-4">
+                  <h3 className="font-display text-lg text-taupe-800">
+                    {t("companyHeading")}
+                  </h3>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label={t("companyName")}>
+                      <input
+                        required
+                        maxLength={150}
+                        autoComplete="organization"
+                        value={form.companyName}
+                        onChange={(e) => update("companyName", e.target.value)}
+                        className={inputClass}
+                      />
+                    </Field>
+                    <Field label={t("companyCui")}>
+                      <input
+                        required
+                        maxLength={20}
+                        value={form.companyCui}
+                        onChange={(e) => update("companyCui", e.target.value)}
+                        className={inputClass}
+                      />
+                    </Field>
+                    <Field label={t("companyRegCom")}>
+                      <input
+                        required
+                        maxLength={40}
+                        value={form.companyRegCom}
+                        onChange={(e) =>
+                          update("companyRegCom", e.target.value)
+                        }
+                        className={inputClass}
+                      />
+                    </Field>
+                    <Field label={t("companyAddress")}>
+                      <input
+                        required
+                        maxLength={250}
+                        value={form.companyAddress}
+                        onChange={(e) =>
+                          update("companyAddress", e.target.value)
+                        }
+                        className={inputClass}
+                      />
+                    </Field>
+                  </div>
+                </div>
+              )}
             </section>
 
             <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">

@@ -5,6 +5,7 @@ import { startNetopiaPayment } from "@/lib/netopia";
 import { calculateShippingCents } from "@/lib/shipping";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CUI_PATTERN = /^(RO)?\d{2,10}$/;
 const MAX_QUANTITY_PER_ITEM = 20;
 const MAX_DISTINCT_ITEMS = 50;
 
@@ -44,6 +45,29 @@ export async function POST(request: NextRequest) {
     postalCode: clean(body.customer?.postalCode, 12),
   };
   const notes = clean(body.customer?.notes, 500) || null;
+
+  let company: {
+    name: string;
+    cui: string;
+    regCom: string;
+    address: string;
+  } | null = null;
+  if (body.customer?.isCompany === true) {
+    company = {
+      name: clean(body.customer?.companyName, 150),
+      cui: clean(body.customer?.companyCui, 20).replace(/\s/g, "").toUpperCase(),
+      regCom: clean(body.customer?.companyRegCom, 40).toUpperCase(),
+      address: clean(body.customer?.companyAddress, 250),
+    };
+    if (
+      !company.name ||
+      !company.regCom ||
+      !company.address ||
+      !CUI_PATTERN.test(company.cui)
+    ) {
+      return NextResponse.json({ error: "invalid_company" }, { status: 400 });
+    }
+  }
 
   if (
     !customer.firstName ||
@@ -140,6 +164,10 @@ export async function POST(request: NextRequest) {
       county: customer.county,
       postalCode: customer.postalCode,
       notes,
+      companyName: company?.name ?? null,
+      companyCui: company?.cui ?? null,
+      companyRegCom: company?.regCom ?? null,
+      companyAddress: company?.address ?? null,
       subtotalCents,
       shippingCents,
       totalCents,

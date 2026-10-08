@@ -100,7 +100,7 @@
     "anpcSalAlt": "ANPC — Soluționarea Alternativă a Litigiilor (SAL)",
     "termsWithdrawalFormLink": "Folosește formularul online de retragere",
     "termsProductsHeading": "Produse și prețuri",
-    "termsProductsBody": "Toate prețurile afișate pe site sunt exprimate în RON (lei românești) și includ TVA, acolo unde este cazul. Ne rezervăm dreptul de a modifica prețurile și disponibilitatea produselor fără notificare prealabilă, modificările neafectând comenzile deja confirmate.",
+    "termsProductsBody": "Toate prețurile afișate pe site sunt exprimate în RON (lei românești). IDESIGN STUDIO S.R.L. nu este plătitoare de TVA, astfel că prețurile nu includ TVA. Ne rezervăm dreptul de a modifica prețurile și disponibilitatea produselor fără notificare prealabilă, modificările neafectând comenzile deja confirmate.",
     "termsPaymentHeading": "Metode de plată",
     "termsPaymentBody": "Plățile online cu cardul (Visa, Mastercard) sunt procesate în siguranță prin NETOPIA Payments, un procesator autorizat de plăți. Datele cardului tău nu sunt niciodată stocate pe serverele noastre.",
     "termsDeliveryHeading": "Politica de livrare",
@@ -161,7 +161,15 @@
     "returnFailedTitle": "Plata nu a reușit",
     "returnFailedBody": "Nu s-a încasat nicio sumă. Poți reveni în coș și încerca din nou.",
     "orderNumber": "Număr comandă",
-    "continueShopping": "Continuă cumpărăturile"
+    "continueShopping": "Continuă cumpărăturile",
+    "companyToggleOn": "Comand pe firmă (persoană juridică)",
+    "companyToggleOff": "Comand ca persoană fizică",
+    "companyHeading": "Date firmă (pentru factură)",
+    "companyName": "Denumire firmă",
+    "companyCui": "CUI / CIF",
+    "companyRegCom": "Nr. înregistrare Registrul Comerțului",
+    "companyAddress": "Adresa sediului social",
+    "errorCompany": "Verifică datele firmei (CUI valid, de exemplu RO12345678 sau 12345678)."
   },
   "Withdrawal": {
     "title": "Retragere din contract",
