@@ -124,14 +124,13 @@ export default function CartView() {
             <span>{t("total")}</span>
             <span>{formatPrice(total, currency, locale)}</span>
           </div>
-          <button
-            type="button"
-            disabled
-            className="cursor-not-allowed rounded-full bg-taupe-300 px-8 py-3 text-sm font-semibold text-cream-50 opacity-70"
+          <Link
+            href="/checkout"
+            className="rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-tangerine-400"
           >
             {t("checkout")}
-          </button>
-          <p className="text-xs text-taupe-400">{t("checkoutComingSoon")}</p>
+          </Link>
+          <p className="text-xs text-taupe-400">{t("shippingNote")}</p>
         </div>
       </div>
     </div>

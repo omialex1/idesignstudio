@@ -1,3 +1,4 @@
+import { escapeHtml } from "../html";
 import { baseEmailHtml } from "./base";
 
 export type WithdrawalRequest = {
@@ -7,16 +8,6 @@ export type WithdrawalRequest = {
   products: string;
   message: string;
 };
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;")
-    .replace(/\n/g, "<br>");
-}
 
 function detailRow(label: string, value: string): string {
   return `<tr>

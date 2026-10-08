@@ -14,7 +14,8 @@ export default async function AdminOrdersPage() {
           <thead className="border-b border-cream-200 text-taupe-500">
             <tr>
               <th className="px-4 py-3 font-medium">Comandă</th>
-              <th className="px-4 py-3 font-medium">Client</th>
+              <th className="px-4 py-3 font-medium">Client și livrare</th>
+              <th className="px-4 py-3 font-medium">Produse</th>
               <th className="px-4 py-3 font-medium">Data</th>
               <th className="px-4 py-3 font-medium">Total</th>
               <th className="px-4 py-3 font-medium">Status</th>
@@ -26,7 +27,29 @@ export default async function AdminOrdersPage() {
                 <td className="px-4 py-3 font-mono text-xs text-taupe-600">
                   {o.id.slice(0, 8)}
                 </td>
-                <td className="px-4 py-3 text-taupe-800">{o.customerEmail}</td>
+                <td className="px-4 py-3 text-taupe-800">
+                  <div className="font-medium">
+                    {o.firstName} {o.lastName}
+                  </div>
+                  <div className="text-xs text-taupe-600">
+                    {o.customerEmail} · {o.phone}
+                  </div>
+                  <div className="text-xs text-taupe-600">
+                    {o.addressLine}, {o.city}, {o.county} {o.postalCode}
+                  </div>
+                  {o.notes && (
+                    <div className="mt-1 text-xs italic text-taupe-500">
+                      {o.notes}
+                    </div>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-xs text-taupe-600">
+                  {o.items.map((item) => (
+                    <div key={item.id}>
+                      {item.productNameSnapshot} &times; {item.quantity}
+                    </div>
+                  ))}
+                </td>
                 <td className="px-4 py-3 text-taupe-600">
                   {o.createdAt.toLocaleDateString("ro-RO")}
                 </td>
@@ -40,7 +63,7 @@ export default async function AdminOrdersPage() {
             ))}
             {orders.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-taupe-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-taupe-400">
                   Nicio comandă încă.
                 </td>
               </tr>

@@ -50,7 +50,6 @@ model Product {
   slug          String               @unique
   priceCents    Int
   currency      String               @default("RON")
-  stripePriceId String?
   isActive      Boolean              @default(true)
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
@@ -91,19 +90,31 @@ model Inventory {
 }
 
 model Order {
-  id                      String      @id @default(cuid())
-  stripeCheckoutSessionId String      @unique
-  stripePaymentIntentId   String?
-  customerEmail           String
-  customerId              String?
-  customer                Customer?   @relation(fields: [customerId], references: [id])
-  status                  OrderStatus @default(PENDING)
-  totalCents              Int
-  currency                String      @default("RON")
-  locale                  String
-  createdAt               DateTime    @default(now())
-  updatedAt               DateTime    @updatedAt
-  items                   OrderItem[]
+  id              String      @id @default(cuid())
+  ntpId           String?     @unique
+  customerEmail   String
+  customerId      String?
+  customer        Customer?   @relation(fields: [customerId], references: [id])
+  firstName       String
+  lastName        String
+  phone           String
+  addressLine     String
+  city            String
+  county          String
+  postalCode      String
+  country         String      @default("RO")
+  notes           String?
+  status          OrderStatus @default(PENDING)
+  subtotalCents   Int
+  shippingCents   Int
+  totalCents      Int
+  currency        String      @default("RON")
+  locale          String
+  termsAcceptedAt DateTime
+  paidAt          DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
 }
 
 model Customer {
