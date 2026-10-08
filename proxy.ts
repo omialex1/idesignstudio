@@ -7,6 +7,11 @@ const intlMiddleware = createMiddleware(routing);
 
 const ADMIN_COOKIE_NAME = "admin_session";
 const CUSTOMER_COOKIE_NAME = "customer_session";
+const PUBLIC_ADMIN_PATHS = [
+  "/admin/login",
+  "/admin/forgot-password",
+  "/admin/reset-password",
+];
 const PUBLIC_ACCOUNT_PATHS = [
   "/login",
   "/register",
@@ -30,7 +35,7 @@ export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/admin")) {
-    if (pathname === "/admin/login") {
+    if (PUBLIC_ADMIN_PATHS.includes(pathname)) {
       return NextResponse.next();
     }
 

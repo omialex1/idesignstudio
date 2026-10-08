@@ -159,3 +159,17 @@ model OrderItem {
   unitPriceCents      Int
   quantity            Int
 }
+
+model AdminCredential {
+  id           String   @id @default("admin")
+  passwordHash String
+  updatedAt    DateTime @updatedAt
+}
+
+model AdminPasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
