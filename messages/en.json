@@ -42,7 +42,7 @@
     "checkout": "Checkout",
     "addToCart": "Add to cart",
     "added": "Added to cart",
-    "shippingNote": "Shipping is 20 RON, free for orders over 250 RON. Cash on delivery: +3.99 RON."
+    "shippingNote": "Shipping is 19.99 RON, free for orders of 200 RON or more. Cash on delivery: +3.99 RON."
   },
   "Account": {
     "accountLabel": "Account",
@@ -104,7 +104,7 @@
     "termsPaymentHeading": "Payment methods",
     "termsPaymentBody": "You can pay online by card (Visa, Mastercard), securely processed by NETOPIA Payments, an authorized payment processor; your card details are never stored on our servers. Alternatively, you can pay by cash on delivery, in cash to the courier when the parcel arrives, for an additional cash-on-delivery fee of 3.99 RON.",
     "termsDeliveryHeading": "Delivery policy",
-    "termsDeliveryBody": "Personalized products (invitations, stationery, 3D-printed decor) are made to order. The estimated delivery time is made up of processing/production time of 1-2 business days, plus courier transit time. We currently ship within Romania only, via courier, with an estimated delivery time of 1-2 business days after dispatch. Shipping is a flat fee of 20 RON, which includes protective packaging for fragile items, and is free for orders over 250 RON. You'll receive a tracking number (AWB) as soon as your order ships.",
+    "termsDeliveryBody": "Personalized products (invitations, stationery, 3D-printed decor) are made to order. The estimated delivery time is made up of processing/production time of 1-2 business days, plus courier transit time. We currently ship within Romania only, via courier, with an estimated delivery time of 1-2 business days after dispatch. Shipping is a flat fee of 19.99 RON, which includes protective packaging for fragile items, and is free for orders of 200 RON or more. You'll receive a tracking number (AWB) as soon as your order ships.",
     "termsReturnsHeading": "Returns & cancellation policy",
     "termsReturnsBody": "Personalized products (invitations, decor, or stationery made to your specifications — names, text, dates) cannot be returned or exchanged for reasons of personal preference once production has begun, per art. 16(c) of OUG no. 34/2014. You can cancel or modify a personalized order free of charge within 24 hours of placing it, or before production begins, whichever comes first — please contact us as soon as possible. Non-personalized products can be returned within 14 days of delivery, per the \"Right of withdrawal\" section below. Regardless of product type, if you receive a product that was damaged in transit, defective, or different from what you ordered, please contact us within 48 hours of delivery with photos of the issue — we will offer a replacement or a full refund at no extra cost. Approved refunds are processed to the original payment method used for the order, within 14 days of the return being confirmed.",
     "termsWithdrawalHeading": "Right of withdrawal",

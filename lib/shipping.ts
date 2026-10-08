@@ -1,7 +1,7 @@
-export const SHIPPING_FEE_CENTS = 2000;
+export const SHIPPING_FEE_CENTS = 1999;
 export const COD_FEE_CENTS = 399;
-export const FREE_SHIPPING_THRESHOLD_CENTS = 25000;
+export const FREE_SHIPPING_THRESHOLD_CENTS = 20000;
 
 export function calculateShippingCents(subtotalCents: number): number {
-  return subtotalCents > FREE_SHIPPING_THRESHOLD_CENTS ? 0 : SHIPPING_FEE_CENTS;
+  return subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : SHIPPING_FEE_CENTS;
 }
