@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
     });
 
     await prisma.order.update({ where: { id: order.id }, data: { ntpId } });
-    return NextResponse.json({ paymentUrl });
+    return NextResponse.json({ paymentUrl, orderId: order.id });
   } catch (err) {
     console.error("Could not start Netopia payment", err);
     await prisma.order.update({

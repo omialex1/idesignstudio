@@ -2,12 +2,14 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { PENDING_ORDER_KEY } from "@/lib/cart/pending-order";
 import { useCartStore } from "@/lib/cart/store";
 
 export function ClearCartOnMount() {
   const clear = useCartStore((s) => s.clear);
   useEffect(() => {
     clear();
+    localStorage.removeItem(PENDING_ORDER_KEY);
   }, [clear]);
   return null;
 }

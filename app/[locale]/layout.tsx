@@ -7,6 +7,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import PendingOrderWatcher from "@/components/checkout/PendingOrderWatcher";
 import "../globals.css";
 
 const fraunces = Fraunces({
@@ -53,6 +54,7 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         <NextIntlClientProvider>
+          <PendingOrderWatcher />
           <Header />
           <main className="flex-1 flex flex-col">{children}</main>
           <Footer />

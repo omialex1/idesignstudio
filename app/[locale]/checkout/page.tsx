@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { PENDING_ORDER_KEY } from "@/lib/cart/pending-order";
 import { useCartStore } from "@/lib/cart/store";
 import { formatPrice } from "@/lib/format";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
@@ -99,6 +100,12 @@ export default function CheckoutPage() {
       });
       const data = await res.json().catch(() => null);
       if (res.ok && (data?.paymentUrl || data?.redirectUrl)) {
+        if (data.orderId) {
+          localStorage.setItem(
+            PENDING_ORDER_KEY,
+            JSON.stringify({ id: data.orderId, locale, startedAt: Date.now() }),
+          );
+        }
         window.location.href = data.paymentUrl ?? data.redirectUrl;
         return;
       }
