@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { lineConfig } from "@/lib/lines";
+import { LINES } from "@/lib/lines";
 import {
   PIECE_SLOTS,
   VARIANT_SLOTS,
@@ -92,7 +92,7 @@ export default function ProductForm({
   extra?: React.ReactNode;
 }) {
   const d: ProductFormDefaults = defaultValues ?? {
-    categoryId: categories[0]?.id ?? "",
+    categoryId: "",
     slug: "",
     roName: "",
     roDescription: "",
@@ -111,6 +111,14 @@ export default function ProductForm({
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [pending, setPending] = useState(false);
+
+  // Two steps: main category (one of the four), then one of its subcategories.
+  // Only the subcategory is saved; the main category follows from it.
+  const [line, setLine] = useState<string>(
+    categories.find((c) => c.id === d.categoryId)?.line ?? "",
+  );
+  const [subcategoryId, setSubcategoryId] = useState(d.categoryId);
+  const subcategories = categories.filter((c) => c.line === line);
 
   function showErrors(next: FormErrors, form: HTMLFormElement) {
     setErrors(next);
@@ -176,19 +184,60 @@ export default function ProductForm({
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
         <h2 className="font-display text-lg text-taupe-800">General</h2>
 
-        <Field label="Categorie" required error={errors.categoryId}>
+        <Field label="Categorie principală" required>
           <select
-            name="categoryId"
-            defaultValue={d.categoryId}
-            aria-invalid={invalid("categoryId")}
-            className={controlClass(!!errors.categoryId, "bg-white")}
+            value={line}
+            onChange={(e) => {
+              setLine(e.target.value);
+              setSubcategoryId("");
+            }}
+            className={controlClass(false, "bg-white")}
           >
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({lineConfig(c.line).adminLabel})
+            <option value="">— Alege categoria —</option>
+            {LINES.map((l) => (
+              <option key={l.line} value={l.line}>
+                {l.adminLabel}
               </option>
             ))}
           </select>
+        </Field>
+
+        <Field label="Subcategorie" required error={errors.categoryId}>
+          <select
+            name="categoryId"
+            value={subcategoryId}
+            onChange={(e) => setSubcategoryId(e.target.value)}
+            disabled={!line || subcategories.length === 0}
+            aria-invalid={invalid("categoryId")}
+            className={controlClass(!!errors.categoryId, "bg-white disabled:opacity-60")}
+          >
+            <option value="">
+              {!line
+                ? "Alege mai întâi categoria principală"
+                : subcategories.length === 0
+                  ? "Nicio subcategorie încă"
+                  : "— Alege subcategoria —"}
+            </option>
+            {subcategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          {line && subcategories.length === 0 && (
+            <span className="text-xs text-taupe-600">
+              Această categorie nu are încă subcategorii.{" "}
+              <a
+                href="/admin/categories/new"
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-salamander-600 hover:underline"
+              >
+                Adaugă una (se deschide într-un tab nou)
+              </a>
+              , apoi reîncarcă această pagină.
+            </span>
+          )}
         </Field>
 
         <Field

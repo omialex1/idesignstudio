@@ -29,7 +29,7 @@ const WHOLE_NUMBER = /^\d+$/;
 export function validateProductForm(fd: FormData): FormErrors {
   const errors: FormErrors = {};
 
-  if (!text(fd, "categoryId")) errors.categoryId = "Alege o categorie.";
+  if (!text(fd, "categoryId")) errors.categoryId = "Alege categoria principală și apoi o subcategorie.";
   if (!text(fd, "roName")) {
     errors.roName = "Completează numele produsului în română.";
   }

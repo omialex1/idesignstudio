@@ -45,6 +45,19 @@ async function checkSlug(
   return {};
 }
 
+// The subcategory must still exist (it may have been deleted meanwhile).
+async function checkCategory(formData: FormData): Promise<FormErrors> {
+  const categoryId = String(formData.get("categoryId") || "");
+  if (!categoryId) return {};
+  const found = await prisma.category.findUnique({
+    where: { id: categoryId },
+    select: { id: true },
+  });
+  return found
+    ? {}
+    : { categoryId: "Subcategoria aleasă nu mai există. Alege alta." };
+}
+
 type PieceInput = {
   sortOrder: number;
   nameRo: string;
@@ -222,7 +235,11 @@ export async function createProduct(
   formData: FormData,
 ): Promise<{ id: string } | { errors: FormErrors }> {
   await assertAdmin();
-  const errors = { ...validateProductForm(formData), ...(await checkSlug(formData)) };
+  const errors = {
+    ...validateProductForm(formData),
+    ...(await checkSlug(formData)),
+    ...(await checkCategory(formData)),
+  };
   if (hasErrors(errors)) return { errors };
 
   const data = readProductForm(formData);
@@ -288,6 +305,7 @@ export async function updateProduct(
   const errors = {
     ...validateProductForm(formData),
     ...(await checkSlug(formData, productId)),
+    ...(await checkCategory(formData)),
   };
   if (hasErrors(errors)) return { errors };
 
