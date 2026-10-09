@@ -6,10 +6,13 @@ import ProductImageManager from "@/components/admin/ProductImageManager";
 
 export default async function EditProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string }>;
 }) {
   const { id } = await params;
+  const { created } = await searchParams;
   const [product, categories] = await Promise.all([
     getProductForEdit(id),
     getCategoryOptions(),
@@ -25,6 +28,12 @@ export default async function EditProductPage({
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-2xl text-taupe-800">Editează produs</h1>
+      {created && (
+        <p className="max-w-2xl rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          Produsul a fost creat. Poți adăuga acum fotografiile, mai jos, la
+          secțiunea Fotografii.
+        </p>
+      )}
       <ProductForm
         action={boundUpdate}
         categories={categories}

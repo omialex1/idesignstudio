@@ -99,7 +99,7 @@ function readProductForm(formData: FormData) {
 export async function createProduct(formData: FormData) {
   const data = readProductForm(formData);
 
-  await prisma.product.create({
+  const created = await prisma.product.create({
     data: {
       categoryId: data.categoryId,
       slug: data.slug,
@@ -139,7 +139,7 @@ export async function createProduct(formData: FormData) {
   });
 
   revalidatePath("/", "layout");
-  redirect("/admin/products");
+  redirect(`/admin/products/${created.id}/edit?created=1`);
 }
 
 export async function updateProduct(productId: string, formData: FormData) {
