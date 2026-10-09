@@ -42,8 +42,8 @@
     "colorsHintOne": "Choose one colour.",
     "wholeSet": "Whole set",
     "colorsForSet": "Colours for the whole set",
-    "colorModeEach": "Separate colours per component",
-    "colorModeSet": "Same colours for the whole set"
+    "colorsTargetHint": "Choose what you are setting colours for: each component separately or the whole set.",
+    "pickColorAll": "Pick colours for every component, or for the whole set."
   },
   "Cart": {
     "cartLabel": "Shopping cart",

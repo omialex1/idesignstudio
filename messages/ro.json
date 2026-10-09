@@ -42,8 +42,8 @@
     "colorsHintOne": "Alege o culoare.",
     "wholeSet": "Tot setul",
     "colorsForSet": "Culori pentru tot setul",
-    "colorModeEach": "Culori separate pe componente",
-    "colorModeSet": "Aceleași culori pe tot setul"
+    "colorsTargetHint": "Alege pentru ce vrei să setezi culorile: fiecare componentă separat sau tot setul.",
+    "pickColorAll": "Alege culori pentru toate componentele sau pentru tot setul."
   },
   "Cart": {
     "cartLabel": "Cos de cumparaturi",
