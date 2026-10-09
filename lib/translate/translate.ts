@@ -24,6 +24,7 @@ Rules:
 - Translate naturally, in a warm, clear, concise tone suited to online shop copy. Do not add, remove or explain anything.
 - Keep product and brand names exactly as written, especially those in capital letters (TEAGRID, MORRA, COFESIA, STACKSEY, IDESIGN STUDIO).
 - Keep the structure exactly: line breaks, blank lines, bullet characters (•), numbers, units (mm, RON) and punctuation.
+- Texts may contain formatting markers: **bold** and *italic*. Keep every marker around the translation of the same words, exactly as written.
 - Short fragments such as "Mare", "Mic", "Cutie" are names of product options or parts: translate them as short labels.
 - Romanian text must use correct diacritics (ă â î ș ț).
 - Return one translation per input item, in the same order.`;

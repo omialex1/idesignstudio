@@ -6,6 +6,7 @@ import { lineConfig } from "@/lib/lines";
 import ProductPurchase from "@/components/product/ProductPurchase";
 import ProductGallery from "@/components/product/ProductGallery";
 import { COMPANY, shortText, siteUrl } from "@/lib/seo";
+import { renderRichText } from "@/lib/rich-text";
 import type { ProductLine } from "@/lib/generated/prisma";
 
 export default async function ProductDetailPage({
@@ -130,7 +131,7 @@ export default async function ProductDetailPage({
       {product.longDescription && (
         <div className="mx-auto mt-12 w-full max-w-4xl border-t border-cream-200 pt-10">
           <p className="max-w-2xl leading-relaxed whitespace-pre-line text-taupe-600">
-            {product.longDescription}
+            {renderRichText(product.longDescription)}
           </p>
         </div>
       )}

@@ -10,6 +10,7 @@ import {
   type FormErrors,
 } from "@/lib/admin/form-validation";
 import SubmitButton from "@/components/admin/SubmitButton";
+import RichTextField from "@/components/admin/RichTextField";
 import {
   Field,
   FieldError,
@@ -226,17 +227,12 @@ export default function ProductForm({
           />
         </Field>
 
-        <Field
+        <RichTextField
+          name="roLongDescription"
           label="Descriere detaliată (Română)"
           hint="Apare pe pagina produsului. Rândurile noi se păstrează."
-        >
-          <textarea
-            name="roLongDescription"
-            defaultValue={d.roLongDescription}
-            rows={10}
-            className={controlClass()}
-          />
-        </Field>
+          defaultValue={d.roLongDescription}
+        />
 
         <Field
           label="Nume (Engleză)"
@@ -258,14 +254,11 @@ export default function ProductForm({
           />
         </Field>
 
-        <Field label="Descriere detaliată (Engleză)">
-          <textarea
-            name="enLongDescription"
-            defaultValue={d.enLongDescription}
-            rows={10}
-            className={controlClass()}
-          />
-        </Field>
+        <RichTextField
+          name="enLongDescription"
+          label="Descriere detaliată (Engleză)"
+          defaultValue={d.enLongDescription}
+        />
 
         <Field
           label="Preț (RON)"
