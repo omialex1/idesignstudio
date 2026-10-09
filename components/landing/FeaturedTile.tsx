@@ -22,8 +22,9 @@ export default function FeaturedTile({
       href={`/${config.slug}/${product.categorySlug}/${product.slug}`}
       className="group flex flex-col items-center gap-2 text-center"
     >
-      <span className="text-sm font-medium text-taupe-800 group-hover:text-salamander-600">
-        {product.name}
+      {/* Fixed two-line slot, so photos line up whatever the name length. */}
+      <span className="flex h-11 w-full items-center justify-center text-sm leading-tight font-medium text-taupe-800 group-hover:text-salamander-600">
+        <span className="line-clamp-2">{product.name}</span>
       </span>
       {product.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
