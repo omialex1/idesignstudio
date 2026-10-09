@@ -5,6 +5,7 @@ import { getProductDetail } from "@/lib/db/products";
 import { lineConfig } from "@/lib/lines";
 import ProductPurchase from "@/components/product/ProductPurchase";
 import ProductGallery from "@/components/product/ProductGallery";
+import { COMPANY, shortText, siteUrl } from "@/lib/seo";
 import type { ProductLine } from "@/lib/generated/prisma";
 
 export default async function ProductDetailPage({
@@ -33,8 +34,48 @@ export default async function ProductDetailPage({
   const config = lineConfig(line);
   const basePath = `/${config.slug}`;
 
+  // Structured data so search engines can show price and availability.
+  const url = `${siteUrl()}/${locale}${basePath}/${subcategory}/${product.slug}`;
+  const availability = `https://schema.org/${inStock ? "InStock" : "OutOfStock"}`;
+  const prices = product.variants.length
+    ? product.variants.map((v) => v.priceCents)
+    : [product.priceCents];
+  const money = (cents: number) => (cents / 100).toFixed(2);
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: shortText(product.description, 300),
+    image: product.images.map((i) => `${siteUrl()}${i.url}`),
+    sku: product.slug,
+    brand: { "@type": "Brand", name: COMPANY.brand },
+    offers:
+      prices.length > 1
+        ? {
+            "@type": "AggregateOffer",
+            priceCurrency: product.currency,
+            lowPrice: money(Math.min(...prices)),
+            highPrice: money(Math.max(...prices)),
+            offerCount: prices.length,
+            availability,
+            url,
+          }
+        : {
+            "@type": "Offer",
+            priceCurrency: product.currency,
+            price: money(prices[0]),
+            availability,
+            itemCondition: "https://schema.org/NewCondition",
+            url,
+          },
+  };
+
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <div className="mx-auto grid w-full max-w-4xl gap-10 sm:grid-cols-2">
         {product.images.length > 0 ? (
           <ProductGallery

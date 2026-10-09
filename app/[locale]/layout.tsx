@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Fraunces, Manrope } from "next/font/google";
 import { routing } from "@/i18n/routing";
+import { siteUrl } from "@/lib/seo";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PendingOrderWatcher from "@/components/checkout/PendingOrderWatcher";
@@ -33,8 +34,15 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Metadata" });
   return {
-    title: t("title"),
+    metadataBase: new URL(siteUrl()),
+    title: { default: t("title"), template: "%s | iDesignStudio.ro" },
     description: t("description"),
+    openGraph: {
+      type: "website",
+      siteName: "iDesignStudio.ro",
+      locale: locale === "en" ? "en_GB" : "ro_RO",
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
