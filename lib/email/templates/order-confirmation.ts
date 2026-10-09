@@ -68,10 +68,17 @@ export function orderConfirmationEmail(input: OrderConfirmationInput) {
 
   const heading = isRo ? "Multumim pentru comanda!" : "Thank you for your order!";
 
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.idesignstudio.ro").replace(/\/$/, "");
+  const withdrawalUrl = `${site}/${isRo ? "ro" : "en"}/withdrawal`;
+  const withdrawalNote = isRo
+    ? `Te poți retrage din contract în 14 zile de la primirea produselor (cu excepția celor personalizate), folosind <a href="${withdrawalUrl}" style="color:#C33F16;">formularul online de retragere</a>.`
+    : `You can withdraw from the contract within 14 days of receiving the products (except personalized items) using the <a href="${withdrawalUrl}" style="color:#C33F16;">online withdrawal form</a>.`;
+
   const body = `<h1 style="font-size:20px;color:#3D332E;margin:0 0 12px;">${heading}</h1>
        <p style="margin:0 0 16px;">${intro}</p>
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">${tableBody}
-       </table>`;
+       </table>
+       <p style="margin:20px 0 0;font-size:13px;color:#6B5D54;">${withdrawalNote}</p>`;
 
   return { subject, html: baseEmailHtml(body) };
 }

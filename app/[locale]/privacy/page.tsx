@@ -23,7 +23,19 @@ export default async function PrivacyPage() {
           heading={t("privacyDataHeading")}
           body={t("privacyDataBody")}
         />
+        <Section
+          heading={t("privacyLegalHeading")}
+          body={t("privacyLegalBody")}
+        />
         <Section heading={t("privacyUseHeading")} body={t("privacyUseBody")} />
+        <Section
+          heading={t("privacyRecipientsHeading")}
+          body={t("privacyRecipientsBody")}
+        />
+        <Section
+          heading={t("privacyRetentionHeading")}
+          body={t("privacyRetentionBody")}
+        />
         <Section heading={t("privacyCookiesHeading")}>
           <p className="text-taupe-600">{t("privacyCookiesIntro")}</p>
           <ul className="mt-2 list-disc pl-5 text-taupe-600">
@@ -36,7 +48,20 @@ export default async function PrivacyPage() {
         <Section
           heading={t("privacyRightsHeading")}
           body={t("privacyRightsBody")}
-        />
+        >
+          <p className="mt-2 text-taupe-600">
+            {t("privacyRightsComplaint")}{" "}
+            <a
+              href="https://www.dataprotection.ro"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-salamander-600 hover:underline"
+            >
+              www.dataprotection.ro
+            </a>
+            .
+          </p>
+        </Section>
 
         <Section heading={t("privacyContactHeading")}>
           <CompanyInfoBlock />

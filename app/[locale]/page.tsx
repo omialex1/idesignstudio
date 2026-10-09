@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { getMainCategories } from "@/lib/main-categories";
+import { getVisibleMainCategories } from "@/lib/main-categories";
 import { categoryColorClass } from "@/lib/category-colors";
 import { getFeaturedProductsByMain, getMainImageUrl } from "@/lib/db/products";
 import FeaturedTile from "@/components/landing/FeaturedTile";
@@ -19,7 +19,7 @@ export async function generateMetadata({
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   const t = await getTranslations("Home");
-  const mainCategories = await getMainCategories(locale);
+  const mainCategories = await getVisibleMainCategories(locale);
 
   const sections = await Promise.all(
     mainCategories.map(async (main) => ({

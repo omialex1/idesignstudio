@@ -48,6 +48,22 @@ export const getMainCategories = cache(
   },
 );
 
+// Only the categories that have at least one active product. Used for the menu,
+// the homepage and the sitemap, so visitors never land on an empty category
+// (it reappears by itself when its first product is added).
+export const getVisibleMainCategories = cache(
+  async (locale: string): Promise<MainCategory[]> => {
+    const rows = await prisma.mainCategory.findMany({
+      where: {
+        categories: { some: { products: { some: { isActive: true } } } },
+      },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      include: { translations: true },
+    });
+    return rows.map((r) => localize(r, locale));
+  },
+);
+
 export async function getMainCategoryBySlug(
   slug: string,
   locale: string,
