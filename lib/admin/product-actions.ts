@@ -6,6 +6,29 @@ import { prisma } from "@/lib/db/client";
 import { slugify } from "@/lib/admin/slug";
 
 const VARIANT_SLOTS = 4;
+const COMPONENT_SLOTS = 5;
+
+function readComponents(formData: FormData) {
+  const components: {
+    sortOrder: number;
+    nameRo: string;
+    nameEn: string | null;
+    maxColors: number;
+  }[] = [];
+  for (let i = 0; i < COMPONENT_SLOTS; i++) {
+    const nameRo = String(formData.get(`componentNameRo${i}`) || "").trim();
+    if (!nameRo) continue;
+    const nameEn = String(formData.get(`componentNameEn${i}`) || "").trim();
+    const max = parseInt(String(formData.get(`componentMaxColors${i}`) || "1"), 10);
+    components.push({
+      sortOrder: i,
+      nameRo,
+      nameEn: nameEn || null,
+      maxColors: Math.min(3, Math.max(1, Number.isFinite(max) ? max : 1)),
+    });
+  }
+  return components;
+}
 
 function readVariants(formData: FormData) {
   const variants: {
@@ -44,6 +67,7 @@ function readProductForm(formData: FormData) {
   const isActive = formData.get("isActive") === "on";
   const hasColorOptions = formData.get("hasColorOptions") === "on";
   const variants = readVariants(formData);
+  const components = readComponents(formData);
 
   // With variants, the product price is the cheapest one ("from X").
   const priceCents = variants.length
@@ -65,6 +89,7 @@ function readProductForm(formData: FormData) {
     priceCents,
     hasColorOptions,
     variants,
+    components,
     quantityOnHand: Number.isFinite(quantityOnHand) ? quantityOnHand : 0,
     lowStockThreshold: Number.isFinite(lowStockThreshold) ? lowStockThreshold : 5,
     isActive,
@@ -83,6 +108,7 @@ export async function createProduct(formData: FormData) {
       isActive: data.isActive,
       hasColorOptions: data.hasColorOptions,
       variants: { create: data.variants },
+      components: { create: data.components },
       translations: {
         create: [
           {
@@ -136,6 +162,20 @@ export async function updateProduct(productId: string, formData: FormData) {
             nameRo: v.nameRo,
             nameEn: v.nameEn,
             priceCents: v.priceCents,
+          },
+        })),
+      },
+      components: {
+        deleteMany: {
+          sortOrder: { notIn: data.components.map((c) => c.sortOrder) },
+        },
+        upsert: data.components.map((c) => ({
+          where: { productId_sortOrder: { productId, sortOrder: c.sortOrder } },
+          create: c,
+          update: {
+            nameRo: c.nameRo,
+            nameEn: c.nameEn,
+            maxColors: c.maxColors,
           },
         })),
       },

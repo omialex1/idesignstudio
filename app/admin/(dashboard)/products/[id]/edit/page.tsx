@@ -42,6 +42,11 @@ export default async function EditProductPage({
             ? ""
             : (product.priceCents / 100).toFixed(2),
           hasColorOptions: product.hasColorOptions,
+          components: product.components.map((c) => ({
+            nameRo: c.nameRo,
+            nameEn: c.nameEn ?? "",
+            maxColors: c.maxColors,
+          })),
           variants: product.variants.map((v) => ({
             nameRo: v.nameRo,
             nameEn: v.nameEn ?? "",

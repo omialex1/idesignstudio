@@ -2,13 +2,19 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ProductLine } from "@/lib/generated/prisma";
 
+export type CartColorChoice = {
+  componentId: string;
+  componentName: string | null;
+  colors: string[];
+};
+
 export type CartItem = {
   // Same product with a different variant/colours is a separate cart line.
   lineId: string;
   productId: string;
   variantId?: string | null;
   variantName?: string | null;
-  colors: string[];
+  colorChoices: CartColorChoice[];
   colorNote?: string | null;
   slug: string;
   categorySlug: string;
@@ -23,12 +29,14 @@ export type CartItem = {
 export type NewCartItem = Omit<CartItem, "quantity" | "lineId">;
 
 export function buildLineId(
-  item: Pick<NewCartItem, "productId" | "variantId" | "colors" | "colorNote">,
+  item: Pick<NewCartItem, "productId" | "variantId" | "colorChoices" | "colorNote">,
 ) {
   return [
     item.productId,
     item.variantId ?? "",
-    [...item.colors].sort().join("+"),
+    item.colorChoices
+      .map((c) => `${c.componentId}:${[...c.colors].sort().join("+")}`)
+      .join(";"),
     (item.colorNote ?? "").trim().toLowerCase(),
   ].join("|");
 }
@@ -81,8 +89,8 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "idesignstudio-cart",
-      // v1 carts had no variants/colours, so they cannot be checked out any more.
-      version: 2,
+      // Older carts have a different colour format and cannot be checked out.
+      version: 3,
       migrate: () => ({ items: [] }),
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),

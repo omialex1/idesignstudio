@@ -82,6 +82,7 @@ export default async function ProductDetailPage({
             imageUrl={product.images[0]?.url ?? null}
             variants={product.variants}
             hasColorOptions={product.hasColorOptions}
+            components={product.components}
           />
         </div>
       </div>

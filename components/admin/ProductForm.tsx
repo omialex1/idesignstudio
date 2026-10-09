@@ -3,6 +3,14 @@ import type { ProductLine } from "@/lib/generated/prisma";
 
 type CategoryOption = { id: string; name: string; line: ProductLine };
 
+export type ComponentDefaults = {
+  nameRo: string;
+  nameEn: string;
+  maxColors: number;
+};
+
+export const COMPONENT_SLOTS = 5;
+
 export type VariantDefaults = { nameRo: string; nameEn: string; priceRon: string };
 
 export const VARIANT_SLOTS = 4;
@@ -19,6 +27,7 @@ export type ProductFormDefaults = {
   priceRon: string;
   hasColorOptions: boolean;
   variants: VariantDefaults[];
+  components: ComponentDefaults[];
   quantityOnHand: number;
   lowStockThreshold: number;
   isActive: boolean;
@@ -47,6 +56,7 @@ export default function ProductForm({
     priceRon: "",
     hasColorOptions: true,
     variants: [],
+    components: [],
     quantityOnHand: 0,
     lowStockThreshold: 5,
     isActive: true,
@@ -164,6 +174,49 @@ export default function ProductForm({
           />
           Vizibil pe site
         </label>
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
+        <div>
+          <h2 className="font-display text-lg text-taupe-800">
+            Componente și culori
+          </h2>
+          <p className="mt-1 text-xs text-taupe-400">
+            Pentru produsele la care clientul alege culorile (bifa de mai sus).
+            Adaugă fiecare componentă (ex: Cutie, Grilă, Capac) și spune câte
+            culori poate alege clientul pentru ea. Dacă nu adaugi nimic,
+            clientul alege până la 3 culori pentru întregul produs.
+          </p>
+        </div>
+        {Array.from({ length: COMPONENT_SLOTS }, (_, i) => {
+          const c = d.components[i];
+          return (
+            <div key={i} className="grid grid-cols-[1fr_1fr_8rem] gap-3">
+              <input
+                name={`componentNameRo${i}`}
+                defaultValue={c?.nameRo ?? ""}
+                placeholder={`Componenta ${i + 1} (Română)`}
+                className={inputClass}
+              />
+              <input
+                name={`componentNameEn${i}`}
+                defaultValue={c?.nameEn ?? ""}
+                placeholder="(Engleză)"
+                className={inputClass}
+              />
+              <select
+                name={`componentMaxColors${i}`}
+                defaultValue={c?.maxColors ?? 1}
+                className={selectClass}
+                aria-label="Număr maxim de culori"
+              >
+                <option value={1}>1 culoare</option>
+                <option value={2}>până la 2</option>
+                <option value={3}>până la 3</option>
+              </select>
+            </div>
+          );
+        })}
       </section>
 
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">

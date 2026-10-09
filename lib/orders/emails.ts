@@ -57,7 +57,11 @@ export async function sendOrderEmails(order: OrderWithItems) {
       totalCents: order.totalCents,
       currency: order.currency,
     });
-    await sendEmail({ to: businessEmail, ...notification });
+    await sendEmail({
+      to: businessEmail,
+      replyTo: order.customerEmail,
+      ...notification,
+    });
   } catch (err) {
     console.error("Failed to send new order notification email", err);
   }

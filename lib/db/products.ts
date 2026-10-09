@@ -96,6 +96,7 @@ export async function getProductDetail(productSlug: string, locale: string) {
       inventory: true,
       images: { orderBy: { sortOrder: "asc" } },
       variants: { orderBy: { sortOrder: "asc" } },
+      components: { orderBy: { sortOrder: "asc" } },
       category: { include: { translations: true } },
     },
   });
@@ -110,6 +111,11 @@ export async function getProductDetail(productSlug: string, locale: string) {
     ...translateProduct(product, locale),
     images: product.images,
     hasColorOptions: product.hasColorOptions,
+    components: product.components.map((c) => ({
+      id: c.id,
+      name: locale === "en" ? (c.nameEn ?? c.nameRo) : c.nameRo,
+      maxColors: c.maxColors,
+    })),
     variants: product.variants.map((v) => ({
       id: v.id,
       name: locale === "en" ? (v.nameEn ?? v.nameRo) : v.nameRo,

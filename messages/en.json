@@ -32,12 +32,14 @@
     "backTo": "Back to {name}",
     "chooseOption": "Choose an option",
     "chooseColors": "Choose your colours",
-    "colorsHint": "You can pick up to {max} colours. We combine them as you choose.",
+    "colorsHint": "Pick up to {max} colours. We combine them as you choose.",
     "colorsChosen": "Selected: {names}",
     "colorNoteLabel": "Colour details (optional)",
     "colorNotePlaceholder": "e.g. white lid, the rest caramel",
     "pickColorFirst": "Pick at least one colour to order.",
-    "fromPrice": "from {price}"
+    "fromPrice": "from {price}",
+    "colorsFor": "Colours for {name}",
+    "colorsHintOne": "Choose one colour."
   },
   "Cart": {
     "cartLabel": "Shopping cart",

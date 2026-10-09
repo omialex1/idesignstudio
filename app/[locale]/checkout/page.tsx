@@ -96,7 +96,10 @@ export default function CheckoutPage() {
           items: items.map((item) => ({
             productId: item.productId,
             variantId: item.variantId ?? null,
-            colors: item.colors,
+            colorChoices: item.colorChoices.map((c) => ({
+              componentId: c.componentId,
+              colors: c.colors,
+            })),
             colorNote: item.colorNote ?? null,
             quantity: item.quantity,
           })),

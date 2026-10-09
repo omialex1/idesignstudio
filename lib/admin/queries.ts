@@ -40,6 +40,7 @@ export async function getProductForEdit(id: string) {
       inventory: true,
       images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true } },
       variants: { orderBy: { sortOrder: "asc" } },
+      components: { orderBy: { sortOrder: "asc" } },
     },
   });
 }

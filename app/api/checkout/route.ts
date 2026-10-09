@@ -5,6 +5,7 @@ import { startNetopiaPayment } from "@/lib/netopia";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import {
+  DEFAULT_COMPONENT_ID,
   MAX_COLORS,
   MAX_COLOR_NOTE_LENGTH,
   isColorId,
@@ -19,6 +20,31 @@ class OutOfStockError extends Error {
   constructor(public productId: string) {
     super("out_of_stock");
   }
+}
+
+type ColorChoiceInput = { componentId: string; colors: string[] };
+
+// Returns null when the client sent something malformed.
+function parseColorChoices(value: unknown): ColorChoiceInput[] | null {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value) || value.length > 10) return null;
+  const choices: ColorChoiceInput[] = [];
+  for (const raw of value) {
+    const componentId = clean(raw?.componentId, 60);
+    const colors: unknown = raw?.colors;
+    if (
+      !componentId ||
+      !Array.isArray(colors) ||
+      colors.length > MAX_COLORS ||
+      !colors.every(isColorId) ||
+      new Set(colors).size !== colors.length ||
+      choices.some((c) => c.componentId === componentId)
+    ) {
+      return null;
+    }
+    choices.push({ componentId, colors: colors as string[] });
+  }
+  return choices;
 }
 
 function clean(value: unknown, maxLength: number): string {
@@ -95,7 +121,7 @@ export async function POST(request: NextRequest) {
   type RequestedLine = {
     productId: string;
     variantId: string | null;
-    colors: string[];
+    colorChoices: ColorChoiceInput[];
     colorNote: string | null;
     quantity: number;
   };
@@ -106,25 +132,27 @@ export async function POST(request: NextRequest) {
     const productId = clean(item?.productId, 60);
     const variantId = clean(item?.variantId, 60) || null;
     const quantity = Number(item?.quantity);
-    const rawColors: unknown = item?.colors;
-    const colors = Array.isArray(rawColors) ? rawColors : [];
+    const colorChoices = parseColorChoices(item?.colorChoices);
     const colorNote = clean(item?.colorNote, MAX_COLOR_NOTE_LENGTH) || null;
     if (
       !productId ||
       !Number.isInteger(quantity) ||
       quantity < 1 ||
       quantity > MAX_QUANTITY_PER_ITEM ||
-      colors.length > MAX_COLORS ||
-      !colors.every(isColorId) ||
-      new Set(colors).size !== colors.length
+      colorChoices === null
     ) {
       return NextResponse.json({ error: "invalid_items" }, { status: 400 });
     }
 
-    const key = [productId, variantId ?? "", [...colors].sort().join("+"), colorNote ?? ""].join("|");
+    const key = [
+      productId,
+      variantId ?? "",
+      JSON.stringify(colorChoices),
+      colorNote ?? "",
+    ].join("|");
     const existing = requested.get(key);
     if (existing) existing.quantity += quantity;
-    else requested.set(key, { productId, variantId, colors: colors as string[], colorNote, quantity });
+    else requested.set(key, { productId, variantId, colorChoices: colorChoices!, colorNote, quantity });
     quantities.set(productId, (quantities.get(productId) ?? 0) + quantity);
   }
 
@@ -135,6 +163,7 @@ export async function POST(request: NextRequest) {
       inventory: true,
       category: true,
       variants: true,
+      components: { orderBy: { sortOrder: "asc" } },
     },
   });
   if (products.length !== quantities.size) {
@@ -163,7 +192,7 @@ export async function POST(request: NextRequest) {
     code: string;
     category: string;
     variantName: string | null;
-    colors: string[];
+    colorChoices: { component: string | null; colors: string[] }[];
     colorNote: string | null;
     unitPriceCents: number;
     quantity: number;
@@ -181,12 +210,29 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json({ error: "unavailable" }, { status: 409 });
     }
-    // Made-to-order colours are required where the product offers them.
-    if (
-      product.hasColorOptions
-        ? line.colors.length === 0
-        : line.colors.length > 0 || line.colorNote
-    ) {
+    // Made-to-order colours: every component needs 1..max colours.
+    const expected = product.hasColorOptions
+      ? product.components.length > 0
+        ? product.components.map((c) => ({
+            id: c.id,
+            max: c.maxColors,
+            name: locale === "en" ? (c.nameEn ?? c.nameRo) : c.nameRo,
+          }))
+        : [{ id: DEFAULT_COMPONENT_ID, max: MAX_COLORS, name: null }]
+      : [];
+    const orderChoices: { component: string | null; colors: string[] }[] = [];
+    let colorsValid =
+      line.colorChoices.length === expected.length &&
+      (product.hasColorOptions || !line.colorNote);
+    for (const component of expected) {
+      const choice = line.colorChoices.find((c) => c.componentId === component.id);
+      if (!choice || choice.colors.length < 1 || choice.colors.length > component.max) {
+        colorsValid = false;
+        break;
+      }
+      orderChoices.push({ component: component.name, colors: choice.colors });
+    }
+    if (!colorsValid) {
       return NextResponse.json({ error: "invalid_items" }, { status: 400 });
     }
 
@@ -203,7 +249,7 @@ export async function POST(request: NextRequest) {
           ? (variant.nameEn ?? variant.nameRo)
           : variant.nameRo
         : null,
-      colors: line.colors,
+      colorChoices: orderChoices,
       colorNote: line.colorNote,
       unitPriceCents: variant?.priceCents ?? product.priceCents,
       quantity: line.quantity,
@@ -248,7 +294,8 @@ export async function POST(request: NextRequest) {
         productId: line.productId,
         productNameSnapshot: line.name,
         variantName: line.variantName,
-        colors: line.colors,
+        colors: line.colorChoices.flatMap((c) => c.colors),
+        colorChoices: line.colorChoices,
         colorNote: line.colorNote,
         unitPriceCents: line.unitPriceCents,
         quantity: line.quantity,

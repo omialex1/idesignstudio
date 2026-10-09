@@ -48,7 +48,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const toBusiness = withdrawalBusinessEmail(withdrawal);
-    await sendEmail({ to: notifyEmail, ...toBusiness });
+    await sendEmail({
+      to: notifyEmail,
+      replyTo: withdrawal.email,
+      ...toBusiness,
+    });
 
     const toCustomer = withdrawalAcknowledgementEmail(locale, withdrawal);
     await sendEmail({ to: withdrawal.email, ...toCustomer });

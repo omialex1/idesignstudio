@@ -18,7 +18,7 @@ export function baseEmailHtml(bodyHtml: string): string {
           </tr>
           <tr>
             <td style="padding:20px 32px;border-top:1px solid #EFE4D0;color:#9C8F85;font-size:12px;">
-              iDesignStudio.ro
+              iDesignStudio.ro &middot; <a href="mailto:contact@idesignstudio.ro" style="color:#9C8F85;">contact@idesignstudio.ro</a>
             </td>
           </tr>
         </table>
