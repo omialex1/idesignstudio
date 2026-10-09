@@ -67,14 +67,14 @@ type Pair = [roField: string, enField: string];
 
 const ERROR_MESSAGES: Record<string, string> = {
   not_configured:
-    "Traducerea automată nu e încă activată: lipsește cheia DeepL din setările site-ului.",
-  invalid_key: "Cheia DeepL nu este validă. Verific-o în setările site-ului.",
-  quota: "Limita lunară gratuită DeepL a fost atinsă. Încearcă luna viitoare.",
+    "Traducerea automată nu e încă activată: lipsește cheia Claude (ANTHROPIC_API_KEY) din setările site-ului.",
+  invalid_key: "Cheia Claude nu este validă. Verific-o în setările site-ului.",
+  quota: "Creditul contului Claude s-a epuizat sau limita de cereri a fost atinsă. Adaugă credit în console.anthropic.com sau încearcă peste un minut.",
   too_long: "Textul este prea lung pentru o singură traducere.",
   unauthorized: "Sesiunea a expirat. Conectează-te din nou.",
 };
 
-// Fills the English fields from the Romanian ones (or the reverse) with DeepL.
+// Fills the English fields from the Romanian ones (or the reverse) with Claude.
 // Nothing is saved: the person reads the result and saves the form as usual.
 export function TranslateBar({ pairs }: { pairs: Pair[] }) {
   const anchor = useRef<HTMLDivElement>(null);
@@ -175,7 +175,7 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
       className="flex flex-col gap-2 rounded-xl border border-cream-200 bg-cream-50 p-4"
     >
       <p className="text-sm font-medium text-taupe-700">
-        Traducere automată (DeepL)
+        Traducere automată (Claude)
       </p>
       <div className="flex flex-wrap gap-2">
         <button

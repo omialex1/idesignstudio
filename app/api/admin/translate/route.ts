@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin/auth";
-import { TranslationError, translateTexts } from "@/lib/translate/deepl";
+import { TranslationError, translateTexts } from "@/lib/translate/translate";
 
 const MAX_TEXTS = 60;
 const MAX_TOTAL_CHARS = 40_000;
