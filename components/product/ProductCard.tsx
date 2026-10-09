@@ -1,24 +1,23 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
-import { lineConfig } from "@/lib/lines";
+import { categoryColorClass } from "@/lib/category-colors";
 import type { ProductWithTranslation } from "@/lib/db/products";
-import type { ProductLine } from "@/lib/generated/prisma";
+import type { MainCategory } from "@/lib/main-categories";
 
 export default async function ProductCard({
   product,
-  line,
+  main,
   categorySlug,
   locale,
 }: {
   product: ProductWithTranslation;
-  line: ProductLine;
+  main: Pick<MainCategory, "slug" | "colorKey">;
   categorySlug: string;
   locale: string;
 }) {
   const t = await getTranslations("Shop");
-  const config = lineConfig(line);
-  const basePath = `/${config.slug}`;
+  const basePath = `/${main.slug}`;
   const inStock = product.quantityOnHand > 0;
 
   return (
@@ -36,7 +35,7 @@ export default async function ProductCard({
         />
       ) : (
         <div
-          className={`flex aspect-[4/5] items-center justify-center font-display text-3xl ${config.placeholderClass}`}
+          className={`flex aspect-[4/5] items-center justify-center font-display text-3xl ${categoryColorClass(main.colorKey)}`}
         >
           {product.name.charAt(0).toUpperCase()}
         </div>

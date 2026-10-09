@@ -27,9 +27,40 @@ enum PaymentMethod {
   COD
 }
 
+// Top-level categories shown in the menu (Events, Handmade, ...). They own the
+// subcategories below. Managed from the admin.
+model MainCategory {
+  id           String                    @id @default(cuid())
+  slug         String                    @unique
+  sortOrder    Int                       @default(0)
+  // Key into lib/category-colors.ts: colour of the placeholder tiles.
+  color        String                    @default("salamander")
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  translations MainCategoryTranslation[]
+  categories   Category[]
+}
+
+model MainCategoryTranslation {
+  id             String       @id @default(cuid())
+  mainCategoryId String
+  mainCategory   MainCategory @relation(fields: [mainCategoryId], references: [id], onDelete: Cascade)
+  locale         String
+  name           String
+  headline       String?
+  description    String?
+
+  @@unique([mainCategoryId, locale])
+  @@index([locale])
+}
+
+// A subcategory: belongs to one main category and holds products.
 model Category {
   id           String                @id @default(cuid())
-  line         ProductLine
+  // Legacy enum, replaced by mainCategoryId; removed once the new code is live.
+  line         ProductLine?
+  mainCategoryId String?
+  mainCategory MainCategory? @relation(fields: [mainCategoryId], references: [id])
   slug         String                @unique
   sortOrder    Int                   @default(0)
   heroImageUrl String?

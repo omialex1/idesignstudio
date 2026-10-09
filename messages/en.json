@@ -3,27 +3,11 @@
     "title": "iDesignStudio.ro | 3D-printed home decor, handmade and stationery",
     "description": "Objects with soul for home, office and special days: vases, planters, organizers, event decor, handmade and custom stationery. Made to order in Romania, in your colours."
   },
-  "Nav": {
-    "events": "Events",
-    "handmade": "Handmade",
-    "stationary": "Stationery",
-    "homeLifestyle": "Home & lifestyle"
-  },
   "Home": {
     "tagline": "Objects with soul for home, office and special days",
     "discover": "Discover our categories",
     "viewMore": "See more",
     "viewCollection": "View collection"
-  },
-  "EventsPage": {
-    "eyebrow": "Events",
-    "title": "Find the right category for your event.",
-    "subtitle": "Explore our collections of decor and planning for memorable events."
-  },
-  "StationaryPage": {
-    "eyebrow": "Stationary",
-    "title": "Custom stationery for every occasion.",
-    "subtitle": "Explore our collections of invitations, menus, and paper goods."
   },
   "Shop": {
     "noProducts": "No products in this category yet.",
@@ -235,15 +219,5 @@
   },
   "Footer": {
     "rights": "All rights reserved."
-  },
-  "HandmadePage": {
-    "eyebrow": "Handmade",
-    "title": "Handmade objects, made with care for detail.",
-    "subtitle": "Explore our collections of handcrafted objects."
-  },
-  "HomeLifestylePage": {
-    "eyebrow": "Home & lifestyle",
-    "title": "Objects that make a home more welcoming.",
-    "subtitle": "Explore our collections for home and lifestyle."
   }
 }

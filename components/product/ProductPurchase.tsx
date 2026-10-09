@@ -13,7 +13,6 @@ import {
   colorLabel,
   colorSwatchUrl,
 } from "@/lib/colors";
-import type { ProductLine } from "@/lib/generated/prisma";
 
 type ColorComponent = { id: string; name: string | null; maxColors: number };
 type Variant = {
@@ -28,7 +27,8 @@ export default function ProductPurchase({
   productId,
   slug,
   categorySlug,
-  line,
+  mainSlug,
+  colorKey,
   name,
   priceCents,
   currency,
@@ -41,7 +41,8 @@ export default function ProductPurchase({
   productId: string;
   slug: string;
   categorySlug: string;
-  line: ProductLine;
+  mainSlug: string;
+  colorKey: string;
   name: string;
   priceCents: number;
   currency: string;
@@ -150,7 +151,8 @@ export default function ProductPurchase({
       colorNote: hasColorOptions && note.trim() ? note.trim() : null,
       slug,
       categorySlug,
-      line,
+      mainSlug,
+      colorKey,
       nameSnapshot: name,
       priceCents: unitPrice,
       currency,

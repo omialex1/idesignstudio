@@ -1,21 +1,20 @@
 import { prisma } from "@/lib/db/client";
-import type { ProductLine } from "@/lib/generated/prisma";
 
 export type CategoryWithTranslation = {
   id: string;
   slug: string;
-  line: ProductLine;
   heroImageUrl: string | null;
   name: string;
   description: string | null;
 };
 
-export async function getCategoriesByLine(
-  line: ProductLine,
+// Subcategories of one main category, in the order set in the admin.
+export async function getCategoriesByMain(
+  mainCategoryId: string,
   locale: string,
 ): Promise<CategoryWithTranslation[]> {
   const categories = await prisma.category.findMany({
-    where: { line },
+    where: { mainCategoryId },
     orderBy: { sortOrder: "asc" },
     include: { translations: true },
   });
@@ -28,7 +27,6 @@ export async function getCategoriesByLine(
     return {
       id: category.id,
       slug: category.slug,
-      line: category.line,
       heroImageUrl: category.heroImageUrl,
       name: translation?.name ?? category.slug,
       description: translation?.description ?? null,

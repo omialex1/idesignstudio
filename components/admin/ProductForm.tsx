@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { LINES } from "@/lib/lines";
 import {
   PIECE_SLOTS,
   VARIANT_SLOTS,
@@ -10,7 +9,7 @@ import {
   type FormErrors,
 } from "@/lib/admin/form-validation";
 import SubmitButton from "@/components/admin/SubmitButton";
-import { createSubcategory } from "@/lib/admin/category-actions";
+import { createSubcategory } from "@/lib/admin/subcategory-actions";
 import RichTextField from "@/components/admin/RichTextField";
 import {
   Field,
@@ -18,9 +17,8 @@ import {
   TranslateBar,
   controlClass,
 } from "@/components/admin/FormBits";
-import type { ProductLine } from "@/lib/generated/prisma";
-
-type CategoryOption = { id: string; name: string; line: ProductLine };
+type CategoryOption = { id: string; name: string; mainCategoryId: string };
+type MainCategoryOption = { id: string; name: string };
 
 export type PieceDefaults = {
   nameRo: string;
@@ -80,6 +78,7 @@ const TRANSLATE_PAIRS: [string, string][] = [
 export default function ProductForm({
   onSubmit,
   categories,
+  mainCategories,
   defaultValues,
   submitLabel,
   extra,
@@ -88,6 +87,7 @@ export default function ProductForm({
   // Resolves to { errors } when the server rejects the data (nothing on success).
   onSubmit: (formData: FormData) => Promise<unknown>;
   categories: CategoryOption[];
+  mainCategories: MainCategoryOption[];
   defaultValues?: ProductFormDefaults;
   submitLabel: string;
   // Extra sections shown just above the submit button (e.g. photos).
@@ -118,13 +118,13 @@ export default function ProductForm({
   // Two steps: main category (one of the four), then one of its subcategories.
   // Only the subcategory is saved; the main category follows from it.
   const [line, setLine] = useState<string>(
-    categories.find((c) => c.id === d.categoryId)?.line ?? "",
+    categories.find((c) => c.id === d.categoryId)?.mainCategoryId ?? "",
   );
   const [subcategoryId, setSubcategoryId] = useState(d.categoryId);
   // Subcategories created from this form are added to the list on the spot.
   const [created, setCreated] = useState<CategoryOption[]>([]);
   const allCategories = [...categories, ...created];
-  const subcategories = allCategories.filter((c) => c.line === line);
+  const subcategories = allCategories.filter((c) => c.mainCategoryId === line);
   const [adding, setAdding] = useState(false);
   const [newNameRo, setNewNameRo] = useState("");
   const [newNameEn, setNewNameEn] = useState("");
@@ -137,7 +137,7 @@ export default function ProductForm({
     setCreateError(null);
     try {
       const result = await createSubcategoryAction(
-        line as ProductLine,
+        line,
         newNameRo,
         newNameEn,
       );
@@ -236,9 +236,9 @@ export default function ProductForm({
             className={controlClass(false, "bg-white")}
           >
             <option value="">— Alege categoria —</option>
-            {LINES.map((l) => (
-              <option key={l.line} value={l.line}>
-                {l.adminLabel}
+            {mainCategories.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
               </option>
             ))}
           </select>
@@ -296,7 +296,7 @@ export default function ProductForm({
               >
                 <p className="text-sm font-medium text-taupe-700">
                   Subcategorie nouă în{" "}
-                  {LINES.find((l) => l.line === line)?.adminLabel}
+                  {mainCategories.find((m) => m.id === line)?.name}
                 </p>
                 <input
                   value={newNameRo}

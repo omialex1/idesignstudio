@@ -3,27 +3,11 @@
     "title": "iDesignStudio.ro | Obiecte 3D printate, decor, handmade și papetărie",
     "description": "Obiecte cu suflet pentru casă, birou și zile speciale: vaze, ghivece, organizatoare, decor de evenimente, handmade și papetărie personalizată. Făcute la comandă în România, în culorile tale."
   },
-  "Nav": {
-    "events": "Evenimente",
-    "handmade": "Handmade",
-    "stationary": "Papetărie",
-    "homeLifestyle": "Casă și stil de viață"
-  },
   "Home": {
     "tagline": "Obiecte cu suflet pentru casă, birou și zile speciale",
     "discover": "Descoperă categoriile noastre",
     "viewMore": "Vezi mai multe",
     "viewCollection": "Vezi colecția"
-  },
-  "EventsPage": {
-    "eyebrow": "Evenimente",
-    "title": "Alege categoria potrivita pentru evenimentul tau.",
-    "subtitle": "Descopera colectiile noastre de decor si organizare pentru evenimente memorabile."
-  },
-  "StationaryPage": {
-    "eyebrow": "Papetarie",
-    "title": "Papetarie personalizata pentru fiecare ocazie.",
-    "subtitle": "Descopera colectiile noastre de invitatii, meniuri si accesorii de hartie."
   },
   "Shop": {
     "noProducts": "Nu exista inca produse in aceasta categorie.",
@@ -235,15 +219,5 @@
   },
   "Footer": {
     "rights": "Toate drepturile rezervate."
-  },
-  "HandmadePage": {
-    "eyebrow": "Handmade",
-    "title": "Obiecte făcute manual, cu grijă pentru detalii.",
-    "subtitle": "Descoperă colecțiile noastre de obiecte lucrate manual."
-  },
-  "HomeLifestylePage": {
-    "eyebrow": "Casă și stil de viață",
-    "title": "Obiecte care fac casa mai primitoare.",
-    "subtitle": "Descoperă colecțiile noastre pentru casă și stil de viață."
   }
 }

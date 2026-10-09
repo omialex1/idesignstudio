@@ -7,188 +7,105 @@ import { PrismaClient } from "../lib/generated/prisma";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-type CategorySeed = {
-  slug: string;
-  sortOrder: number;
-  ro: { name: string; description: string };
-  en: { name: string; description: string };
-  products: {
-    slug: string;
-    priceCents: number;
-    quantityOnHand: number;
-    ro: { name: string; description: string };
-    en: { name: string; description: string };
-  }[];
-};
-
-const eventsCategories: CategorySeed[] = [
+// The shop's main categories. Idempotent: only creates the ones that are
+// missing, never touches existing ones (they are edited from the admin).
+const MAIN_CATEGORIES = [
   {
-    slug: "wedding-decor",
+    slug: "events",
     sortOrder: 1,
-    ro: { name: "Decor Nunta", description: "Decor personalizat pentru nunti de neuitat." },
-    en: { name: "Wedding Decor", description: "Custom decor for unforgettable weddings." },
-    products: [
-      {
-        slug: "floral-arch",
-        priceCents: 120000,
-        quantityOnHand: 5,
-        ro: { name: "Arcada Florala", description: "Arcada decorativa cu flori pentru ceremonie." },
-        en: { name: "Floral Arch", description: "Decorative floral arch for the ceremony." },
-      },
-      {
-        slug: "table-centerpiece",
-        priceCents: 25000,
-        quantityOnHand: 20,
-        ro: { name: "Aranjament Masa", description: "Aranjament floral pentru masa invitatilor." },
-        en: { name: "Table Centerpiece", description: "Floral centerpiece for guest tables." },
-      },
-    ],
+    color: "salamander",
+    ro: {
+      name: "Evenimente",
+      headline: "Alege categoria potrivita pentru evenimentul tau.",
+      description:
+        "Descopera colectiile noastre de decor si organizare pentru evenimente memorabile.",
+    },
+    en: {
+      name: "Events",
+      headline: "Find the right category for your event.",
+      description:
+        "Explore our collections of decor and planning for memorable events.",
+    },
   },
   {
-    slug: "party-signage",
+    slug: "handmade",
     sortOrder: 2,
-    ro: { name: "Panouri Petrecere", description: "Panouri personalizate pentru evenimente festive." },
-    en: { name: "Party Signage", description: "Custom signage for festive events." },
-    products: [
-      {
-        slug: "welcome-sign",
-        priceCents: 35000,
-        quantityOnHand: 10,
-        ro: { name: "Panou Bun Venit", description: "Panou personalizat de intampinare." },
-        en: { name: "Welcome Sign", description: "Custom welcome sign for guests." },
-      },
-    ],
+    color: "tangerine",
+    ro: {
+      name: "Handmade",
+      headline: "Obiecte făcute manual, cu grijă pentru detalii.",
+      description: "Descoperă colecțiile noastre de obiecte lucrate manual.",
+    },
+    en: {
+      name: "Handmade",
+      headline: "Handmade objects, made with care for detail.",
+      description: "Explore our collections of handcrafted objects.",
+    },
   },
   {
-    slug: "corporate-events",
+    slug: "stationary",
     sortOrder: 3,
-    ro: { name: "Evenimente Corporate", description: "Decor si organizare pentru evenimente business." },
-    en: { name: "Corporate Events", description: "Decor and planning for business events." },
-    products: [
-      {
-        slug: "branded-backdrop",
-        priceCents: 90000,
-        quantityOnHand: 3,
-        ro: { name: "Backdrop Personalizat", description: "Fundal personalizat cu branding-ul companiei." },
-        en: { name: "Branded Backdrop", description: "Custom backdrop featuring your company branding." },
-      },
-    ],
+    color: "cream",
+    ro: {
+      name: "Papetărie",
+      headline: "Papetarie personalizata pentru fiecare ocazie.",
+      description:
+        "Descopera colectiile noastre de invitatii, meniuri si accesorii de hartie.",
+    },
+    en: {
+      name: "Stationery",
+      headline: "Custom stationery for every occasion.",
+      description:
+        "Explore our collections of invitations, menus, and paper goods.",
+    },
+  },
+  {
+    slug: "home-lifestyle",
+    sortOrder: 4,
+    color: "taupe",
+    ro: {
+      name: "Casă și stil de viață",
+      headline: "Obiecte care fac casa mai primitoare.",
+      description: "Descoperă colecțiile noastre pentru casă și stil de viață.",
+    },
+    en: {
+      name: "Home & lifestyle",
+      headline: "Objects that make a home more welcoming.",
+      description: "Explore our collections for home and lifestyle.",
+    },
   },
 ];
 
-const stationaryCategories: CategorySeed[] = [
-  {
-    slug: "wedding-invitations",
-    sortOrder: 1,
-    ro: { name: "Invitatii Nunta", description: "Invitatii elegante pentru ziua voastra speciala." },
-    en: { name: "Wedding Invitations", description: "Elegant invitations for your special day." },
-    products: [
-      {
-        slug: "sealed-invitation",
-        priceCents: 1500,
-        quantityOnHand: 200,
-        ro: { name: "Invitatie cu Sigiliu", description: "Invitatie eleganta cu sigiliu de ceara." },
-        en: { name: "Wax-Seal Invitation", description: "Elegant invitation with a wax seal." },
-      },
-      {
-        slug: "envelope-invitation",
-        priceCents: 1200,
-        quantityOnHand: 200,
-        ro: { name: "Invitatie cu Plic", description: "Invitatie clasica cu plic asortat." },
-        en: { name: "Envelope Invitation", description: "Classic invitation with a matching envelope." },
-      },
-    ],
-  },
-  {
-    slug: "menus-place-cards",
-    sortOrder: 2,
-    ro: { name: "Meniuri si Place Cards", description: "Papetarie coordonata pentru masa festiva." },
-    en: { name: "Menus & Place Cards", description: "Coordinated stationery for the reception table." },
-    products: [
-      {
-        slug: "individual-menu",
-        priceCents: 900,
-        quantityOnHand: 150,
-        ro: { name: "Meniu Individual", description: "Meniu personalizat pentru fiecare invitat." },
-        en: { name: "Individual Menu", description: "Personalized menu for each guest." },
-      },
-    ],
-  },
-  {
-    slug: "thematic-stationery",
-    sortOrder: 3,
-    ro: { name: "Papetarie Tematica", description: "Colectii inspirate din temele voastre preferate." },
-    en: { name: "Thematic Stationery", description: "Collections inspired by your favorite themes." },
-    products: [
-      {
-        slug: "travel-theme-set",
-        priceCents: 1800,
-        quantityOnHand: 100,
-        ro: { name: "Set Tema Calatorii", description: "Papetarie cu tematica de calatorie." },
-        en: { name: "Travel Theme Set", description: "Stationery set with a travel theme." },
-      },
-    ],
-  },
-];
-
-async function seedCategories(line: "EVENTS" | "STATIONARY", categories: CategorySeed[]) {
-  for (const cat of categories) {
-    const category = await prisma.category.upsert({
-      where: { slug: cat.slug },
-      update: { sortOrder: cat.sortOrder, line },
-      create: { slug: cat.slug, sortOrder: cat.sortOrder, line },
+async function main() {
+  for (const m of MAIN_CATEGORIES) {
+    const existing = await prisma.mainCategory.findUnique({
+      where: { slug: m.slug },
+      select: { id: true },
     });
-
-    await prisma.categoryTranslation.upsert({
-      where: { categoryId_locale: { categoryId: category.id, locale: "ro" } },
-      update: cat.ro,
-      create: { categoryId: category.id, locale: "ro", ...cat.ro },
-    });
-    await prisma.categoryTranslation.upsert({
-      where: { categoryId_locale: { categoryId: category.id, locale: "en" } },
-      update: cat.en,
-      create: { categoryId: category.id, locale: "en", ...cat.en },
-    });
-
-    for (const p of cat.products) {
-      const product = await prisma.product.upsert({
-        where: { slug: p.slug },
-        update: { priceCents: p.priceCents, categoryId: category.id },
-        create: { slug: p.slug, priceCents: p.priceCents, categoryId: category.id },
-      });
-
-      await prisma.productTranslation.upsert({
-        where: { productId_locale: { productId: product.id, locale: "ro" } },
-        update: p.ro,
-        create: { productId: product.id, locale: "ro", ...p.ro },
-      });
-      await prisma.productTranslation.upsert({
-        where: { productId_locale: { productId: product.id, locale: "en" } },
-        update: p.en,
-        create: { productId: product.id, locale: "en", ...p.en },
-      });
-
-      await prisma.inventory.upsert({
-        where: { productId: product.id },
-        update: { quantityOnHand: p.quantityOnHand },
-        create: { productId: product.id, quantityOnHand: p.quantityOnHand },
-      });
+    if (existing) {
+      console.log(`exists: ${m.slug}`);
+      continue;
     }
+    await prisma.mainCategory.create({
+      data: {
+        slug: m.slug,
+        sortOrder: m.sortOrder,
+        color: m.color,
+        translations: {
+          create: [
+            { locale: "ro", ...m.ro },
+            { locale: "en", ...m.en },
+          ],
+        },
+      },
+    });
+    console.log(`created: ${m.slug}`);
   }
 }
 
-async function main() {
-  await seedCategories("EVENTS", eventsCategories);
-  await seedCategories("STATIONARY", stationaryCategories);
-}
-
 main()
-  .then(async () => {
-    console.log("Seed complete.");
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
-  });
+  })
+  .finally(() => prisma.$disconnect());

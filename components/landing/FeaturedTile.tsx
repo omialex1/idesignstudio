@@ -1,25 +1,24 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
-import { lineConfig } from "@/lib/lines";
+import { categoryColorClass } from "@/lib/category-colors";
 import type { FeaturedProduct } from "@/lib/db/products";
-import type { ProductLine } from "@/lib/generated/prisma";
+import type { MainCategory } from "@/lib/main-categories";
 
 export default function FeaturedTile({
   product,
-  line,
+  main,
   locale,
 }: {
   product: FeaturedProduct;
-  line: ProductLine;
+  main: Pick<MainCategory, "slug" | "colorKey">;
   locale: string;
 }) {
   const t = useTranslations("Shop");
-  const config = lineConfig(line);
 
   return (
     <Link
-      href={`/${config.slug}/${product.categorySlug}/${product.slug}`}
+      href={`/${main.slug}/${product.categorySlug}/${product.slug}`}
       className="group flex flex-col items-center gap-2 text-center"
     >
       {/* Fixed two-line slot, so photos line up whatever the name length. */}
@@ -36,7 +35,7 @@ export default function FeaturedTile({
         />
       ) : (
         <div
-          className={`flex aspect-[4/5] w-full items-center justify-center rounded-xl font-display text-3xl ${config.placeholderClass}`}
+          className={`flex aspect-[4/5] w-full items-center justify-center rounded-xl font-display text-3xl ${categoryColorClass(main.colorKey)}`}
         >
           {product.name.charAt(0).toUpperCase()}
         </div>

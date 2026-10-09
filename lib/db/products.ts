@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db/client";
 import { finalPriceCents } from "@/lib/pricing";
-import type { ProductLine } from "@/lib/generated/prisma";
 
 export type ProductWithTranslation = {
   id: string;
@@ -53,12 +52,12 @@ function translateProduct(
 }
 
 export async function getProductsByCategorySlug(
-  line: ProductLine,
+  mainCategoryId: string,
   categorySlug: string,
   locale: string,
 ) {
   const category = await prisma.category.findFirst({
-    where: { slug: categorySlug, line },
+    where: { slug: categorySlug, mainCategoryId },
     include: {
       translations: true,
       products: {
@@ -82,7 +81,6 @@ export async function getProductsByCategorySlug(
   return {
     id: category.id,
     slug: category.slug,
-    line: category.line,
     name: categoryTranslation?.name ?? category.slug,
     description: categoryTranslation?.description ?? null,
     products: category.products.map((p) => translateProduct(p, locale)),
@@ -141,7 +139,7 @@ export async function getProductDetail(productSlug: string, locale: string) {
     category: {
       id: product.category.id,
       slug: product.category.slug,
-      line: product.category.line,
+      mainCategoryId: product.category.mainCategoryId,
       name: categoryTranslation?.name ?? product.category.slug,
     },
   };
@@ -158,14 +156,14 @@ export type FeaturedProduct = {
   hasVariants: boolean;
 };
 
-// Newest active products of a line, for the homepage sections.
-export async function getFeaturedProductsByLine(
-  line: ProductLine,
+// Newest active products of a main category, for the homepage sections.
+export async function getFeaturedProductsByMain(
+  mainCategoryId: string,
   locale: string,
   take = 4,
 ): Promise<FeaturedProduct[]> {
   const products = await prisma.product.findMany({
-    where: { isActive: true, category: { line } },
+    where: { isActive: true, category: { mainCategoryId } },
     orderBy: { createdAt: "desc" },
     take,
     include: {
@@ -193,10 +191,10 @@ export async function getFeaturedProductsByLine(
   });
 }
 
-// First product photo found in a line, used as the line's tile image.
-export async function getLineImageUrl(line: ProductLine) {
+// First product photo found in a main category, used as its tile image.
+export async function getMainImageUrl(mainCategoryId: string) {
   const image = await prisma.productImage.findFirst({
-    where: { product: { isActive: true, category: { line } } },
+    where: { product: { isActive: true, category: { mainCategoryId } } },
     orderBy: { sortOrder: "asc" },
     select: { url: true },
   });

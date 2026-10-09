@@ -5,10 +5,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart/store";
-import { LINES } from "@/lib/lines";
 
-export default function Header() {
-  const t = useTranslations("Nav");
+export default function Header({
+  categories,
+}: {
+  categories: { slug: string; name: string }[];
+}) {
   const tCart = useTranslations("Cart");
   const tAccount = useTranslations("Account");
   const locale = useLocale();
@@ -22,9 +24,9 @@ export default function Header() {
 
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const navLinks = LINES.map((l) => ({
-    href: `/${l.slug}`,
-    label: t(l.navKey),
+  const navLinks = categories.map((c) => ({
+    href: `/${c.slug}`,
+    label: c.name,
   }));
 
   return (

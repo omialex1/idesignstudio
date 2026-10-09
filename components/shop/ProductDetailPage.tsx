@@ -2,20 +2,20 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductDetail } from "@/lib/db/products";
-import { lineConfig } from "@/lib/lines";
+import { categoryColorClass } from "@/lib/category-colors";
 import ProductPurchase from "@/components/product/ProductPurchase";
 import ProductGallery from "@/components/product/ProductGallery";
 import { COMPANY, shortText, siteUrl } from "@/lib/seo";
 import { renderRichText } from "@/lib/rich-text";
-import type { ProductLine } from "@/lib/generated/prisma";
+import type { MainCategory } from "@/lib/main-categories";
 
 export default async function ProductDetailPage({
-  line,
+  main,
   subcategory,
   product: productSlug,
   locale,
 }: {
-  line: ProductLine;
+  main: MainCategory;
   subcategory: string;
   product: string;
   locale: string;
@@ -24,7 +24,7 @@ export default async function ProductDetailPage({
 
   if (
     !product ||
-    product.category.line !== line ||
+    product.category.mainCategoryId !== main.id ||
     product.category.slug !== subcategory
   ) {
     notFound();
@@ -32,8 +32,7 @@ export default async function ProductDetailPage({
 
   const t = await getTranslations("Shop");
   const inStock = product.quantityOnHand > 0;
-  const config = lineConfig(line);
-  const basePath = `/${config.slug}`;
+  const basePath = `/${main.slug}`;
 
   // Structured data so search engines can show price and availability.
   const url = `${siteUrl()}/${locale}${basePath}/${subcategory}/${product.slug}`;
@@ -85,7 +84,7 @@ export default async function ProductDetailPage({
           />
         ) : (
           <div
-            className={`flex h-80 items-center justify-center rounded-2xl font-display text-6xl ${config.placeholderClass}`}
+            className={`flex h-80 items-center justify-center rounded-2xl font-display text-6xl ${categoryColorClass(main.colorKey)}`}
           >
             {product.name.charAt(0).toUpperCase()}
           </div>
@@ -116,7 +115,8 @@ export default async function ProductDetailPage({
             productId={product.id}
             slug={product.slug}
             categorySlug={subcategory}
-            line={line}
+            mainSlug={main.slug}
+            colorKey={main.colorKey}
             name={product.name}
             priceCents={product.priceCents}
             currency={product.currency}

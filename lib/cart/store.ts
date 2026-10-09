@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { ProductLine } from "@/lib/generated/prisma";
 
 export type CartColorChoice = {
   componentId: string;
@@ -18,7 +17,9 @@ export type CartItem = {
   colorNote?: string | null;
   slug: string;
   categorySlug: string;
-  line: ProductLine;
+  // Main category the product belongs to: used for its link and placeholder colour.
+  mainSlug: string;
+  colorKey: string;
   nameSnapshot: string;
   priceCents: number;
   currency: string;
@@ -89,8 +90,8 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "idesignstudio-cart",
-      // Older carts have a different colour format and cannot be checked out.
-      version: 3,
+      // Older carts have a different shape (colour picks, category link) and cannot be checked out.
+      version: 4,
       migrate: () => ({ items: [] }),
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),

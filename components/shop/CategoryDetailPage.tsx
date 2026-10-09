@@ -3,33 +3,30 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductsByCategorySlug } from "@/lib/db/products";
 import ProductGrid from "@/components/product/ProductGrid";
-import { lineConfig } from "@/lib/lines";
-import type { ProductLine } from "@/lib/generated/prisma";
+import type { MainCategory } from "@/lib/main-categories";
 
 export default async function CategoryDetailPage({
-  line,
+  main,
   subcategory,
   locale,
 }: {
-  line: ProductLine;
+  main: MainCategory;
   subcategory: string;
   locale: string;
 }) {
-  const category = await getProductsByCategorySlug(line, subcategory, locale);
+  const category = await getProductsByCategorySlug(main.id, subcategory, locale);
   if (!category) notFound();
 
   const t = await getTranslations("Shop");
-  const tNav = await getTranslations("Nav");
-  const config = lineConfig(line);
 
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
       <div className="mx-auto w-full max-w-5xl">
         <Link
-          href={`/${config.slug}`}
+          href={`/${main.slug}`}
           className="text-sm font-medium text-salamander-600 hover:underline"
         >
-          {t("backTo", { name: tNav(config.navKey) })}
+          {t("backTo", { name: main.name })}
         </Link>
         <h1 className="mt-4 font-display text-3xl text-taupe-800">
           {category.name}
@@ -44,7 +41,7 @@ export default async function CategoryDetailPage({
           {category.products.length > 0 ? (
             <ProductGrid
               products={category.products}
-              line={line}
+              main={main}
               categorySlug={category.slug}
               locale={locale}
             />

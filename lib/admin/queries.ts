@@ -45,29 +45,59 @@ export async function getProductForEdit(id: string) {
   });
 }
 
-export async function getCategoriesForAdmin() {
+// Subcategories with their main category and product count.
+export async function getSubcategoriesForAdmin() {
   return prisma.category.findMany({
-    include: { translations: true, _count: { select: { products: true } } },
-    orderBy: [{ line: "asc" }, { sortOrder: "asc" }],
+    include: {
+      translations: true,
+      mainCategory: { include: { translations: true } },
+      _count: { select: { products: true } },
+    },
+    orderBy: [{ mainCategory: { sortOrder: "asc" } }, { sortOrder: "asc" }],
   });
 }
 
-export async function getCategoryForEdit(id: string) {
+export async function getSubcategoryForEdit(id: string) {
   return prisma.category.findUnique({
     where: { id },
-    include: { translations: true },
+    include: { translations: true, _count: { select: { products: true } } },
   });
 }
 
+// Subcategories as choices for the product form.
 export async function getCategoryOptions() {
   const categories = await prisma.category.findMany({
+    where: { mainCategoryId: { not: null } },
     include: { translations: true },
-    orderBy: [{ line: "asc" }, { sortOrder: "asc" }],
+    orderBy: [{ mainCategory: { sortOrder: "asc" } }, { sortOrder: "asc" }],
   });
   return categories.map((c) => ({
     id: c.id,
-    line: c.line,
+    mainCategoryId: c.mainCategoryId!,
     name: c.translations.find((t) => t.locale === "ro")?.name ?? c.slug,
+  }));
+}
+
+// The main categories (Evenimente, Handmade, ...) with how many subcategories they hold.
+export async function getMainCategoriesForAdmin() {
+  return prisma.mainCategory.findMany({
+    include: { translations: true, _count: { select: { categories: true } } },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+export async function getMainCategoryForEdit(id: string) {
+  return prisma.mainCategory.findUnique({
+    where: { id },
+    include: { translations: true, _count: { select: { categories: true } } },
+  });
+}
+
+export async function getMainCategoryOptions() {
+  const mains = await getMainCategoriesForAdmin();
+  return mains.map((m) => ({
+    id: m.id,
+    name: m.translations.find((t) => t.locale === "ro")?.name ?? m.slug,
   }));
 }
 

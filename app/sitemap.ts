@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db/client";
 import { routing } from "@/i18n/routing";
-import { lineSlug, LINES } from "@/lib/lines";
 import { siteUrl } from "@/lib/seo";
 
 // Rebuilt at most once an hour, so new products show up without a redeploy.
@@ -27,29 +26,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     }));
 
-  const [categories, products] = await Promise.all([
+  const [mains, categories, products] = await Promise.all([
+    prisma.mainCategory.findMany({ select: { slug: true, updatedAt: true } }),
     prisma.category.findMany({
-      select: { slug: true, line: true, updatedAt: true },
+      where: { mainCategoryId: { not: null } },
+      select: { slug: true, updatedAt: true, mainCategory: { select: { slug: true } } },
     }),
     prisma.product.findMany({
-      where: { isActive: true },
+      where: { isActive: true, category: { mainCategoryId: { not: null } } },
       select: {
         slug: true,
         updatedAt: true,
-        category: { select: { slug: true, line: true } },
+        category: { select: { slug: true, mainCategory: { select: { slug: true } } } },
       },
     }),
   ]);
 
   return [
     ...entry("", undefined, 1),
-    ...LINES.flatMap((l) => entry(`/${l.slug}`, undefined, 0.8)),
+    ...mains.flatMap((m) => entry(`/${m.slug}`, m.updatedAt, 0.8)),
     ...categories.flatMap((c) =>
-      entry(`/${lineSlug(c.line)}/${c.slug}`, c.updatedAt, 0.7),
+      entry(`/${c.mainCategory!.slug}/${c.slug}`, c.updatedAt, 0.7),
     ),
     ...products.flatMap((p) =>
       entry(
-        `/${lineSlug(p.category.line)}/${p.category.slug}/${p.slug}`,
+        `/${p.category.mainCategory!.slug}/${p.category.slug}/${p.slug}`,
         p.updatedAt,
         0.9,
       ),

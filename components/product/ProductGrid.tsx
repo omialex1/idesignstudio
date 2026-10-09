@@ -1,15 +1,15 @@
 import ProductCard from "./ProductCard";
 import type { ProductWithTranslation } from "@/lib/db/products";
-import type { ProductLine } from "@/lib/generated/prisma";
+import type { MainCategory } from "@/lib/main-categories";
 
 export default function ProductGrid({
   products,
-  line,
+  main,
   categorySlug,
   locale,
 }: {
   products: ProductWithTranslation[];
-  line: ProductLine;
+  main: Pick<MainCategory, "slug" | "colorKey">;
   categorySlug: string;
   locale: string;
 }) {
@@ -19,7 +19,7 @@ export default function ProductGrid({
         <ProductCard
           key={product.id}
           product={product}
-          line={line}
+          main={main}
           categorySlug={categorySlug}
           locale={locale}
         />

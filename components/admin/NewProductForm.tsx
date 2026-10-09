@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { createProduct } from "@/lib/admin/product-actions";
 import ProductForm from "@/components/admin/ProductForm";
 import PhotoPicker, { type PickedPhoto } from "@/components/admin/PhotoPicker";
-import type { ProductLine } from "@/lib/generated/prisma";
-
-type CategoryOption = { id: string; name: string; line: ProductLine };
+type CategoryOption = { id: string; name: string; mainCategoryId: string };
 
 export default function NewProductForm({
   categories,
+  mainCategories,
 }: {
   categories: CategoryOption[];
+  mainCategories: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
@@ -42,6 +42,7 @@ export default function NewProductForm({
     <ProductForm
       onSubmit={handleCreate}
       categories={categories}
+      mainCategories={mainCategories}
       submitLabel="Creează produs"
       extra={<PhotoPicker photos={photos} onChange={setPhotos} />}
     />

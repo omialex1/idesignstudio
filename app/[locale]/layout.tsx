@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { Fraunces, Manrope } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/seo";
+import { getMainCategories } from "@/lib/main-categories";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PendingOrderWatcher from "@/components/checkout/PendingOrderWatcher";
@@ -55,6 +56,8 @@ export default async function LocaleLayout({
     notFound();
   }
 
+  const mainCategories = await getMainCategories(locale);
+
   return (
     <html
       lang={locale}
@@ -63,7 +66,9 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col font-sans">
         <NextIntlClientProvider>
           <PendingOrderWatcher />
-          <Header />
+          <Header
+            categories={mainCategories.map((c) => ({ slug: c.slug, name: c.name }))}
+          />
           <main className="flex-1 flex flex-col">{children}</main>
           <Footer />
         </NextIntlClientProvider>

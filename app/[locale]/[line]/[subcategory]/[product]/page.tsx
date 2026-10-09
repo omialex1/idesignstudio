@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import ProductDetailPage from "@/components/shop/ProductDetailPage";
-import { lineFromSlug } from "@/lib/lines";
+import { getMainCategoryBySlug } from "@/lib/main-categories";
 import { getProductDetail } from "@/lib/db/products";
 import { pageAlternates, shortText } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -16,11 +16,11 @@ export default async function ProductPage({
   }>;
 }) {
   const { locale, line, subcategory, product } = await params;
-  const config = lineFromSlug(line);
-  if (!config) notFound();
+  const main = await getMainCategoryBySlug(line, locale);
+  if (!main) notFound();
   return (
     <ProductDetailPage
-      line={config.line}
+      main={main}
       subcategory={subcategory}
       product={product}
       locale={locale}
@@ -40,8 +40,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, line, subcategory, product } = await params;
   const detail = await getProductDetail(product, locale);
-  const config = lineFromSlug(line);
-  if (!detail || !config) return {};
+  const main = await getMainCategoryBySlug(line, locale);
+  if (!detail || !main) return {};
   const description = shortText(detail.description);
   const photo = detail.images[0]?.url;
   return {
@@ -49,7 +49,7 @@ export async function generateMetadata({
     description,
     alternates: pageAlternates(
       locale,
-      `/${config.slug}/${subcategory}/${detail.slug}`,
+      `/${main.slug}/${subcategory}/${detail.slug}`,
     ),
     openGraph: {
       type: "website",

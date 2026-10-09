@@ -2,6 +2,7 @@
 // show next to the field without losing anything typed), the server runs it
 // again before saving.
 import { MAX_DISCOUNT_PERCENT } from "@/lib/pricing";
+import { isCategoryColor } from "@/lib/category-colors";
 
 export const VARIANT_SLOTS = 4;
 // Pieces (parts with their own colour choice) per variant, and per product
@@ -108,11 +109,28 @@ export function validateProductForm(fd: FormData): FormErrors {
   return errors;
 }
 
-export function validateCategoryForm(fd: FormData): FormErrors {
+export function validateSubcategoryForm(fd: FormData): FormErrors {
   const errors: FormErrors = {};
-  if (!text(fd, "line")) errors.line = "Alege categoria principală.";
+  if (!text(fd, "mainCategoryId")) {
+    errors.mainCategoryId = "Alege categoria principală.";
+  }
+  if (!text(fd, "roName")) {
+    errors.roName = "Completează numele subcategoriei în română.";
+  }
+  const order = text(fd, "sortOrder");
+  if (order !== "" && !/^-?\d+$/.test(order)) {
+    errors.sortOrder = "Ordinea trebuie să fie un număr întreg.";
+  }
+  return errors;
+}
+
+export function validateMainCategoryForm(fd: FormData): FormErrors {
+  const errors: FormErrors = {};
   if (!text(fd, "roName")) {
     errors.roName = "Completează numele categoriei în română.";
+  }
+  if (!isCategoryColor(text(fd, "color"))) {
+    errors.color = "Alege o culoare din listă.";
   }
   const order = text(fd, "sortOrder");
   if (order !== "" && !/^-?\d+$/.test(order)) {

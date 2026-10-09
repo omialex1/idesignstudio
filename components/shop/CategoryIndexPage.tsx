@@ -1,39 +1,32 @@
-import { getTranslations } from "next-intl/server";
-import { getCategoriesByLine } from "@/lib/db/categories";
+import { getCategoriesByMain } from "@/lib/db/categories";
 import CategoryFeed from "@/components/landing/CategoryFeed";
-import type { ProductLine } from "@/lib/generated/prisma";
-
-const messageKey = {
-  EVENTS: "EventsPage",
-  HANDMADE: "HandmadePage",
-  STATIONARY: "StationaryPage",
-  HOME_LIFESTYLE: "HomeLifestylePage",
-} as const satisfies Record<ProductLine, string>;
+import type { MainCategory } from "@/lib/main-categories";
 
 export default async function CategoryIndexPage({
-  line,
+  main,
   locale,
 }: {
-  line: ProductLine;
+  main: MainCategory;
   locale: string;
 }) {
-  const t = await getTranslations(messageKey[line]);
-  const categories = await getCategoriesByLine(line, locale);
+  const categories = await getCategoriesByMain(main.id, locale);
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="px-6 py-16 text-center">
         <p className="text-sm font-semibold tracking-[0.2em] text-salamander-600 uppercase">
-          {t("eyebrow")}
+          {main.name}
         </p>
         <h1 className="mt-2 font-display text-4xl text-taupe-800">
-          {t("title")}
+          {main.headline ?? main.name}
         </h1>
-        <p className="mx-auto mt-3 max-w-lg text-taupe-600">
-          {t("subtitle")}
-        </p>
+        {main.description && (
+          <p className="mx-auto mt-3 max-w-lg text-taupe-600">
+            {main.description}
+          </p>
+        )}
       </div>
-      <CategoryFeed categories={categories} />
+      <CategoryFeed categories={categories} main={main} />
     </div>
   );
 }
