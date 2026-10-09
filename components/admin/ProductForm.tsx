@@ -1,5 +1,21 @@
+"use client";
+
+import { useState } from "react";
 import { lineConfig } from "@/lib/lines";
+import {
+  COMPONENT_SLOTS,
+  VARIANT_SLOTS,
+  hasErrors,
+  validateProductForm,
+  type FormErrors,
+} from "@/lib/admin/form-validation";
 import SubmitButton from "@/components/admin/SubmitButton";
+import {
+  Field,
+  FieldError,
+  TranslateBar,
+  controlClass,
+} from "@/components/admin/FormBits";
 import type { ProductLine } from "@/lib/generated/prisma";
 
 type CategoryOption = { id: string; name: string; line: ProductLine };
@@ -10,11 +26,7 @@ export type ComponentDefaults = {
   maxColors: number;
 };
 
-export const COMPONENT_SLOTS = 5;
-
 export type VariantDefaults = { nameRo: string; nameEn: string; priceRon: string };
-
-export const VARIANT_SLOTS = 4;
 
 export type ProductFormDefaults = {
   categoryId: string;
@@ -34,14 +46,29 @@ export type ProductFormDefaults = {
   isActive: boolean;
 };
 
+const TRANSLATE_PAIRS: [string, string][] = [
+  ["roName", "enName"],
+  ["roDescription", "enDescription"],
+  ["roLongDescription", "enLongDescription"],
+  ...Array.from(
+    { length: VARIANT_SLOTS },
+    (_, i): [string, string] => [`variantNameRo${i}`, `variantNameEn${i}`],
+  ),
+  ...Array.from(
+    { length: COMPONENT_SLOTS },
+    (_, i): [string, string] => [`componentNameRo${i}`, `componentNameEn${i}`],
+  ),
+];
+
 export default function ProductForm({
-  action,
+  onSubmit,
   categories,
   defaultValues,
   submitLabel,
   extra,
 }: {
-  action: (formData: FormData) => void | Promise<void>;
+  // Resolves to { errors } when the server rejects the data (nothing on success).
+  onSubmit: (formData: FormData) => Promise<unknown>;
   categories: CategoryOption[];
   defaultValues?: ProductFormDefaults;
   submitLabel: string;
@@ -66,17 +93,79 @@ export default function ProductForm({
     isActive: true,
   };
 
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [pending, setPending] = useState(false);
+
+  function showErrors(next: FormErrors, form: HTMLFormElement) {
+    setErrors(next);
+    // Bring the first problem into view.
+    requestAnimationFrame(() => {
+      const first = form.querySelector<HTMLElement>('[aria-invalid="true"]');
+      first?.scrollIntoView({ behavior: "smooth", block: "center" });
+      first?.focus({ preventScroll: true });
+    });
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    const clientErrors = validateProductForm(formData);
+    if (hasErrors(clientErrors)) {
+      showErrors(clientErrors, form);
+      return;
+    }
+
+    setErrors({});
+    setPending(true);
+    try {
+      const result = (await onSubmit(formData)) as
+        | { errors?: FormErrors }
+        | undefined;
+      if (result?.errors && hasErrors(result.errors)) {
+        showErrors(result.errors, form);
+      }
+    } catch {
+      showErrors(
+        { _form: "Nu am putut salva produsul. Încearcă din nou." },
+        form,
+      );
+    } finally {
+      setPending(false);
+    }
+  }
+
+  // Typing in a field clears its error message.
+  function clearError(e: React.FormEvent<HTMLFormElement>) {
+    const name = (e.target as HTMLInputElement).name;
+    if (name && errors[name]) {
+      setErrors((current) => {
+        const rest = { ...current };
+        delete rest[name];
+        return rest;
+      });
+    }
+  }
+
+  const invalid = (name: string) => (errors[name] ? true : undefined);
+
   return (
-    <form action={action} className="flex max-w-2xl flex-col gap-8">
+    <form
+      onSubmit={handleSubmit}
+      onInput={clearError}
+      noValidate
+      className="flex max-w-2xl flex-col gap-8"
+    >
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
         <h2 className="font-display text-lg text-taupe-800">General</h2>
 
-        <Field label="Categorie">
+        <Field label="Categorie" required error={errors.categoryId}>
           <select
             name="categoryId"
             defaultValue={d.categoryId}
-            required
-            className={selectClass}
+            aria-invalid={invalid("categoryId")}
+            className={controlClass(!!errors.categoryId, "bg-white")}
           >
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
@@ -86,16 +175,27 @@ export default function ProductForm({
           </select>
         </Field>
 
-        <Field label="Slug (URL)" hint="Lasă gol pentru generare automată din nume.">
-          <input name="slug" defaultValue={d.slug} className={inputClass} />
+        <Field
+          label="Slug (URL)"
+          hint="Lasă gol pentru generare automată din nume."
+          error={errors.slug}
+        >
+          <input
+            name="slug"
+            defaultValue={d.slug}
+            aria-invalid={invalid("slug")}
+            className={controlClass(!!errors.slug)}
+          />
         </Field>
 
-        <Field label="Nume (Română)">
+        <TranslateBar pairs={TRANSLATE_PAIRS} />
+
+        <Field label="Nume (Română)" required error={errors.roName}>
           <input
             name="roName"
             defaultValue={d.roName}
-            required
-            className={inputClass}
+            aria-invalid={invalid("roName")}
+            className={controlClass(!!errors.roName)}
           />
         </Field>
 
@@ -107,7 +207,7 @@ export default function ProductForm({
             name="roDescription"
             defaultValue={d.roDescription}
             rows={3}
-            className={inputClass}
+            className={controlClass()}
           />
         </Field>
 
@@ -119,12 +219,19 @@ export default function ProductForm({
             name="roLongDescription"
             defaultValue={d.roLongDescription}
             rows={10}
-            className={inputClass}
+            className={controlClass()}
           />
         </Field>
 
-        <Field label="Nume (Engleză)" hint="Opțional — dacă lipsește, se afișează numele în română.">
-          <input name="enName" defaultValue={d.enName} className={inputClass} />
+        <Field
+          label="Nume (Engleză)"
+          hint="Opțional — dacă lipsește, se afișează numele în română."
+        >
+          <input
+            name="enName"
+            defaultValue={d.enName}
+            className={controlClass()}
+          />
         </Field>
 
         <Field label="Descriere scurtă (Engleză)">
@@ -132,7 +239,7 @@ export default function ProductForm({
             name="enDescription"
             defaultValue={d.enDescription}
             rows={3}
-            className={inputClass}
+            className={controlClass()}
           />
         </Field>
 
@@ -141,13 +248,15 @@ export default function ProductForm({
             name="enLongDescription"
             defaultValue={d.enLongDescription}
             rows={10}
-            className={inputClass}
+            className={controlClass()}
           />
         </Field>
 
         <Field
           label="Preț (RON)"
-          hint="Lasă gol dacă produsul are variante cu preț propriu (mai jos)."
+          required
+          hint="Lasă gol doar dacă produsul are variante cu preț propriu (mai jos)."
+          error={errors.priceRon}
         >
           <input
             name="priceRon"
@@ -155,7 +264,8 @@ export default function ProductForm({
             step="0.01"
             min="0"
             defaultValue={d.priceRon}
-            className={inputClass}
+            aria-invalid={invalid("priceRon")}
+            className={controlClass(!!errors.priceRon)}
           />
         </Field>
 
@@ -194,30 +304,35 @@ export default function ProductForm({
         </div>
         {Array.from({ length: COMPONENT_SLOTS }, (_, i) => {
           const c = d.components[i];
+          const error = errors[`componentNameRo${i}`];
           return (
-            <div key={i} className="grid grid-cols-[1fr_1fr_8rem] gap-3">
-              <input
-                name={`componentNameRo${i}`}
-                defaultValue={c?.nameRo ?? ""}
-                placeholder={`Componenta ${i + 1} (Română)`}
-                className={inputClass}
-              />
-              <input
-                name={`componentNameEn${i}`}
-                defaultValue={c?.nameEn ?? ""}
-                placeholder="(Engleză)"
-                className={inputClass}
-              />
-              <select
-                name={`componentMaxColors${i}`}
-                defaultValue={c?.maxColors ?? 1}
-                className={selectClass}
-                aria-label="Număr maxim de culori"
-              >
-                <option value={1}>1 culoare</option>
-                <option value={2}>până la 2</option>
-                <option value={3}>până la 3</option>
-              </select>
+            <div key={i} className="flex flex-col gap-1.5">
+              <div className="grid grid-cols-[1fr_1fr_8rem] gap-3">
+                <input
+                  name={`componentNameRo${i}`}
+                  defaultValue={c?.nameRo ?? ""}
+                  placeholder={`Componenta ${i + 1} (Română)`}
+                  aria-invalid={invalid(`componentNameRo${i}`)}
+                  className={controlClass(!!error)}
+                />
+                <input
+                  name={`componentNameEn${i}`}
+                  defaultValue={c?.nameEn ?? ""}
+                  placeholder="(Engleză)"
+                  className={controlClass()}
+                />
+                <select
+                  name={`componentMaxColors${i}`}
+                  defaultValue={c?.maxColors ?? 1}
+                  className={controlClass(false, "bg-white")}
+                  aria-label="Număr maxim de culori"
+                >
+                  <option value={1}>1 culoare</option>
+                  <option value={2}>până la 2</option>
+                  <option value={3}>până la 3</option>
+                </select>
+              </div>
+              {error && <FieldError message={error} />}
             </div>
           );
         })}
@@ -233,29 +348,38 @@ export default function ProductForm({
         </div>
         {Array.from({ length: VARIANT_SLOTS }, (_, i) => {
           const v = d.variants[i];
+          const nameError = errors[`variantNameRo${i}`];
+          const priceError = errors[`variantPriceRon${i}`];
           return (
-            <div key={i} className="grid grid-cols-3 gap-3">
-              <input
-                name={`variantNameRo${i}`}
-                defaultValue={v?.nameRo ?? ""}
-                placeholder={`Variantă ${i + 1} (Română)`}
-                className={inputClass}
-              />
-              <input
-                name={`variantNameEn${i}`}
-                defaultValue={v?.nameEn ?? ""}
-                placeholder="(Engleză)"
-                className={inputClass}
-              />
-              <input
-                name={`variantPriceRon${i}`}
-                type="number"
-                step="0.01"
-                min="0"
-                defaultValue={v?.priceRon ?? ""}
-                placeholder="Preț RON"
-                className={inputClass}
-              />
+            <div key={i} className="flex flex-col gap-1.5">
+              <div className="grid grid-cols-3 gap-3">
+                <input
+                  name={`variantNameRo${i}`}
+                  defaultValue={v?.nameRo ?? ""}
+                  placeholder={`Variantă ${i + 1} (Română)`}
+                  aria-invalid={invalid(`variantNameRo${i}`)}
+                  className={controlClass(!!nameError)}
+                />
+                <input
+                  name={`variantNameEn${i}`}
+                  defaultValue={v?.nameEn ?? ""}
+                  placeholder="(Engleză)"
+                  className={controlClass()}
+                />
+                <input
+                  name={`variantPriceRon${i}`}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={v?.priceRon ?? ""}
+                  placeholder="Preț RON"
+                  aria-invalid={invalid(`variantPriceRon${i}`)}
+                  className={controlClass(!!priceError)}
+                />
+              </div>
+              {(nameError || priceError) && (
+                <FieldError message={(nameError || priceError) as string} />
+              )}
             </div>
           );
         })}
@@ -264,57 +388,47 @@ export default function ProductForm({
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
         <h2 className="font-display text-lg text-taupe-800">Inventar</h2>
 
-        <Field label="Cantitate în stoc">
+        <Field label="Cantitate în stoc" required error={errors.quantityOnHand}>
           <input
             name="quantityOnHand"
             type="number"
             min="0"
             defaultValue={d.quantityOnHand}
-            required
-            className={inputClass}
+            aria-invalid={invalid("quantityOnHand")}
+            className={controlClass(!!errors.quantityOnHand)}
           />
         </Field>
 
         <Field
           label="Prag stoc redus"
+          required
           hint="Sub această cantitate, produsul apare ca „stoc redus”."
+          error={errors.lowStockThreshold}
         >
           <input
             name="lowStockThreshold"
             type="number"
             min="0"
             defaultValue={d.lowStockThreshold}
-            required
-            className={inputClass}
+            aria-invalid={invalid("lowStockThreshold")}
+            className={controlClass(!!errors.lowStockThreshold)}
           />
         </Field>
       </section>
 
       {extra}
 
-      <SubmitButton label={submitLabel} />
+      {hasErrors(errors) && (
+        <p
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+        >
+          {errors._form ??
+            "Produsul nu a fost salvat. Corectează câmpurile marcate cu roșu și apasă din nou."}
+        </p>
+      )}
+
+      <SubmitButton label={submitLabel} pending={pending} />
     </form>
   );
 }
-
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium text-taupe-700">{label}</span>
-      {children}
-      {hint && <span className="text-xs text-taupe-400">{hint}</span>}
-    </label>
-  );
-}
-
-const inputClass =
-  "rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400";
-const selectClass = inputClass + " bg-white";

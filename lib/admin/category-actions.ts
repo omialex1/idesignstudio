@@ -4,6 +4,40 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/client";
 import { slugify } from "@/lib/admin/slug";
+import { isAdminAuthenticated } from "@/lib/admin/auth";
+import {
+  hasErrors,
+  validateCategoryForm,
+  type FormErrors,
+} from "@/lib/admin/form-validation";
+
+async function assertAdmin() {
+  if (!(await isAdminAuthenticated())) throw new Error("unauthorized");
+}
+
+async function checkSlug(
+  formData: FormData,
+  ignoreCategoryId?: string,
+): Promise<FormErrors> {
+  const slugInput = String(formData.get("slug") || "").trim();
+  const roName = String(formData.get("roName") || "").trim();
+  const slug = slugInput ? slugify(slugInput) : slugify(roName);
+  if (!slug) {
+    return {
+      slug: "Nu pot crea adresa din acest text. Scrie manual una, cu litere și cifre.",
+    };
+  }
+  const existing = await prisma.category.findUnique({
+    where: { slug },
+    select: { id: true },
+  });
+  if (existing && existing.id !== ignoreCategoryId) {
+    return {
+      slug: "Există deja o categorie cu această adresă (slug). Schimb-o sau lasă câmpul gol și modifică numele.",
+    };
+  }
+  return {};
+}
 import type { ProductLine } from "@/lib/generated/prisma";
 
 function readCategoryForm(formData: FormData) {
@@ -26,7 +60,13 @@ function readCategoryForm(formData: FormData) {
   };
 }
 
-export async function createCategory(formData: FormData) {
+export async function createCategory(
+  formData: FormData,
+): Promise<{ errors: FormErrors } | void> {
+  await assertAdmin();
+  const errors = { ...validateCategoryForm(formData), ...(await checkSlug(formData)) };
+  if (hasErrors(errors)) return { errors };
+
   const data = readCategoryForm(formData);
 
   await prisma.category.create({
@@ -49,7 +89,17 @@ export async function createCategory(formData: FormData) {
   redirect("/admin/categories");
 }
 
-export async function updateCategory(categoryId: string, formData: FormData) {
+export async function updateCategory(
+  categoryId: string,
+  formData: FormData,
+): Promise<{ errors: FormErrors } | void> {
+  await assertAdmin();
+  const errors = {
+    ...validateCategoryForm(formData),
+    ...(await checkSlug(formData, categoryId)),
+  };
+  if (hasErrors(errors)) return { errors };
+
   const data = readCategoryForm(formData);
 
   await prisma.category.update({
@@ -88,6 +138,7 @@ export async function updateCategory(categoryId: string, formData: FormData) {
 }
 
 export async function deleteCategory(formData: FormData) {
+  await assertAdmin();
   const categoryId = String(formData.get("categoryId") || "");
   if (!categoryId) return;
 

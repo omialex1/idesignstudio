@@ -16,27 +16,18 @@ export default function NewProductForm({
 }) {
   const router = useRouter();
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
   async function handleCreate(formData: FormData) {
-    setError(null);
-
-    let productId: string;
-    try {
-      ({ id: productId } = await createProduct(formData));
-    } catch {
-      setError(
-        "Nu am putut crea produsul. Verifică datele: adresa (slug-ul) poate exista deja sau lipsește un câmp obligatoriu.",
-      );
-      return;
-    }
+    const result = await createProduct(formData);
+    // Validation problems: nothing was created, the form keeps what was typed.
+    if ("errors" in result) return result;
 
     // The product exists now, so the photos can be attached to it.
     let failed = 0;
     for (const photo of photos) {
       const body = new FormData();
       body.append("file", photo.blob, "photo");
-      const res = await fetch(`/api/admin/products/${productId}/images`, {
+      const res = await fetch(`/api/admin/products/${result.id}/images`, {
         method: "POST",
         body,
       }).catch(() => null);
@@ -44,24 +35,15 @@ export default function NewProductForm({
     }
 
     const query = failed > 0 ? `created=1&photoError=${failed}` : "created=1";
-    router.push(`/admin/products/${productId}/edit?${query}`);
+    router.push(`/admin/products/${result.id}/edit?${query}`);
   }
 
   return (
     <ProductForm
-      action={handleCreate}
+      onSubmit={handleCreate}
       categories={categories}
       submitLabel="Creează produs"
-      extra={
-        <>
-          <PhotoPicker photos={photos} onChange={setPhotos} />
-          {error && (
-            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </p>
-          )}
-        </>
-      }
+      extra={<PhotoPicker photos={photos} onChange={setPhotos} />}
     />
   );
 }

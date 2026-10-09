@@ -41,7 +41,7 @@ export default async function EditProductPage({
         </p>
       )}
       <ProductForm
-        action={boundUpdate}
+        onSubmit={boundUpdate}
         categories={categories}
         submitLabel="Salvează modificările"
         defaultValues={{

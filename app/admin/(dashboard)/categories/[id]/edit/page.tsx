@@ -21,7 +21,7 @@ export default async function EditCategoryPage({
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-2xl text-taupe-800">Editează categorie</h1>
       <CategoryForm
-        action={boundUpdate}
+        onSubmit={boundUpdate}
         submitLabel="Salvează modificările"
         defaultValues={{
           line: category.line,

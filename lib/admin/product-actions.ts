@@ -4,9 +4,43 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/client";
 import { slugify } from "@/lib/admin/slug";
+import { isAdminAuthenticated } from "@/lib/admin/auth";
+import {
+  COMPONENT_SLOTS,
+  VARIANT_SLOTS,
+  hasErrors,
+  validateProductForm,
+  type FormErrors,
+} from "@/lib/admin/form-validation";
 
-const VARIANT_SLOTS = 4;
-const COMPONENT_SLOTS = 5;
+async function assertAdmin() {
+  if (!(await isAdminAuthenticated())) throw new Error("unauthorized");
+}
+
+// Slug problems that only the database can tell (already used by another product).
+async function checkSlug(
+  formData: FormData,
+  ignoreProductId?: string,
+): Promise<FormErrors> {
+  const slugInput = String(formData.get("slug") || "").trim();
+  const roName = String(formData.get("roName") || "").trim();
+  const slug = slugInput ? slugify(slugInput) : slugify(roName);
+  if (!slug) {
+    return {
+      slug: "Nu pot crea adresa din acest text. Scrie manual una, cu litere și cifre.",
+    };
+  }
+  const existing = await prisma.product.findUnique({
+    where: { slug },
+    select: { id: true },
+  });
+  if (existing && existing.id !== ignoreProductId) {
+    return {
+      slug: "Există deja un produs cu această adresă (slug). Schimb-o sau lasă câmpul gol și modifică numele.",
+    };
+  }
+  return {};
+}
 
 function readComponents(formData: FormData) {
   const components: {
@@ -98,7 +132,11 @@ function readProductForm(formData: FormData) {
 
 export async function createProduct(
   formData: FormData,
-): Promise<{ id: string }> {
+): Promise<{ id: string } | { errors: FormErrors }> {
+  await assertAdmin();
+  const errors = { ...validateProductForm(formData), ...(await checkSlug(formData)) };
+  if (hasErrors(errors)) return { errors };
+
   const data = readProductForm(formData);
 
   const created = await prisma.product.create({
@@ -144,7 +182,17 @@ export async function createProduct(
   return { id: created.id };
 }
 
-export async function updateProduct(productId: string, formData: FormData) {
+export async function updateProduct(
+  productId: string,
+  formData: FormData,
+): Promise<{ errors: FormErrors } | void> {
+  await assertAdmin();
+  const errors = {
+    ...validateProductForm(formData),
+    ...(await checkSlug(formData, productId)),
+  };
+  if (hasErrors(errors)) return { errors };
+
   const data = readProductForm(formData);
 
   await prisma.product.update({
@@ -237,6 +285,7 @@ export async function updateProduct(productId: string, formData: FormData) {
 }
 
 export async function deleteProduct(formData: FormData) {
+  await assertAdmin();
   const productId = String(formData.get("productId") || "");
   if (!productId) return;
 
