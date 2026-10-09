@@ -1,6 +1,7 @@
 // Palette offered to customers for made-to-order products. The id is stored on
 // the order, so production always sees the same names whatever the site language.
-export const MAX_COLORS = 3;
+// A customer picks exactly one colour per piece, or one for the whole set.
+export const MAX_COLORS = 1;
 // Id of the single generic picker used when a product lists no components.
 export const DEFAULT_COMPONENT_ID = "default";
 // Choice that applies the same colours to every component of a set.

@@ -62,7 +62,10 @@ export default function ProductPurchase({
   const variant = variants.find((v) => v.id === variantId) ?? null;
 
   // Colours are picked only for the pieces of the chosen variant.
-  const basePieces = variant ? variant.components : components;
+  const basePieces = (variant ? variant.components : components).map((c) => ({
+    ...c,
+    maxColors: MAX_COLORS,
+  }));
   const pickers: ColorComponent[] = hasColorOptions
     ? basePieces.length > 0
       ? basePieces
@@ -74,7 +77,7 @@ export default function ProductPurchase({
       ? {
           id: ALL_COMPONENTS_ID,
           name: t("wholeSet"),
-          maxColors: Math.max(...pickers.map((p) => p.maxColors)),
+          maxColors: MAX_COLORS,
         }
       : null;
   const targets = setTarget ? [...pickers, setTarget] : pickers;

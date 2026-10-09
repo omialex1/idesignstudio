@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
       ? pieces.length > 0
         ? pieces.map((c) => ({
             id: c.id,
-            max: c.maxColors,
+            max: MAX_COLORS,
             name: locale === "en" ? (c.nameEn ?? c.nameRo) : c.nameRo,
           }))
         : [{ id: DEFAULT_COMPONENT_ID, max: MAX_COLORS, name: null }]
@@ -236,7 +236,7 @@ export async function POST(request: NextRequest) {
         : null;
     let colorsValid = product.hasColorOptions || !line.colorNote;
     if (wholeSet) {
-      const maxAll = Math.max(...expected.map((c) => c.max));
+      const maxAll = MAX_COLORS;
       if (wholeSet.colors.length < 1 || wholeSet.colors.length > maxAll) {
         colorsValid = false;
       } else {

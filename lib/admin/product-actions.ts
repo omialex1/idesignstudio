@@ -60,12 +60,11 @@ function readPiece(
   const nameRo = String(formData.get(keys.ro) || "").trim();
   if (!nameRo) return null;
   const nameEn = String(formData.get(keys.en) || "").trim();
-  const max = parseInt(String(formData.get(keys.max) || "1"), 10);
   return {
     sortOrder,
     nameRo,
     nameEn: nameEn || null,
-    maxColors: Math.min(3, Math.max(1, Number.isFinite(max) ? max : 1)),
+    maxColors: 1,
   };
 }
 

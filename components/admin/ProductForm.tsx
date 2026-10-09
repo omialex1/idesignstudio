@@ -312,9 +312,9 @@ export default function ProductForm({
           </h2>
           <p className="mt-1 text-xs text-taupe-400">
             Pentru produsele la care clientul alege culorile (bifa de mai sus)
-            și care nu au variante. Adaugă fiecare piesă (ex: Ghiveci, Farfurie)
-            și spune câte culori poate alege clientul pentru ea. Dacă nu adaugi
-            nimic, clientul alege până la 3 culori pentru întregul produs. La
+            și care nu au variante. Adaugă fiecare piesă (ex: Ghiveci, Farfurie),
+            iar clientul alege câte o culoare pentru fiecare. Dacă nu adaugi
+            nimic, clientul alege o singură culoare pentru întregul produs. La
             produsele cu variante, piesele se definesc în fiecare variantă,
             mai jos.
           </p>
@@ -324,7 +324,7 @@ export default function ProductForm({
           const error = errors[`componentNameRo${i}`];
           return (
             <div key={i} className="flex flex-col gap-1.5">
-              <div className="grid grid-cols-[1fr_1fr_8rem] gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <input
                   name={`componentNameRo${i}`}
                   defaultValue={c?.nameRo ?? ""}
@@ -338,16 +338,6 @@ export default function ProductForm({
                   placeholder="(Engleză)"
                   className={controlClass()}
                 />
-                <select
-                  name={`componentMaxColors${i}`}
-                  defaultValue={c?.maxColors ?? 1}
-                  className={controlClass(false, "bg-white")}
-                  aria-label="Număr maxim de culori"
-                >
-                  <option value={1}>1 culoare</option>
-                  <option value={2}>până la 2</option>
-                  <option value={3}>până la 3</option>
-                </select>
               </div>
               {error && <FieldError message={error} />}
             </div>
@@ -431,7 +421,7 @@ export default function ProductForm({
                 const pieceError = errors[`variantPieceNameRo${i}_${j}`];
                 return (
                   <div key={j} className="flex flex-col gap-1.5">
-                    <div className="grid grid-cols-[1fr_1fr_8rem] gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <input
                         name={`variantPieceNameRo${i}_${j}`}
                         defaultValue={piece?.nameRo ?? ""}
@@ -445,16 +435,6 @@ export default function ProductForm({
                         placeholder="(Engleză)"
                         className={controlClass()}
                       />
-                      <select
-                        name={`variantPieceMax${i}_${j}`}
-                        defaultValue={piece?.maxColors ?? 1}
-                        className={controlClass(false, "bg-white")}
-                        aria-label="Număr maxim de culori"
-                      >
-                        <option value={1}>1 culoare</option>
-                        <option value={2}>până la 2</option>
-                        <option value={3}>până la 3</option>
-                      </select>
                     </div>
                     {pieceError && <FieldError message={pieceError} />}
                   </div>
