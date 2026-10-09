@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/cart/store";
 import { formatPrice } from "@/lib/format";
 import {
+  ALL_COMPONENTS_ID,
   COLORS,
   DEFAULT_COMPONENT_ID,
   MAX_COLORS,
@@ -59,12 +60,24 @@ export default function ProductPurchase({
 
   const [variantId, setVariantId] = useState(variants[0]?.id ?? null);
   const [picked, setPicked] = useState<Record<string, string[]>>({});
+  const [wholeSet, setWholeSet] = useState(false);
   const [note, setNote] = useState("");
   const [justAdded, setJustAdded] = useState(false);
 
   const variant = variants.find((v) => v.id === variantId) ?? null;
   const unitPrice = variant?.priceCents ?? priceCents;
-  const missingColors = pickers.some((p) => (picked[p.id] ?? []).length === 0);
+  // With two or more components the customer can colour the whole set at once.
+  const canPickSet = pickers.length >= 2;
+  const useSet = canPickSet && wholeSet;
+  const setPicker: ColorComponent = {
+    id: ALL_COMPONENTS_ID,
+    name: t("wholeSet"),
+    maxColors: Math.max(1, ...pickers.map((p) => p.maxColors)),
+  };
+  const activePickers = useSet ? [setPicker] : pickers;
+  const missingColors = activePickers.some(
+    (p) => (picked[p.id] ?? []).length === 0,
+  );
 
   function toggleColor(component: ColorComponent, colorId: string) {
     setPicked((current) => {
@@ -89,7 +102,7 @@ export default function ProductPurchase({
       productId,
       variantId: variant?.id ?? null,
       variantName: variant?.name ?? null,
-      colorChoices: pickers.map((p) => ({
+      colorChoices: activePickers.map((p) => ({
         componentId: p.id,
         componentName: p.name,
         colors: picked[p.id] ?? [],
@@ -141,15 +154,40 @@ export default function ProductPurchase({
         </fieldset>
       )}
 
+      {inStock && canPickSet && (
+        <div className="flex flex-wrap gap-2" role="group">
+          {[
+            { value: false, label: t("colorModeEach") },
+            { value: true, label: t("colorModeSet") },
+          ].map((option) => (
+            <button
+              key={String(option.value)}
+              type="button"
+              aria-pressed={useSet === option.value}
+              onClick={() => setWholeSet(option.value)}
+              className={`rounded-full border px-4 py-2 text-sm transition-colors ${
+                useSet === option.value
+                  ? "border-salamander-500 bg-salamander-50 font-semibold text-salamander-700"
+                  : "border-cream-200 text-taupe-700 hover:border-salamander-400"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {inStock &&
-        pickers.map((component) => {
+        activePickers.map((component) => {
           const selected = picked[component.id] ?? [];
           return (
             <fieldset key={component.id} className="flex flex-col gap-3">
               <legend className="text-sm font-medium text-taupe-700">
-                {component.name
-                  ? t("colorsFor", { name: component.name })
-                  : t("chooseColors")}
+                {component.id === ALL_COMPONENTS_ID
+                  ? t("colorsForSet")
+                  : component.name
+                    ? t("colorsFor", { name: component.name })
+                    : t("chooseColors")}
               </legend>
               <p className="text-xs text-taupe-500">
                 {component.maxColors === 1

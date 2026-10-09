@@ -5,6 +5,7 @@ import { startNetopiaPayment } from "@/lib/netopia";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import {
+  ALL_COMPONENTS_ID,
   DEFAULT_COMPONENT_ID,
   MAX_COLORS,
   MAX_COLOR_NOTE_LENGTH,
@@ -221,16 +222,40 @@ export async function POST(request: NextRequest) {
         : [{ id: DEFAULT_COMPONENT_ID, max: MAX_COLORS, name: null }]
       : [];
     const orderChoices: { component: string | null; colors: string[] }[] = [];
-    let colorsValid =
-      line.colorChoices.length === expected.length &&
-      (product.hasColorOptions || !line.colorNote);
-    for (const component of expected) {
-      const choice = line.colorChoices.find((c) => c.componentId === component.id);
-      if (!choice || choice.colors.length < 1 || choice.colors.length > component.max) {
+    // Either one choice per component, or one choice for the whole set.
+    const wholeSet =
+      expected.length >= 2 &&
+      line.colorChoices.length === 1 &&
+      line.colorChoices[0].componentId === ALL_COMPONENTS_ID
+        ? line.colorChoices[0]
+        : null;
+    let colorsValid = product.hasColorOptions || !line.colorNote;
+    if (wholeSet) {
+      const maxAll = Math.max(...expected.map((c) => c.max));
+      if (wholeSet.colors.length < 1 || wholeSet.colors.length > maxAll) {
         colorsValid = false;
-        break;
+      } else {
+        orderChoices.push({
+          component: locale === "en" ? "Whole set" : "Tot setul",
+          colors: wholeSet.colors,
+        });
       }
-      orderChoices.push({ component: component.name, colors: choice.colors });
+    } else {
+      colorsValid = colorsValid && line.colorChoices.length === expected.length;
+      for (const component of expected) {
+        const choice = line.colorChoices.find(
+          (c) => c.componentId === component.id,
+        );
+        if (
+          !choice ||
+          choice.colors.length < 1 ||
+          choice.colors.length > component.max
+        ) {
+          colorsValid = false;
+          break;
+        }
+        orderChoices.push({ component: component.name, colors: choice.colors });
+      }
     }
     if (!colorsValid) {
       return NextResponse.json({ error: "invalid_items" }, { status: 400 });

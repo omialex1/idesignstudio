@@ -39,7 +39,11 @@
     "pickColorFirst": "Pick at least one colour to order.",
     "fromPrice": "from {price}",
     "colorsFor": "Colours for {name}",
-    "colorsHintOne": "Choose one colour."
+    "colorsHintOne": "Choose one colour.",
+    "wholeSet": "Whole set",
+    "colorsForSet": "Colours for the whole set",
+    "colorModeEach": "Separate colours per component",
+    "colorModeSet": "Same colours for the whole set"
   },
   "Cart": {
     "cartLabel": "Shopping cart",

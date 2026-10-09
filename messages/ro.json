@@ -39,7 +39,11 @@
     "pickColorFirst": "Alege cel puțin o culoare ca să poți comanda.",
     "fromPrice": "de la {price}",
     "colorsFor": "Culori pentru {name}",
-    "colorsHintOne": "Alege o culoare."
+    "colorsHintOne": "Alege o culoare.",
+    "wholeSet": "Tot setul",
+    "colorsForSet": "Culori pentru tot setul",
+    "colorModeEach": "Culori separate pe componente",
+    "colorModeSet": "Aceleași culori pe tot setul"
   },
   "Cart": {
     "cartLabel": "Cos de cumparaturi",

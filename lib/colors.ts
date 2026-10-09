@@ -3,6 +3,8 @@
 export const MAX_COLORS = 3;
 // Id of the single generic picker used when a product lists no components.
 export const DEFAULT_COMPONENT_ID = "default";
+// Choice that applies the same colours to every component of a set.
+export const ALL_COMPONENTS_ID = "all";
 export const MAX_COLOR_NOTE_LENGTH = 200;
 
 export const COLORS = [
