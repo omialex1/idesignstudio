@@ -2,33 +2,11 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { compressImage } from "@/lib/images/client-compress";
 
 const MAX_IMAGES = 6;
-const MAX_SIDE_PX = 1600;
 
 type Image = { id: string; url: string };
-
-async function toCompressedBlob(file: File): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_SIDE_PX / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-
-  const encode = (type: string, quality: number) =>
-    new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, type, quality),
-    );
-
-  // Browsers that cannot encode WebP return PNG, so fall back to JPEG.
-  const webp = await encode("image/webp", 0.82);
-  if (webp && webp.type === "image/webp") return webp;
-  const jpeg = await encode("image/jpeg", 0.85);
-  if (!jpeg) throw new Error("encode_failed");
-  return jpeg;
-}
 
 const ERRORS: Record<string, string> = {
   limit_reached: `Maximum ${MAX_IMAGES} fotografii per produs.`,
@@ -61,7 +39,7 @@ export default function ProductImageManager({
         break;
       }
       try {
-        const blob = await toCompressedBlob(file);
+        const blob = await compressImage(file);
         const body = new FormData();
         body.append("file", blob, "photo");
         const res = await fetch(`/api/admin/products/${productId}/images`, {

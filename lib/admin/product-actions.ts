@@ -96,7 +96,9 @@ function readProductForm(formData: FormData) {
   };
 }
 
-export async function createProduct(formData: FormData) {
+export async function createProduct(
+  formData: FormData,
+): Promise<{ id: string }> {
   const data = readProductForm(formData);
 
   const created = await prisma.product.create({
@@ -139,7 +141,7 @@ export async function createProduct(formData: FormData) {
   });
 
   revalidatePath("/", "layout");
-  redirect(`/admin/products/${created.id}/edit?created=1`);
+  return { id: created.id };
 }
 
 export async function updateProduct(productId: string, formData: FormData) {

@@ -1,4 +1,5 @@
 import { lineConfig } from "@/lib/lines";
+import SubmitButton from "@/components/admin/SubmitButton";
 import type { ProductLine } from "@/lib/generated/prisma";
 
 type CategoryOption = { id: string; name: string; line: ProductLine };
@@ -38,11 +39,14 @@ export default function ProductForm({
   categories,
   defaultValues,
   submitLabel,
+  extra,
 }: {
   action: (formData: FormData) => void | Promise<void>;
   categories: CategoryOption[];
   defaultValues?: ProductFormDefaults;
   submitLabel: string;
+  // Extra sections shown just above the submit button (e.g. photos).
+  extra?: React.ReactNode;
 }) {
   const d: ProductFormDefaults = defaultValues ?? {
     categoryId: categories[0]?.id ?? "",
@@ -286,12 +290,9 @@ export default function ProductForm({
         </Field>
       </section>
 
-      <button
-        type="submit"
-        className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
-      >
-        {submitLabel}
-      </button>
+      {extra}
+
+      <SubmitButton label={submitLabel} />
     </form>
   );
 }

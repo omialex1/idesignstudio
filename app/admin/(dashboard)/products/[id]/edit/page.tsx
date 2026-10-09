@@ -9,10 +9,10 @@ export default async function EditProductPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; photoError?: string }>;
 }) {
   const { id } = await params;
-  const { created } = await searchParams;
+  const { created, photoError } = await searchParams;
   const [product, categories] = await Promise.all([
     getProductForEdit(id),
     getCategoryOptions(),
@@ -28,7 +28,13 @@ export default async function EditProductPage({
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-2xl text-taupe-800">Editează produs</h1>
-      {created && (
+      {photoError && (
+        <p className="max-w-2xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          Produsul a fost creat, dar {photoError} fotografii nu s-au încărcat.
+          Adaugă-le din nou mai jos, la secțiunea Fotografii.
+        </p>
+      )}
+      {created && !photoError && (
         <p className="max-w-2xl rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
           Produsul a fost creat. Poți adăuga acum fotografiile, mai jos, la
           secțiunea Fotografii.
