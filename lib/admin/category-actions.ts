@@ -4,6 +4,10 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/client";
 import { slugify } from "@/lib/admin/slug";
+import {
+  createSubcategoryRecord,
+  type SubcategoryResult,
+} from "@/lib/admin/subcategory";
 import { isAdminAuthenticated } from "@/lib/admin/auth";
 import {
   hasErrors,
@@ -146,4 +150,17 @@ export async function deleteCategory(formData: FormData) {
 
   revalidatePath("/", "layout");
   redirect("/admin/categories");
+}
+
+// Quick-create used from the product form: makes a subcategory right away and
+// returns it, so the form can select it without leaving the page.
+export async function createSubcategory(
+  line: ProductLine,
+  nameRo: string,
+  nameEn: string,
+): Promise<SubcategoryResult> {
+  await assertAdmin();
+  const result = await createSubcategoryRecord(line, nameRo, nameEn);
+  if (!("error" in result)) revalidatePath("/", "layout");
+  return result;
 }

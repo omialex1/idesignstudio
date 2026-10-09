@@ -10,6 +10,7 @@ import {
   type FormErrors,
 } from "@/lib/admin/form-validation";
 import SubmitButton from "@/components/admin/SubmitButton";
+import { createSubcategory } from "@/lib/admin/category-actions";
 import RichTextField from "@/components/admin/RichTextField";
 import {
   Field,
@@ -82,6 +83,7 @@ export default function ProductForm({
   defaultValues,
   submitLabel,
   extra,
+  createSubcategoryAction = createSubcategory,
 }: {
   // Resolves to { errors } when the server rejects the data (nothing on success).
   onSubmit: (formData: FormData) => Promise<unknown>;
@@ -90,6 +92,7 @@ export default function ProductForm({
   submitLabel: string;
   // Extra sections shown just above the submit button (e.g. photos).
   extra?: React.ReactNode;
+  createSubcategoryAction?: typeof createSubcategory;
 }) {
   const d: ProductFormDefaults = defaultValues ?? {
     categoryId: "",
@@ -118,7 +121,46 @@ export default function ProductForm({
     categories.find((c) => c.id === d.categoryId)?.line ?? "",
   );
   const [subcategoryId, setSubcategoryId] = useState(d.categoryId);
-  const subcategories = categories.filter((c) => c.line === line);
+  // Subcategories created from this form are added to the list on the spot.
+  const [created, setCreated] = useState<CategoryOption[]>([]);
+  const allCategories = [...categories, ...created];
+  const subcategories = allCategories.filter((c) => c.line === line);
+  const [adding, setAdding] = useState(false);
+  const [newNameRo, setNewNameRo] = useState("");
+  const [newNameEn, setNewNameEn] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  async function addSubcategory() {
+    if (!line) return;
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const result = await createSubcategoryAction(
+        line as ProductLine,
+        newNameRo,
+        newNameEn,
+      );
+      if ("error" in result) {
+        setCreateError(result.error);
+        return;
+      }
+      setCreated((list) => [...list, result]);
+      setSubcategoryId(result.id);
+      setErrors((current) => {
+        const rest = { ...current };
+        delete rest.categoryId;
+        return rest;
+      });
+      setAdding(false);
+      setNewNameRo("");
+      setNewNameEn("");
+    } catch {
+      setCreateError("Nu am putut crea subcategoria. Încearcă din nou.");
+    } finally {
+      setCreating(false);
+    }
+  }
 
   function showErrors(next: FormErrors, form: HTMLFormElement) {
     setErrors(next);
@@ -224,21 +266,76 @@ export default function ProductForm({
               </option>
             ))}
           </select>
-          {line && subcategories.length === 0 && (
-            <span className="text-xs text-taupe-600">
-              Această categorie nu are încă subcategorii.{" "}
-              <a
-                href="/admin/categories/new"
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-salamander-600 hover:underline"
-              >
-                Adaugă una (se deschide într-un tab nou)
-              </a>
-              , apoi reîncarcă această pagină.
-            </span>
-          )}
         </Field>
+
+        {line && (
+          <div className="-mt-2 flex flex-col gap-2">
+            {subcategories.length === 0 && (
+              <p className="text-xs text-taupe-600">
+                Această categorie nu are încă subcategorii.
+              </p>
+            )}
+            {!adding ? (
+              <button
+                type="button"
+                onClick={() => setAdding(true)}
+                className="w-fit text-sm font-medium text-salamander-600 hover:underline"
+              >
+                + Adaugă subcategorie
+              </button>
+            ) : (
+              <div
+                className="flex flex-col gap-3 rounded-xl border border-cream-200 bg-cream-50 p-4"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    // Enter here must not save the whole product.
+                    e.preventDefault();
+                    if (!creating) addSubcategory();
+                  }
+                }}
+              >
+                <p className="text-sm font-medium text-taupe-700">
+                  Subcategorie nouă în{" "}
+                  {LINES.find((l) => l.line === line)?.adminLabel}
+                </p>
+                <input
+                  value={newNameRo}
+                  onChange={(e) => setNewNameRo(e.target.value)}
+                  placeholder="Nume (Română)"
+                  autoFocus
+                  className={controlClass(!!createError)}
+                />
+                <input
+                  value={newNameEn}
+                  onChange={(e) => setNewNameEn(e.target.value)}
+                  placeholder="Nume (Engleză), opțional"
+                  className={controlClass()}
+                />
+                {createError && <FieldError message={createError} />}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={creating}
+                    onClick={addSubcategory}
+                    className="rounded-full bg-salamander-500 px-5 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
+                  >
+                    {creating ? "Se creează..." : "Creează subcategoria"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdding(false);
+                      setCreateError(null);
+                    }}
+                    className="rounded-full border border-cream-300 px-5 py-2 text-sm font-semibold text-taupe-700 hover:bg-cream-100"
+                  >
+                    Anulează
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <Field
           label="Slug (URL)"
