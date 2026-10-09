@@ -78,6 +78,10 @@ model ProductVariant {
   nameRo     String
   nameEn     String?
   priceCents Int
+  // Optional % taken off priceCents (used for sets).
+  discountPercent Int @default(0)
+  // Pieces of this variant, each with its own colour choice.
+  components ProductComponent[]
 
   @@unique([productId, sortOrder])
 }
@@ -86,6 +90,10 @@ model ProductComponent {
   id        String  @id @default(cuid())
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // Set for pieces that belong to one variant; null = piece of a product
+  // that has no variants.
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
   sortOrder Int     @default(0)
   nameRo    String
   nameEn    String?

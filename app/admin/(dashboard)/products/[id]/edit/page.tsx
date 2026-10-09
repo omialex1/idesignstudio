@@ -57,15 +57,25 @@ export default async function EditProductPage({
             ? ""
             : (product.priceCents / 100).toFixed(2),
           hasColorOptions: product.hasColorOptions,
-          components: product.components.map((c) => ({
-            nameRo: c.nameRo,
-            nameEn: c.nameEn ?? "",
-            maxColors: c.maxColors,
-          })),
+          components: product.components
+            .filter((c) => !c.variantId)
+            .map((c) => ({
+              nameRo: c.nameRo,
+              nameEn: c.nameEn ?? "",
+              maxColors: c.maxColors,
+            })),
           variants: product.variants.map((v) => ({
             nameRo: v.nameRo,
             nameEn: v.nameEn ?? "",
             priceRon: (v.priceCents / 100).toFixed(2),
+            discount: v.discountPercent ? String(v.discountPercent) : "",
+            pieces: product.components
+              .filter((c) => c.variantId === v.id)
+              .map((c) => ({
+                nameRo: c.nameRo,
+                nameEn: c.nameEn ?? "",
+                maxColors: c.maxColors,
+              })),
           })),
           quantityOnHand: product.inventory?.quantityOnHand ?? 0,
           lowStockThreshold: product.inventory?.lowStockThreshold ?? 5,

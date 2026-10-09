@@ -15,8 +15,14 @@ import {
 } from "@/lib/colors";
 import type { ProductLine } from "@/lib/generated/prisma";
 
-type Variant = { id: string; name: string; priceCents: number };
 type ColorComponent = { id: string; name: string | null; maxColors: number };
+type Variant = {
+  id: string;
+  name: string;
+  priceCents: number;
+  discountPercent: number;
+  components: ColorComponent[];
+};
 
 export default function ProductPurchase({
   productId,
@@ -52,9 +58,14 @@ export default function ProductPurchase({
 
   // A product with colour options but no listed components gets one generic
   // target for the whole product.
+  const [variantId, setVariantId] = useState(variants[0]?.id ?? null);
+  const variant = variants.find((v) => v.id === variantId) ?? null;
+
+  // Colours are picked only for the pieces of the chosen variant.
+  const basePieces = variant ? variant.components : components;
   const pickers: ColorComponent[] = hasColorOptions
-    ? components.length > 0
-      ? components
+    ? basePieces.length > 0
+      ? basePieces
       : [{ id: DEFAULT_COMPONENT_ID, name: null, maxColors: MAX_COLORS }]
     : [];
   // With two or more components the customer can colour the whole set at once.
@@ -68,7 +79,6 @@ export default function ProductPurchase({
       : null;
   const targets = setTarget ? [...pickers, setTarget] : pickers;
 
-  const [variantId, setVariantId] = useState(variants[0]?.id ?? null);
   // One shared palette: `activeId` says which component (or the whole set)
   // the next colour click applies to. Picks are remembered per target.
   const [activeId, setActiveId] = useState(pickers[0]?.id ?? "");
@@ -79,7 +89,6 @@ export default function ProductPurchase({
   const [note, setNote] = useState("");
   const [justAdded, setJustAdded] = useState(false);
 
-  const variant = variants.find((v) => v.id === variantId) ?? null;
   const unitPrice = variant?.priceCents ?? priceCents;
 
   const wholeSetPicked =
@@ -176,6 +185,11 @@ export default function ProductPurchase({
                 <span className="ml-2 text-taupe-500">
                   {formatPrice(v.priceCents, currency, locale)}
                 </span>
+                {v.discountPercent > 0 && (
+                  <span className="ml-2 rounded-full bg-salamander-500 px-2 py-0.5 text-xs font-semibold text-cream-50">
+                    −{v.discountPercent}%
+                  </span>
+                )}
               </button>
             ))}
           </div>

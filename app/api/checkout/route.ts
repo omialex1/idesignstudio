@@ -4,6 +4,7 @@ import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { startNetopiaPayment } from "@/lib/netopia";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
+import { finalPriceCents } from "@/lib/pricing";
 import {
   ALL_COMPONENTS_ID,
   DEFAULT_COMPONENT_ID,
@@ -211,10 +212,14 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json({ error: "unavailable" }, { status: 409 });
     }
-    // Made-to-order colours: every component needs 1..max colours.
+    // Made-to-order colours: every piece of the chosen variant (or of the
+    // product, when it has no variants) needs 1..max colours.
+    const pieces = product.components.filter((c) =>
+      variant ? c.variantId === variant.id : !c.variantId,
+    );
     const expected = product.hasColorOptions
-      ? product.components.length > 0
-        ? product.components.map((c) => ({
+      ? pieces.length > 0
+        ? pieces.map((c) => ({
             id: c.id,
             max: c.maxColors,
             name: locale === "en" ? (c.nameEn ?? c.nameRo) : c.nameRo,
@@ -276,7 +281,9 @@ export async function POST(request: NextRequest) {
         : null,
       colorChoices: orderChoices,
       colorNote: line.colorNote,
-      unitPriceCents: variant?.priceCents ?? product.priceCents,
+      unitPriceCents: variant
+        ? finalPriceCents(variant.priceCents, variant.discountPercent)
+        : product.priceCents,
       quantity: line.quantity,
     });
   }

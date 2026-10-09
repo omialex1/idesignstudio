@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { finalPriceCents } from "@/lib/pricing";
 import type { ProductLine } from "@/lib/generated/prisma";
 
 export type ProductWithTranslation = {
@@ -88,6 +89,17 @@ export async function getProductsByCategorySlug(
   };
 }
 
+function toPiece(
+  c: { id: string; nameRo: string; nameEn: string | null; maxColors: number },
+  locale: string,
+) {
+  return {
+    id: c.id,
+    name: locale === "en" ? (c.nameEn ?? c.nameRo) : c.nameRo,
+    maxColors: c.maxColors,
+  };
+}
+
 export async function getProductDetail(productSlug: string, locale: string) {
   const product = await prisma.product.findFirst({
     where: { slug: productSlug, isActive: true },
@@ -111,15 +123,20 @@ export async function getProductDetail(productSlug: string, locale: string) {
     ...translateProduct(product, locale),
     images: product.images,
     hasColorOptions: product.hasColorOptions,
-    components: product.components.map((c) => ({
-      id: c.id,
-      name: locale === "en" ? (c.nameEn ?? c.nameRo) : c.nameRo,
-      maxColors: c.maxColors,
-    })),
+    // Pieces of a product without variants (variants carry their own).
+    components: product.components
+      .filter((c) => !c.variantId)
+      .map((c) => toPiece(c, locale)),
     variants: product.variants.map((v) => ({
       id: v.id,
       name: locale === "en" ? (v.nameEn ?? v.nameRo) : v.nameRo,
-      priceCents: v.priceCents,
+      // What the customer pays, after the variant's discount.
+      priceCents: finalPriceCents(v.priceCents, v.discountPercent),
+      fullPriceCents: v.priceCents,
+      discountPercent: v.discountPercent,
+      components: product.components
+        .filter((c) => c.variantId === v.id)
+        .map((c) => toPiece(c, locale)),
     })),
     category: {
       id: product.category.id,

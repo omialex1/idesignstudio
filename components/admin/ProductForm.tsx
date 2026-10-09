@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { lineConfig } from "@/lib/lines";
 import {
-  COMPONENT_SLOTS,
+  PIECE_SLOTS,
   VARIANT_SLOTS,
   hasErrors,
   validateProductForm,
@@ -20,13 +20,19 @@ import type { ProductLine } from "@/lib/generated/prisma";
 
 type CategoryOption = { id: string; name: string; line: ProductLine };
 
-export type ComponentDefaults = {
+export type PieceDefaults = {
   nameRo: string;
   nameEn: string;
   maxColors: number;
 };
 
-export type VariantDefaults = { nameRo: string; nameEn: string; priceRon: string };
+export type VariantDefaults = {
+  nameRo: string;
+  nameEn: string;
+  priceRon: string;
+  discount: string;
+  pieces: PieceDefaults[];
+};
 
 export type ProductFormDefaults = {
   categoryId: string;
@@ -40,7 +46,7 @@ export type ProductFormDefaults = {
   priceRon: string;
   hasColorOptions: boolean;
   variants: VariantDefaults[];
-  components: ComponentDefaults[];
+  components: PieceDefaults[];
   quantityOnHand: number;
   lowStockThreshold: number;
   isActive: boolean;
@@ -55,9 +61,18 @@ const TRANSLATE_PAIRS: [string, string][] = [
     (_, i): [string, string] => [`variantNameRo${i}`, `variantNameEn${i}`],
   ),
   ...Array.from(
-    { length: COMPONENT_SLOTS },
+    { length: PIECE_SLOTS },
     (_, i): [string, string] => [`componentNameRo${i}`, `componentNameEn${i}`],
   ),
+  ...Array.from({ length: VARIANT_SLOTS }, (_, i) =>
+    Array.from(
+      { length: PIECE_SLOTS },
+      (_, j): [string, string] => [
+        `variantPieceNameRo${i}_${j}`,
+        `variantPieceNameEn${i}_${j}`,
+      ],
+    ),
+  ).flat(),
 ];
 
 export default function ProductForm({
@@ -293,16 +308,18 @@ export default function ProductForm({
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
         <div>
           <h2 className="font-display text-lg text-taupe-800">
-            Componente și culori
+            Piese și culori (produse fără variante)
           </h2>
           <p className="mt-1 text-xs text-taupe-400">
-            Pentru produsele la care clientul alege culorile (bifa de mai sus).
-            Adaugă fiecare componentă (ex: Cutie, Grilă, Capac) și spune câte
-            culori poate alege clientul pentru ea. Dacă nu adaugi nimic,
-            clientul alege până la 3 culori pentru întregul produs.
+            Pentru produsele la care clientul alege culorile (bifa de mai sus)
+            și care nu au variante. Adaugă fiecare piesă (ex: Ghiveci, Farfurie)
+            și spune câte culori poate alege clientul pentru ea. Dacă nu adaugi
+            nimic, clientul alege până la 3 culori pentru întregul produs. La
+            produsele cu variante, piesele se definesc în fiecare variantă,
+            mai jos.
           </p>
         </div>
-        {Array.from({ length: COMPONENT_SLOTS }, (_, i) => {
+        {Array.from({ length: PIECE_SLOTS }, (_, i) => {
           const c = d.components[i];
           const error = errors[`componentNameRo${i}`];
           return (
@@ -311,7 +328,7 @@ export default function ProductForm({
                 <input
                   name={`componentNameRo${i}`}
                   defaultValue={c?.nameRo ?? ""}
-                  placeholder={`Componenta ${i + 1} (Română)`}
+                  placeholder={`Piesa ${i + 1} (Română)`}
                   aria-invalid={invalid(`componentNameRo${i}`)}
                   className={controlClass(!!error)}
                 />
@@ -340,46 +357,109 @@ export default function ProductForm({
 
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
         <div>
-          <h2 className="font-display text-lg text-taupe-800">Variante</h2>
+          <h2 className="font-display text-lg text-taupe-800">
+            Variante (seturi)
+          </h2>
           <p className="mt-1 text-xs text-taupe-400">
-            Opțional. Ex: Mare / Mic / Set, fiecare cu prețul lui. Un rând gol
-            nu se folosește. Dacă ai variante, prețul de mai sus se ignoră.
+            Opțional. Fiecare variantă este ce cumpără clientul (ex: Mare, Mic,
+            Set), cu prețul ei și cu piesele ei. Reducerea (%) se scade din
+            prețul variantei, deci o pui doar la seturi. Clientul alege culorile
+            doar pentru piesele variantei alese. O variantă lăsată goală nu se
+            folosește. Dacă ai variante, prețul de mai sus se ignoră.
           </p>
         </div>
         {Array.from({ length: VARIANT_SLOTS }, (_, i) => {
           const v = d.variants[i];
           const nameError = errors[`variantNameRo${i}`];
           const priceError = errors[`variantPriceRon${i}`];
+          const discountError = errors[`variantDiscount${i}`];
           return (
-            <div key={i} className="flex flex-col gap-1.5">
-              <div className="grid grid-cols-3 gap-3">
+            <div
+              key={i}
+              className="flex flex-col gap-3 rounded-xl border border-cream-200 p-4"
+            >
+              <p className="text-sm font-medium text-taupe-700">
+                Varianta {i + 1}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
                 <input
                   name={`variantNameRo${i}`}
                   defaultValue={v?.nameRo ?? ""}
-                  placeholder={`Variantă ${i + 1} (Română)`}
+                  placeholder="Nume (Română), ex: Set mare + mic"
                   aria-invalid={invalid(`variantNameRo${i}`)}
                   className={controlClass(!!nameError)}
                 />
                 <input
                   name={`variantNameEn${i}`}
                   defaultValue={v?.nameEn ?? ""}
-                  placeholder="(Engleză)"
+                  placeholder="Nume (Engleză)"
                   className={controlClass()}
                 />
+              </div>
+              {nameError && <FieldError message={nameError} />}
+              <div className="grid grid-cols-2 gap-3">
                 <input
                   name={`variantPriceRon${i}`}
                   type="number"
                   step="0.01"
                   min="0"
                   defaultValue={v?.priceRon ?? ""}
-                  placeholder="Preț RON"
+                  placeholder="Preț (RON)"
                   aria-invalid={invalid(`variantPriceRon${i}`)}
                   className={controlClass(!!priceError)}
                 />
+                <input
+                  name={`variantDiscount${i}`}
+                  type="number"
+                  step="1"
+                  min="0"
+                  max="90"
+                  defaultValue={v?.discount ?? ""}
+                  placeholder="Reducere % (opțional)"
+                  aria-invalid={invalid(`variantDiscount${i}`)}
+                  className={controlClass(!!discountError)}
+                />
               </div>
-              {(nameError || priceError) && (
-                <FieldError message={(nameError || priceError) as string} />
-              )}
+              {priceError && <FieldError message={priceError} />}
+              {discountError && <FieldError message={discountError} />}
+
+              <p className="mt-1 text-xs font-medium text-taupe-600">
+                Piese și culori pentru această variantă
+              </p>
+              {Array.from({ length: PIECE_SLOTS }, (_, j) => {
+                const piece = v?.pieces[j];
+                const pieceError = errors[`variantPieceNameRo${i}_${j}`];
+                return (
+                  <div key={j} className="flex flex-col gap-1.5">
+                    <div className="grid grid-cols-[1fr_1fr_8rem] gap-3">
+                      <input
+                        name={`variantPieceNameRo${i}_${j}`}
+                        defaultValue={piece?.nameRo ?? ""}
+                        placeholder={`Piesa ${j + 1} (Română)`}
+                        aria-invalid={invalid(`variantPieceNameRo${i}_${j}`)}
+                        className={controlClass(!!pieceError)}
+                      />
+                      <input
+                        name={`variantPieceNameEn${i}_${j}`}
+                        defaultValue={piece?.nameEn ?? ""}
+                        placeholder="(Engleză)"
+                        className={controlClass()}
+                      />
+                      <select
+                        name={`variantPieceMax${i}_${j}`}
+                        defaultValue={piece?.maxColors ?? 1}
+                        className={controlClass(false, "bg-white")}
+                        aria-label="Număr maxim de culori"
+                      >
+                        <option value={1}>1 culoare</option>
+                        <option value={2}>până la 2</option>
+                        <option value={3}>până la 3</option>
+                      </select>
+                    </div>
+                    {pieceError && <FieldError message={pieceError} />}
+                  </div>
+                );
+              })}
             </div>
           );
         })}
