@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import { categoryColorClass } from "@/lib/category-colors";
+import ProductTile, { shortName } from "@/components/product/ProductTile";
 import type { FeaturedProduct } from "@/lib/db/products";
 import type { MainCategory } from "@/lib/main-categories";
 
@@ -15,38 +15,15 @@ export default function FeaturedTile({
   locale: string;
 }) {
   const t = useTranslations("Shop");
+  const price = formatPrice(product.priceCents, product.currency, locale);
 
   return (
-    <Link
+    <ProductTile
       href={`/${main.slug}/${product.categorySlug}/${product.slug}`}
-      className="group flex flex-col items-center gap-2 text-center"
-    >
-      {/* Fixed two-line slot, so photos line up whatever the name length. */}
-      <span className="flex h-11 w-full items-center justify-center text-sm leading-tight font-medium text-taupe-800 group-hover:text-salamander-600">
-        <span className="line-clamp-2">{product.name}</span>
-      </span>
-      {product.imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          loading="lazy"
-          className="aspect-[4/5] w-full rounded-xl border border-salamander-200 object-cover"
-        />
-      ) : (
-        <div
-          className={`flex aspect-[4/5] w-full items-center justify-center rounded-xl font-display text-3xl ${categoryColorClass(main.colorKey)}`}
-        >
-          {product.name.charAt(0).toUpperCase()}
-        </div>
-      )}
-      <span className="text-sm text-taupe-600">
-        {product.hasVariants
-          ? t("fromPrice", {
-              price: formatPrice(product.priceCents, product.currency, locale),
-            })
-          : formatPrice(product.priceCents, product.currency, locale)}
-      </span>
-    </Link>
+      name={shortName(product.name)}
+      imageUrl={product.imageUrl}
+      placeholderClass={categoryColorClass(main.colorKey)}
+      priceLabel={product.hasVariants ? t("fromPrice", { price }) : price}
+    />
   );
 }

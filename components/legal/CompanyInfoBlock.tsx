@@ -1,11 +1,20 @@
 import { getTranslations } from "next-intl/server";
 
-export default async function CompanyInfoBlock() {
+export default async function CompanyInfoBlock({
+  tone = "light",
+}: {
+  tone?: "light" | "dark";
+}) {
+  const dark = tone === "dark";
   const t = await getTranslations("Legal");
 
   return (
-    <div className="flex flex-col gap-1 text-sm text-taupe-600">
-      <p className="font-semibold text-taupe-800">{t("companyName")}</p>
+    <div
+      className={`flex flex-col gap-1 text-sm ${dark ? "text-cream-200" : "text-taupe-600"}`}
+    >
+      <p className={`font-semibold ${dark ? "text-cream-50" : "text-taupe-800"}`}>
+        {t("companyName")}
+      </p>
       <p>{t("companyRegCom")}</p>
       <p>{t("companyCui")}</p>
       <p>{t("companyAddress")}</p>
@@ -14,7 +23,7 @@ export default async function CompanyInfoBlock() {
         {t("companyEmailLabel")}{" "}
         <a
           href={`mailto:${t("companyEmail")}`}
-          className="text-salamander-600 hover:underline"
+          className={`hover:underline ${dark ? "text-gold-400" : "text-salamander-600"}`}
         >
           {t("companyEmail")}
         </a>

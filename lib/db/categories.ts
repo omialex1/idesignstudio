@@ -4,6 +4,8 @@ export type CategoryWithTranslation = {
   id: string;
   slug: string;
   heroImageUrl: string | null;
+  // hero image if set, otherwise the first product photo in the category
+  imageUrl: string | null;
   name: string;
   description: string | null;
 };
@@ -19,6 +21,18 @@ export async function getCategoriesByMain(
     include: { translations: true },
   });
 
+  const photos = await prisma.productImage.findMany({
+    where: { product: { isActive: true, category: { mainCategoryId } } },
+    orderBy: { sortOrder: "asc" },
+    select: { url: true, product: { select: { categoryId: true } } },
+  });
+  const firstPhoto = new Map<string, string>();
+  for (const photo of photos) {
+    if (!firstPhoto.has(photo.product.categoryId)) {
+      firstPhoto.set(photo.product.categoryId, photo.url);
+    }
+  }
+
   return categories.map((category) => {
     const translation =
       category.translations.find((t) => t.locale === locale) ??
@@ -28,6 +42,7 @@ export async function getCategoriesByMain(
       id: category.id,
       slug: category.slug,
       heroImageUrl: category.heroImageUrl,
+      imageUrl: category.heroImageUrl ?? firstPhoto.get(category.id) ?? null,
       name: translation?.name ?? category.slug,
       description: translation?.description ?? null,
     };

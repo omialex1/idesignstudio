@@ -7,7 +7,16 @@
     "tagline": "Objects with soul for home, office and special days",
     "discover": "Discover our categories",
     "viewMore": "See more",
-    "viewCollection": "View collection"
+    "viewCollection": "View collection",
+    "heroCta": "Explore the collection",
+    "trustMadeTitle": "Made to order",
+    "trustMadeBody": "in Romania",
+    "trustColorsTitle": "Colours of your choice",
+    "trustColorsBody": "for every piece",
+    "trustShipTitle": "Delivery in Romania",
+    "trustShipBody": "by courier",
+    "trustPayTitle": "Secure payment",
+    "trustPayBody": "card or cash on delivery"
   },
   "Shop": {
     "noProducts": "No products in this category yet.",

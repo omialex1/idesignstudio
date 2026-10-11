@@ -191,14 +191,14 @@ export default function ProductGallery({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative">
+      <div className="relative rounded border border-cream-200 bg-paper p-3 shadow-[0_8px_22px_rgba(60,40,25,0.10)]">
         <div
           ref={track}
           onScroll={handleScroll}
           onKeyDown={many ? handleKeyDown : undefined}
           tabIndex={many ? 0 : undefined}
           aria-roledescription={many ? "carousel" : undefined}
-          className="flex snap-x snap-mandatory overflow-x-auto rounded-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory overflow-x-auto rounded-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {images.map((url, index) => (
             <button
@@ -226,7 +226,7 @@ export default function ProductGallery({
               type="button"
               aria-label="Previous"
               onClick={() => goTo(active - 1)}
-              className={`${arrowClass} left-3`}
+              className={`${arrowClass} left-6`}
             >
               <Chevron direction="left" />
             </button>
@@ -234,7 +234,7 @@ export default function ProductGallery({
               type="button"
               aria-label="Next"
               onClick={() => goTo(active + 1)}
-              className={`${arrowClass} right-3`}
+              className={`${arrowClass} right-6`}
             >
               <Chevron direction="right" />
             </button>
@@ -384,7 +384,7 @@ export default function ProductGallery({
                   e.stopPropagation();
                   showInLightbox(active - 1);
                 }}
-                className={`${arrowClass} left-3 sm:left-6`}
+                className={`${arrowClass} left-6 sm:left-6`}
               >
                 <Chevron direction="left" />
               </button>
@@ -395,7 +395,7 @@ export default function ProductGallery({
                   e.stopPropagation();
                   showInLightbox(active + 1);
                 }}
-                className={`${arrowClass} right-3 sm:right-6`}
+                className={`${arrowClass} right-6 sm:right-6`}
               >
                 <Chevron direction="right" />
               </button>

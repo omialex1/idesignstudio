@@ -7,7 +7,16 @@
     "tagline": "Obiecte cu suflet pentru casă, birou și zile speciale",
     "discover": "Descoperă categoriile noastre",
     "viewMore": "Vezi mai multe",
-    "viewCollection": "Vezi colecția"
+    "viewCollection": "Vezi colecția",
+    "heroCta": "Descoperă colecția",
+    "trustMadeTitle": "Făcut la comandă",
+    "trustMadeBody": "în România",
+    "trustColorsTitle": "Culori la alegere",
+    "trustColorsBody": "pentru fiecare piesă",
+    "trustShipTitle": "Livrare în România",
+    "trustShipBody": "cu curier",
+    "trustPayTitle": "Plată sigură",
+    "trustPayBody": "card sau ramburs"
   },
   "Shop": {
     "noProducts": "Nu exista inca produse in aceasta categorie.",

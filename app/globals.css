@@ -1,29 +1,38 @@
 @import "tailwindcss";
 
+/* Palette: warm ivory ground, cocoa ink, terracotta accent, champagne gold,
+   chocolate for the dark bar and footer. The old token names are kept so every
+   component picks the new look up at once. */
 :root {
-  --background: #fdfaf5;
-  --foreground: #3d332e;
+  --background: #fbf5e9;
+  --foreground: #2b1d17;
 
-  --color-cream-50: #fdfaf5;
-  --color-cream-100: #f7f0e4;
-  --color-cream-200: #efe4d0;
-  --color-cream-300: #e6d5b8;
+  --color-cream-50: #fbf5e9;
+  --color-cream-100: #f2e6d3;
+  --color-cream-200: #e3d3bb;
+  --color-cream-300: #d6c1a0;
 
-  --color-salamander-50: #fdece5;
-  --color-salamander-100: #fad0c0;
-  --color-salamander-200: #f4a689;
-  --color-salamander-400: #ee7f52;
-  --color-salamander-500: #e85627;
-  --color-salamander-600: #c33f16;
-  --color-salamander-700: #9c3212;
+  --color-salamander-50: #f8eae2;
+  --color-salamander-100: #f1d6c8;
+  --color-salamander-200: #e6b9a3;
+  --color-salamander-400: #c97a58;
+  --color-salamander-500: #b25a3b;
+  --color-salamander-600: #964a2f;
+  --color-salamander-700: #7a3b25;
 
-  --color-tangerine-400: #e9821b;
+  --color-tangerine-400: #c9803f;
 
-  --color-taupe-400: #9c8f85;
-  --color-taupe-500: #85766a;
-  --color-taupe-600: #6b5d54;
-  --color-taupe-700: #55483f;
-  --color-taupe-800: #3d332e;
+  --color-taupe-400: #a38f82;
+  --color-taupe-500: #80675a;
+  --color-taupe-600: #6b5548;
+  --color-taupe-700: #4a3a32;
+  --color-taupe-800: #2b1d17;
+
+  --color-gold-300: #e2c99a;
+  --color-gold-400: #d2a868;
+  --color-gold-600: #b8903f;
+  --color-choc: #2a1d17;
+  --color-paper: #fffdf8;
 }
 
 @theme inline {
@@ -51,11 +60,27 @@
   --color-taupe-700: var(--color-taupe-700);
   --color-taupe-800: var(--color-taupe-800);
 
-  --font-display: var(--font-fraunces);
+  --color-gold-300: var(--color-gold-300);
+  --color-gold-400: var(--color-gold-400);
+  --color-gold-600: var(--color-gold-600);
+  --color-choc: var(--color-choc);
+  --color-paper: var(--color-paper);
+
+  --font-display: var(--font-cormorant);
   --font-sans: var(--font-manrope);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+@layer base {
+  /* Cormorant is fine-stroked; a medium weight keeps titles readable */
+  .font-display,
+  h1,
+  h2,
+  h3 {
+    font-weight: 500;
+  }
 }

@@ -30,15 +30,15 @@ export default function Header({
   }));
 
   return (
-    <header className="sticky top-0 z-50 border-b border-cream-200 bg-cream-50/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
+    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/15 bg-choc/75 px-2.5 py-2 text-cream-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md sm:px-6 sm:py-2.5">
         <div className="flex items-center gap-1 sm:gap-3">
           <button
             type="button"
             aria-label="Menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-taupe-700 transition-colors hover:text-salamander-600 lg:hidden"
+            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-cream-100 transition-colors hover:text-gold-400 lg:hidden"
           >
             <svg
               viewBox="0 0 24 24"
@@ -57,36 +57,36 @@ export default function Header({
           </button>
           <Link
             href="/"
-            className="font-display text-lg tracking-tight text-taupe-800 sm:text-xl"
+            className="font-display text-lg tracking-wide text-cream-50 sm:text-2xl"
           >
             iDesignStudio
-            <span className="text-salamander-500">.ro</span>
+            <span className="text-gold-400">.ro</span>
           </Link>
         </div>
 
-        <nav className="hidden items-center gap-8 text-sm font-medium text-taupe-700 lg:flex">
+        <nav className="hidden items-center gap-8 text-sm font-medium text-cream-100/90 lg:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="transition-colors hover:text-salamander-600"
+              className="transition-colors hover:text-gold-400"
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex items-center gap-1 rounded-full border border-cream-200 p-1 text-xs font-semibold text-taupe-600">
+        <div className="flex items-center gap-1.5 sm:gap-4">
+          <div className="flex items-center gap-1 rounded-full border border-white/20 p-1 text-xs font-semibold text-cream-100/80">
             {routing.locales.map((loc) => (
               <Link
                 key={loc}
                 href={pathname}
                 locale={loc}
-                className={`rounded-full px-2 py-1 transition-colors ${
+                className={`rounded-full px-1.5 py-1 transition-colors sm:px-2 ${
                   locale === loc
-                    ? "bg-salamander-50 text-salamander-600"
-                    : "hover:text-salamander-600"
+                    ? "bg-gold-400 text-choc"
+                    : "hover:text-gold-400"
                 }`}
               >
                 {loc.toUpperCase()}
@@ -97,7 +97,7 @@ export default function Header({
           <Link
             href="/account"
             aria-label={tAccount("accountLabel")}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-taupe-700 transition-colors hover:text-salamander-600"
+            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
           >
             <svg
               viewBox="0 0 24 24"
@@ -115,7 +115,7 @@ export default function Header({
           <Link
             href="/cart"
             aria-label={tCart("cartLabel")}
-            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-cream-200 text-taupe-700 transition-colors hover:text-salamander-600"
+            className="relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
           >
             <svg
               viewBox="0 0 24 24"
@@ -130,7 +130,7 @@ export default function Header({
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
             {itemCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-salamander-500 px-1 text-[10px] font-semibold text-cream-50">
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-400 px-1 text-[10px] font-semibold text-choc">
                 {itemCount}
               </span>
             )}
@@ -139,14 +139,14 @@ export default function Header({
       </div>
 
       {menuOpen && (
-        <nav className="border-t border-cream-200 px-6 py-3 lg:hidden">
+        <nav className="mx-auto mt-2 max-w-6xl rounded-3xl border border-white/15 bg-choc/80 px-6 py-3 text-cream-100 backdrop-blur-md lg:hidden">
           <ul className="flex flex-col">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className="block py-2.5 text-sm font-medium text-taupe-700 hover:text-salamander-600"
+                  className="block py-2.5 text-sm font-medium text-cream-100 hover:text-gold-400"
                 >
                   {link.label}
                 </Link>
