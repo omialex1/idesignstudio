@@ -55,21 +55,37 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           }),
         }}
       />
-      <section className="relative -mt-[68px] h-[560px] overflow-hidden sm:h-[640px]">
+      <section className="relative -mt-[68px] overflow-hidden bg-choc">
+        {/* soft blurred copy of the photo as the backdrop, fading into the page */}
         <Image
           src="/images/hero-home.jpg"
           alt=""
           fill
-          priority
-          sizes="100vw"
-          className="hero-zoom object-cover object-[50%_62%]"
-        />
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/30"
+          sizes="96px"
+          className="scale-125 object-cover blur-2xl brightness-[0.7] saturate-125"
           aria-hidden="true"
         />
-        <div className="relative mx-auto flex h-full max-w-6xl items-end px-4 pb-8 sm:px-6 sm:pb-14">
-          <div className="hero-rise max-w-md rounded-3xl border border-white/20 bg-choc/50 p-7 text-cream-50 shadow-[0_10px_40px_rgba(0,0,0,0.25)] backdrop-blur-md sm:p-9">
+        <div
+          className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-cream-50"
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 pt-28 pb-20 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:pt-32 lg:pb-24">
+          <div className="hero-rise justify-self-center lg:order-2 lg:justify-self-end">
+            {/* gradient frame: champagne gold fading to terracotta */}
+            <div className="rounded-[2rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+              <div className="relative aspect-[4/5] w-[min(74vw,360px)] overflow-hidden rounded-[calc(2rem-3px)] lg:w-[400px]">
+                <Image
+                  src="/images/hero-home.jpg"
+                  alt=""
+                  fill
+                  priority
+                  sizes="400px"
+                  className="hero-zoom object-cover"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="hero-rise max-w-md rounded-3xl border border-white/20 bg-choc/50 p-7 text-cream-50 shadow-[0_10px_40px_rgba(0,0,0,0.25)] backdrop-blur-md sm:p-9 lg:order-1">
             <h1 className="font-display text-4xl leading-[1.08] italic sm:text-5xl">
               {t("tagline")}
             </h1>
