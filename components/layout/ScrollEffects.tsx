@@ -3,23 +3,11 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-// Gentle scroll effects: elements marked with data-reveal fade and rise into
-// place the first time they enter the screen, and the page root gets a
-// data-scrolled flag once the visitor has scrolled (the header uses it to
-// become a little more solid). Everything is visible without JavaScript and
-// is skipped for visitors who ask for reduced motion.
+// Gentle scroll effect: elements marked with data-reveal fade and rise into
+// place the first time they enter the screen. Everything is visible without
+// JavaScript and is skipped for visitors who ask for reduced motion.
 export default function ScrollEffects() {
   const pathname = usePathname();
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const onScroll = () => {
-      root.dataset.scrolled = window.scrollY > 24 ? "true" : "false";
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
