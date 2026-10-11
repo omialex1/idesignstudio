@@ -41,6 +41,17 @@ export default async function ProductDetailPage({
     ? product.variants.map((v) => v.priceCents)
     : [product.priceCents];
   const money = (cents: number) => (cents / 100).toFixed(2);
+  // Mirrors the Terms: 14-day withdrawal, customer pays the return shipping.
+  const returnPolicy = {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: "RO",
+    returnPolicyCategory:
+      "https://schema.org/MerchantReturnFiniteReturnWindow",
+    merchantReturnDays: 14,
+    returnMethod: "https://schema.org/ReturnByMail",
+    returnFees: "https://schema.org/ReturnShippingFees",
+    merchantReturnLink: `${siteUrl()}/${locale}/terms`,
+  };
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -59,6 +70,7 @@ export default async function ProductDetailPage({
             offerCount: prices.length,
             availability,
             url,
+            hasMerchantReturnPolicy: returnPolicy,
           }
         : {
             "@type": "Offer",
@@ -67,6 +79,7 @@ export default async function ProductDetailPage({
             availability,
             itemCondition: "https://schema.org/NewCondition",
             url,
+            hasMerchantReturnPolicy: returnPolicy,
           },
   };
 
