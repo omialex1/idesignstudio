@@ -18,8 +18,6 @@
     "chooseColors": "Alege culorile",
     "colorsHint": "Alege până la {max} culori. Le combinăm după cum ai ales.",
     "colorsChosen": "Alese: {names}",
-    "colorNoteLabel": "Detalii despre culori (opțional)",
-    "colorNotePlaceholder": "ex: capacul alb, restul caramel",
     "pickColorFirst": "Alege cel puțin o culoare ca să poți comanda.",
     "fromPrice": "de la {price}",
     "colorsFor": "Culori pentru {name}",

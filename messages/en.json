@@ -18,8 +18,6 @@
     "chooseColors": "Choose your colours",
     "colorsHint": "Pick up to {max} colours. We combine them as you choose.",
     "colorsChosen": "Selected: {names}",
-    "colorNoteLabel": "Colour details (optional)",
-    "colorNotePlaceholder": "e.g. white lid, the rest caramel",
     "pickColorFirst": "Pick at least one colour to order.",
     "fromPrice": "from {price}",
     "colorsFor": "Colours for {name}",

@@ -9,7 +9,6 @@ import {
   COLORS,
   DEFAULT_COMPONENT_ID,
   MAX_COLORS,
-  MAX_COLOR_NOTE_LENGTH,
   colorLabel,
   colorSwatchUrl,
 } from "@/lib/colors";
@@ -90,7 +89,6 @@ export default function ProductPurchase({
   // Which kind of choice counts: separate components or the whole set. Both
   // are remembered, the one used last wins.
   const [mode, setMode] = useState<"each" | "set">("each");
-  const [note, setNote] = useState("");
   const [justAdded, setJustAdded] = useState(false);
 
   const unitPrice = variant?.priceCents ?? priceCents;
@@ -148,7 +146,7 @@ export default function ProductPurchase({
         componentName: p.name,
         colors: picked[p.id] ?? [],
       })),
-      colorNote: hasColorOptions && note.trim() ? note.trim() : null,
+      colorNote: null,
       slug,
       categorySlug,
       mainSlug,
@@ -316,19 +314,6 @@ export default function ProductPurchase({
               );
             })}
           </div>
-
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium text-taupe-700">
-              {t("colorNoteLabel")}
-            </span>
-            <input
-              value={note}
-              maxLength={MAX_COLOR_NOTE_LENGTH}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder={t("colorNotePlaceholder")}
-              className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400"
-            />
-          </label>
         </fieldset>
       )}
 
