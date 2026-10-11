@@ -84,3 +84,61 @@ body {
     font-weight: 500;
   }
 }
+
+/* Scroll and entrance motion (see components/layout/ScrollEffects.tsx).
+   Content is visible by default; it only waits when JS has marked it. */
+[data-reveal] {
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) var(--reveal-delay, 0ms);
+}
+[data-reveal].reveal-init {
+  opacity: 0;
+  transform: translateY(26px);
+}
+[data-reveal].reveal-init.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-zoom {
+  animation: hero-zoom 2.2s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.hero-rise {
+  animation: rise-in 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.3s both;
+}
+.hero-rise-late {
+  animation: rise-in 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.55s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  .hero-zoom,
+  .hero-rise,
+  .hero-rise-late {
+    animation: none;
+    transition: none;
+  }
+  [data-reveal].reveal-init {
+    opacity: 1;
+    transform: none;
+  }
+}
