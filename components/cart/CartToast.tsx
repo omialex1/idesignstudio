@@ -83,14 +83,14 @@ export default function CartToast() {
         <Link
           href="/cart"
           onClick={() => setItem(null)}
-          className="flex-1 rounded-full bg-gold-400 px-4 py-2.5 text-center text-xs font-semibold tracking-[0.1em] text-choc uppercase transition-colors hover:bg-gold-300"
+          className="flex flex-1 items-center justify-center rounded-full bg-gold-400 px-4 py-2.5 text-center text-xs font-semibold tracking-[0.1em] text-choc uppercase transition duration-200 hover:-translate-y-px hover:bg-gold-300 hover:shadow-[0_6px_16px_rgba(184,144,63,0.45)]"
         >
           {t("viewCart")}
         </Link>
         <button
           type="button"
           onClick={() => setItem(null)}
-          className="flex-1 rounded-full border border-cream-300 px-4 py-2.5 text-center text-xs font-semibold tracking-[0.1em] text-taupe-700 uppercase transition-colors hover:border-gold-600 hover:text-taupe-800"
+          className="flex flex-1 items-center justify-center rounded-full border border-cream-300 px-4 py-2.5 text-center text-xs font-semibold tracking-[0.1em] text-taupe-700 uppercase transition duration-200 hover:-translate-y-px hover:border-gold-600 hover:bg-gold-400/25 hover:text-choc hover:shadow-[0_6px_16px_rgba(184,144,63,0.35)]"
         >
           {t("continueShopping")}
         </button>
