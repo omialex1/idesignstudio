@@ -7,6 +7,7 @@ import ProductPurchase from "@/components/product/ProductPurchase";
 import ProductGallery from "@/components/product/ProductGallery";
 import { COMPANY, shortText, siteUrl } from "@/lib/seo";
 import { renderRichText } from "@/lib/rich-text";
+import { calculateShippingCents } from "@/lib/shipping";
 import type { MainCategory } from "@/lib/main-categories";
 
 export default async function ProductDetailPage({
@@ -52,13 +53,40 @@ export default async function ProductDetailPage({
     returnFees: "https://schema.org/ReturnShippingFees",
     merchantReturnLink: `${siteUrl()}/${locale}/terms`,
   };
+  // Same rule as the checkout: flat fee, free from the threshold. Delivery
+  // times follow the Terms (1-2 working days production + 1-2 days courier).
+  const shippingDetails = {
+    "@type": "OfferShippingDetails",
+    shippingRate: {
+      "@type": "MonetaryAmount",
+      value: money(calculateShippingCents(Math.min(...prices))),
+      currency: product.currency,
+    },
+    shippingDestination: { "@type": "DefinedRegion", addressCountry: "RO" },
+    deliveryTime: {
+      "@type": "ShippingDeliveryTime",
+      handlingTime: {
+        "@type": "QuantitativeValue",
+        minValue: 1,
+        maxValue: 2,
+        unitCode: "DAY",
+      },
+      transitTime: {
+        "@type": "QuantitativeValue",
+        minValue: 1,
+        maxValue: 2,
+        unitCode: "DAY",
+      },
+    },
+  };
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: shortText(product.description, 300),
     image: product.images.map((i) => `${siteUrl()}${i.url}`),
-    sku: product.slug,
+    // Google accepts at most 50 characters in sku
+    sku: product.slug.slice(0, 50).replace(/-+$/, ""),
     brand: { "@type": "Brand", name: COMPANY.brand },
     offers:
       prices.length > 1
@@ -71,6 +99,7 @@ export default async function ProductDetailPage({
             availability,
             url,
             hasMerchantReturnPolicy: returnPolicy,
+            shippingDetails,
           }
         : {
             "@type": "Offer",
@@ -80,6 +109,7 @@ export default async function ProductDetailPage({
             itemCondition: "https://schema.org/NewCondition",
             url,
             hasMerchantReturnPolicy: returnPolicy,
+            shippingDetails,
           },
   };
 
