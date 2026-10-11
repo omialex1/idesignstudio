@@ -128,12 +128,16 @@ body {
 .hero-rise-late {
   animation: rise-in 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.55s both;
 }
+.toast-in {
+  animation: rise-in 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
 
 @media (prefers-reduced-motion: reduce) {
   [data-reveal],
   .hero-zoom,
   .hero-rise,
-  .hero-rise-late {
+  .hero-rise-late,
+  .toast-in {
     animation: none;
     transition: none;
   }

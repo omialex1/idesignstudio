@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/cart/store";
+import {
+  CART_ADDED_EVENT,
+  type CartAddedDetail,
+} from "@/components/cart/CartToast";
 import { formatPrice } from "@/lib/format";
 import {
   ALL_COMPONENTS_ID,
@@ -156,6 +160,11 @@ export default function ProductPurchase({
       currency,
       imageUrl,
     });
+    window.dispatchEvent(
+      new CustomEvent<CartAddedDetail>(CART_ADDED_EVENT, {
+        detail: { name, variantName: variant?.name ?? null, imageUrl: imageUrl ?? null },
+      }),
+    );
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
   }

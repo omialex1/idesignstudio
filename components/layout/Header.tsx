@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart/store";
+import { CART_ADDED_EVENT } from "@/components/cart/CartToast";
 
 export default function Header({
   categories,
@@ -52,11 +53,19 @@ export default function Header({
       }
     };
 
+    // after an add to cart, bring the bar back so the cart badge is seen
+    const onAdded = () => {
+      setHiddenOn(null);
+      hideSoon(6000);
+    };
+
     hideSoon(2200);
     window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener(CART_ADDED_EVENT, onAdded);
     return () => {
       clearTimeout(timer);
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener(CART_ADDED_EVENT, onAdded);
     };
   }, [autoHide, pathname]);
 

@@ -40,14 +40,16 @@
     "cartLabel": "Cos de cumparaturi",
     "title": "Cosul tau",
     "empty": "Cosul tau este gol.",
-    "continueShopping": "Continua cumparaturile",
+    "continueShopping": "Continuă cumpărăturile",
     "remove": "Elimina",
     "subtotal": "Subtotal",
     "total": "Total",
     "checkout": "Finalizeaza comanda",
     "addToCart": "Adauga in cos",
-    "added": "Adaugat in cos",
-    "shippingNote": "Livrare 19,99 lei, gratuită pentru comenzi de 200 lei sau mai mult. Ramburs: +3,99 lei."
+    "added": "Adăugat în coș",
+    "shippingNote": "Livrare 19,99 lei, gratuită pentru comenzi de 200 lei sau mai mult. Ramburs: +3,99 lei.",
+    "close": "Închide",
+    "viewCart": "Vezi coșul"
   },
   "Account": {
     "accountLabel": "Cont",

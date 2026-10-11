@@ -47,7 +47,9 @@
     "checkout": "Checkout",
     "addToCart": "Add to cart",
     "added": "Added to cart",
-    "shippingNote": "Shipping is 19.99 RON, free for orders of 200 RON or more. Cash on delivery: +3.99 RON."
+    "shippingNote": "Shipping is 19.99 RON, free for orders of 200 RON or more. Cash on delivery: +3.99 RON.",
+    "close": "Close",
+    "viewCart": "View cart"
   },
   "Account": {
     "accountLabel": "Account",
