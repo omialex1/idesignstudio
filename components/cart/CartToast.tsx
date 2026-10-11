@@ -13,7 +13,8 @@ export type CartAddedDetail = {
 };
 
 // Small confirmation card shown after something is added to the cart, with
-// the two obvious next steps. Product pages announce an add through the
+// the two obvious next steps. It stays until the visitor closes it (x, Esc or
+// "continue shopping"). Product pages announce an add through the
 // "cart:added" window event (see ProductPurchase).
 export default function CartToast() {
   const t = useTranslations("Cart");
@@ -28,13 +29,11 @@ export default function CartToast() {
 
   useEffect(() => {
     if (!item) return;
-    const timer = setTimeout(() => setItem(null), 9000);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setItem(null);
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("keydown", onKey);
     };
   }, [item]);
@@ -51,11 +50,13 @@ export default function CartToast() {
         type="button"
         onClick={() => setItem(null)}
         aria-label={t("close")}
-        className="absolute top-2 right-3 text-xl leading-none text-taupe-500 hover:text-taupe-800"
+        className="absolute top-2.5 right-2.5 flex h-10 w-10 items-center justify-center rounded-full border-2 border-transparent text-[2.5rem] leading-none text-taupe-800 transition duration-200 hover:border-red-500 hover:bg-red-500/10 hover:text-red-600 hover:shadow-[0_0_16px_rgba(239,68,68,0.6)] focus-visible:border-red-500 focus-visible:bg-red-500/10 focus-visible:text-red-600 focus-visible:shadow-[0_0_16px_rgba(239,68,68,0.6)] focus-visible:outline-none"
       >
-        ×
+        <span aria-hidden="true" className="-mt-1">
+          ×
+        </span>
       </button>
-      <div className="flex items-center gap-3 pr-5">
+      <div className="flex items-center gap-3 pr-11">
         {item.imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
