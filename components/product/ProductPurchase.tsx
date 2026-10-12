@@ -14,6 +14,7 @@ import {
   MAX_COLORS,
 } from "@/lib/colors";
 import type { PaletteColor } from "@/lib/db/colors";
+import { swatchStyle } from "@/lib/colors-shared";
 
 // A round colour sample: the texture photo when there is one, else the colour.
 function Swatch({
@@ -40,7 +41,7 @@ function Swatch({
       role={label ? "img" : undefined}
       aria-label={label || undefined}
       className={`inline-block rounded-full ${className}`}
-      style={{ background: color?.hex ?? "#CCCCCC" }}
+      style={swatchStyle(color?.hex ?? "#CCCCCC")}
     />
   );
 }

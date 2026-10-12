@@ -14,3 +14,20 @@ export function normalizeHex(input: string): string | null {
   if (/^[0-9a-fA-F]{6}$/.test(raw)) return `#${raw.toUpperCase()}`;
   return null;
 }
+
+// Look of a colour without its own photo: the colour with the same soft sheen
+// the photographed filament swatches have (public/colors/texture.webp), so
+// colours added later look like the existing ones, not like flat paint.
+export function swatchStyle(hex: string): {
+  backgroundColor: string;
+  backgroundImage: string;
+  backgroundSize: string;
+  backgroundBlendMode: string;
+} {
+  return {
+    backgroundColor: normalizeHex(hex) ?? "#CCCCCC",
+    backgroundImage: "url(/colors/texture.webp)",
+    backgroundSize: "cover",
+    backgroundBlendMode: "overlay",
+  };
+}

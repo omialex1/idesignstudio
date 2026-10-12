@@ -78,12 +78,20 @@ export async function updateColor(
   const errors = validateColorForm(fd);
   if (Object.keys(errors).length > 0) return { errors };
   const data = readColor(fd);
+  const current = await prisma.color.findUnique({
+    where: { id },
+    select: { hex: true, swatchImage: true },
+  });
   await prisma.color.update({
     where: { id },
     data: {
       nameRo: data.nameRo,
       nameEn: data.nameEn,
       hex: data.hex,
+      // a new hex means the old texture photo no longer matches the colour
+      ...(current?.swatchImage && current.hex !== data.hex
+        ? { swatchImage: false }
+        : {}),
       sortOrder: data.sortOrder,
       isActive: data.isActive,
     },

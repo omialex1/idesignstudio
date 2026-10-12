@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db/client";
+import { swatchStyle } from "@/lib/colors-shared";
 
 export default async function AdminColorsPage() {
   const mains = await prisma.mainCategory.findMany({
@@ -45,7 +46,7 @@ export default async function AdminColorsPage() {
                       <span
                         key={c.id}
                         className="h-6 w-6 rounded-full ring-2 ring-white"
-                        style={{ background: c.hex }}
+                        style={swatchStyle(c.hex)}
                         aria-hidden="true"
                       />
                     ))}

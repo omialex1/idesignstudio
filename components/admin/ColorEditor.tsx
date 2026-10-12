@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { controlClass, FieldError } from "@/components/admin/FormBits";
-import { normalizeHex } from "@/lib/colors-shared";
+import { normalizeHex, swatchStyle } from "@/lib/colors-shared";
 import {
   createColorAction,
   deleteColorAction,
@@ -24,7 +24,6 @@ export type ColorItem = {
 };
 
 function Swatch({ hex, slug, photo }: { hex: string; slug?: string; photo?: boolean }) {
-  const valid = normalizeHex(hex) ?? "#CCCCCC";
   return photo && slug ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -35,7 +34,7 @@ function Swatch({ hex, slug, photo }: { hex: string; slug?: string; photo?: bool
   ) : (
     <span
       className="h-10 w-10 shrink-0 rounded-full ring-1 ring-cream-300"
-      style={{ background: valid }}
+      style={swatchStyle(hex)}
       aria-hidden="true"
     />
   );
