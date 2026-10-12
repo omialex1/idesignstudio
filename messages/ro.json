@@ -16,7 +16,9 @@
     "trustShipTitle": "Livrare în România",
     "trustShipBody": "cu curier",
     "trustPayTitle": "Plată sigură",
-    "trustPayBody": "card sau ramburs"
+    "trustPayBody": "card sau ramburs",
+    "heroTitle": "Obiecte pentru casă, printate 3D la comandă, în culorile tale",
+    "heroPhotoAlt": "Vaze printate 3D, invitație și caiet pe un suport împletit"
   },
   "Shop": {
     "noProducts": "Nu exista inca produse in aceasta categorie.",
