@@ -44,7 +44,7 @@ export default function CartToast() {
     <div
       role="status"
       aria-live="polite"
-      className="toast-in fixed inset-x-4 bottom-4 z-[60] rounded-2xl border border-cream-200 bg-paper p-4 shadow-[0_18px_50px_rgba(40,25,15,0.28)] sm:inset-x-auto sm:top-[72px] sm:right-6 sm:bottom-auto sm:w-[22rem]"
+      className="toast-in fixed inset-x-4 bottom-4 z-[60] rounded-2xl border border-cream-200 bg-paper p-4 shadow-[0_18px_50px_rgba(40,25,15,0.28)] sm:inset-x-auto sm:top-[84px] sm:right-6 sm:bottom-auto sm:w-[22rem]"
     >
       <button
         type="button"

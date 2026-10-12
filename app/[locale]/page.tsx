@@ -55,7 +55,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           }),
         }}
       />
-      <section className="relative -mt-[53px] sm:-mt-[58px] overflow-hidden bg-choc">
+      <section className="relative -mt-[68px] overflow-hidden bg-choc">
         {/* soft blurred copy of the photo as the backdrop, fading into the page */}
         <Image
           src="/images/hero-home.jpg"
