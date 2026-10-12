@@ -6,9 +6,11 @@ export function shortName(name: string) {
   return name.split(" – ")[0];
 }
 
-// Warm paper card with a round photo in a fine gold ring, the name and the
-// price inside. Used for products on the homepage and in category lists, and
-// (with `meta` set) for subcategories.
+// Card with a round photo in a fine gold ring, the name and the price inside.
+// Used for products on the homepage and in category lists, and for
+// categories. Category cards pass `textured`: a soft blurred photo background
+// (a portion of the hero backdrop) inside a black frame with a thin gold
+// gradient line, like the photo frame at the top of the homepage.
 export default function ProductTile({
   href,
   name,
@@ -30,16 +32,10 @@ export default function ProductTile({
   eyebrow?: string;
   description?: string | null;
   cta?: string;
-  // soft blurred photo background (a portion of the hero backdrop) instead of plain paper
   textured?: boolean;
 }) {
-  return (
-    <Link
-      href={href}
-      className={`group flex h-full flex-col rounded border border-cream-200 px-4 pt-5 text-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)] ${
-        textured ? "bg-[url(/images/card-bg.jpg)] bg-cover bg-center" : "bg-paper"
-      }`}
-    >
+  const content = (
+    <>
       <div className="mx-auto w-[calc(100%-12px)]">
         <div
           className={`relative aspect-square overflow-hidden rounded-full ring-1 ring-gold-600 ring-offset-[5px] ${
@@ -96,6 +92,30 @@ export default function ProductTile({
         )}
         {note && <span className="mt-1 text-xs text-red-600">{note}</span>}
       </div>
+    </>
+  );
+
+  if (textured) {
+    return (
+      <Link
+        href={href}
+        className="group flex h-full rounded bg-choc p-[3px] shadow-[0_8px_22px_rgba(60,40,25,0.14)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.2)]"
+      >
+        <span className="flex w-full rounded-[3px] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[2px]">
+          <span className="flex w-full flex-col rounded-[2px] bg-[url(/images/card-bg.jpg)] bg-cover bg-center px-4 pt-5 text-center">
+            {content}
+          </span>
+        </span>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className="group flex h-full flex-col rounded border border-cream-200 bg-paper px-4 pt-5 text-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)]"
+    >
+      {content}
     </Link>
   );
 }
