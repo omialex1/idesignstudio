@@ -118,11 +118,11 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           alt=""
           fill
           sizes="96px"
-          className="scale-125 object-cover blur-2xl brightness-[0.66] contrast-105 saturate-150"
+          className="scale-125 object-cover blur-2xl brightness-[1.04] saturate-110"
           aria-hidden="true"
         />
         <div
-          className="absolute inset-0 bg-gradient-to-r from-choc/50 via-choc/25 to-choc/10"
+          className="absolute inset-0 bg-cream-50/25"
           aria-hidden="true"
         />
         <div
@@ -141,7 +141,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-28 sm:px-6 sm:pt-24 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
           {/* gradient frame: champagne gold fading to terracotta */}
-          <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+          <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_6px_18px_rgba(60,40,25,0.14)]">
             <div className="relative aspect-[520/380] overflow-hidden rounded-[calc(1.75rem-3px)]">
               <Image
                 src="/images/hero-wide.jpg"
@@ -154,12 +154,12 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             </div>
           </div>
 
-          <div className="flex flex-col items-center text-center text-cream-50">
-            <h1 className="hero-rise font-display text-xl leading-[1.15] italic [text-shadow:0_2px_24px_rgba(0,0,0,0.4)] sm:text-2xl">
+          <div className="flex flex-col items-center text-center text-taupe-800">
+            <h1 className="hero-rise font-display text-xl leading-[1.15] italic sm:text-2xl">
               {t("heroTitle")}
             </h1>
             <span
-              className="hero-rise my-5 block h-px w-14 bg-gold-400"
+              className="hero-rise my-5 block h-px w-14 bg-gold-600"
               aria-hidden="true"
             />
             {/* the four points appear one after another */}
@@ -168,7 +168,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 <li
                   key={point.key}
                   style={{ animationDelay: `${0.45 + i * 0.18}s` }}
-                  className="hero-rise flex items-center gap-3 rounded-full border border-gold-400/50 bg-choc/60 py-[10px] pr-5 pl-[10px] text-left shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-md"
+                  className="hero-rise flex items-center gap-3 rounded-full border border-gold-400/50 bg-choc/60 py-[10px] pr-5 pl-[10px] text-left text-cream-50 shadow-[0_3px_10px_rgba(60,40,25,0.14)] backdrop-blur-md"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-400 text-choc">
                     {point.icon}
