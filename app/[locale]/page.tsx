@@ -111,7 +111,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           }),
         }}
       />
-      <section className="relative -mt-[68px] overflow-hidden bg-choc">
+      <section className="relative -mt-[68px] overflow-hidden bg-cream-50">
         {/* soft blurred copy of the photo as the backdrop, fading into the page */}
         <Image
           src="/images/hero-wide.jpg"
@@ -126,16 +126,16 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           aria-hidden="true"
         />
         <div
-          className="absolute inset-x-0 bottom-0 h-28 [background:linear-gradient(to_bottom,rgba(251,245,233,0)_0%,rgba(251,245,233,0.03)_14%,rgba(251,245,233,0.1)_28%,rgba(251,245,233,0.24)_44%,rgba(251,245,233,0.46)_60%,rgba(251,245,233,0.72)_78%,rgba(251,245,233,0.92)_92%,#fbf5e9_100%)]"
+          className="absolute inset-x-0 -bottom-0.5 h-[114px] [background:linear-gradient(to_bottom,rgba(251,245,233,0)_0%,rgba(251,245,233,0.03)_14%,rgba(251,245,233,0.1)_28%,rgba(251,245,233,0.24)_44%,rgba(251,245,233,0.46)_60%,rgba(251,245,233,0.72)_78%,rgba(251,245,233,0.92)_92%,#fbf5e9_100%)]"
           aria-hidden="true"
         />
         {/* progressively stronger blur towards the bottom edge */}
         <div
-          className="absolute inset-x-0 bottom-0 h-28 backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_100%)]"
+          className="absolute inset-x-0 -bottom-10 h-[152px] backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_100%)]"
           aria-hidden="true"
         />
         <div
-          className="absolute inset-x-0 bottom-0 h-14 backdrop-blur-md [mask-image:linear-gradient(to_bottom,transparent_0%,black_100%)]"
+          className="absolute inset-x-0 -bottom-10 h-24 backdrop-blur-md [mask-image:linear-gradient(to_bottom,transparent_0%,black_100%)]"
           aria-hidden="true"
         />
 
