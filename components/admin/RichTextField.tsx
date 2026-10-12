@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { renderRichText } from "@/lib/rich-text";
+import { useRef } from "react";
 import { controlClass } from "@/components/admin/FormBits";
 
 // Textarea with Bold / Italic buttons. Formatting is stored as **bold** and
@@ -20,7 +19,6 @@ export default function RichTextField({
   rows?: number;
 }) {
   const area = useRef<HTMLTextAreaElement>(null);
-  const [value, setValue] = useState(defaultValue);
 
   function wrap(marker: "**" | "*") {
     const el = area.current;
@@ -59,7 +57,6 @@ export default function RichTextField({
     }
 
     el.value = next;
-    setValue(next);
     el.focus();
     el.setSelectionRange(selStart, selEnd);
   }
@@ -114,24 +111,12 @@ export default function RichTextField({
         name={name}
         defaultValue={defaultValue}
         rows={rows}
-        onInput={(e) => setValue(e.currentTarget.value)}
         onKeyDown={onKeyDown}
         className={controlClass(
           false,
           "field-sizing-content min-h-24 max-h-80 resize-y",
         )}
       />
-
-      {value.includes("*") && (
-        <div className="rounded-lg border border-cream-200 bg-cream-50 p-3">
-          <p className="mb-1 text-xs font-medium text-taupe-500">
-            Previzualizare
-          </p>
-          <p className="whitespace-pre-line text-taupe-700">
-            {renderRichText(value)}
-          </p>
-        </div>
-      )}
 
       {hint && <span className="text-xs text-taupe-400">{hint}</span>}
     </div>
