@@ -69,7 +69,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-cream-50"
           aria-hidden="true"
         />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 pt-28 pb-20 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:pt-32 lg:pb-24">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 pt-28 pb-28 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:pt-32 lg:pb-24">
           <div className="hero-rise justify-self-center lg:order-2 lg:justify-self-end">
             {/* gradient frame: champagne gold fading to terracotta */}
             <div className="rounded-[2rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
@@ -85,13 +85,20 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               </div>
             </div>
           </div>
-          <div className="hero-rise max-w-md rounded-3xl border border-white/20 bg-choc/50 p-7 text-cream-50 shadow-[0_10px_40px_rgba(0,0,0,0.25)] backdrop-blur-md sm:p-9 lg:order-1">
-            <h1 className="font-display text-4xl leading-[1.08] italic sm:text-5xl">
+          <div className="max-w-xl text-cream-50 lg:order-1">
+            <p className="hero-rise mb-3 text-[11px] font-semibold tracking-[0.22em] text-gold-400 uppercase">
+              iDesignStudio
+            </p>
+            <h1 className="hero-rise font-display text-5xl leading-[1.05] italic [text-shadow:0_2px_24px_rgba(0,0,0,0.35)] sm:text-6xl">
               {t("tagline")}
             </h1>
+            <span
+              className="hero-rise my-6 block h-px w-14 bg-gold-400"
+              aria-hidden="true"
+            />
             <a
               href="#categorii"
-              className="hero-rise-late mt-6 inline-block rounded-full bg-gold-400 px-8 py-3 text-xs font-semibold tracking-[0.14em] text-choc uppercase transition-colors hover:bg-gold-300"
+              className="hero-rise-late inline-block rounded-full bg-gold-400 px-8 py-3 text-xs font-semibold tracking-[0.14em] text-choc uppercase transition-colors hover:bg-gold-300"
             >
               {t("heroCta")}
             </a>
