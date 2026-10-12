@@ -28,7 +28,7 @@ export default async function AdminColorsPage() {
             <Link
               key={m.id}
               href={`/admin/colors/${m.id}`}
-              className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-cream-200 bg-white p-5 transition-shadow hover:shadow-md"
+              className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-5 transition-shadow hover:shadow-md"
             >
               <div>
                 <p className="font-medium text-taupe-800">{name}</p>

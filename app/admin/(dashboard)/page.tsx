@@ -40,7 +40,7 @@ export default async function AdminDashboardPage() {
               return (
                 <li
                   key={p.id}
-                  className="flex items-center justify-between rounded-lg border border-cream-200 bg-white px-4 py-2 text-sm"
+                  className="flex items-center justify-between rounded-lg border border-cream-300 bg-white shadow-sm px-4 py-2 text-sm"
                 >
                   <Link
                     href={`/admin/products/${p.id}/edit`}
@@ -77,7 +77,7 @@ function StatCard({
         ? "text-red-600"
         : "text-taupe-800";
   return (
-    <div className="rounded-2xl border border-cream-200 bg-white p-5">
+    <div className="rounded-2xl border border-cream-300 bg-white shadow-sm p-5">
       <p className="text-sm text-taupe-500">{label}</p>
       <p className={`mt-1 font-display text-3xl ${color}`}>{value}</p>
     </div>

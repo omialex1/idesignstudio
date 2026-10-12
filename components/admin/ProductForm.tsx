@@ -52,6 +52,9 @@ export type ProductFormDefaults = {
   isActive: boolean;
 };
 
+// Text areas that grow with their content (within limits), so short texts stay small.
+const TEXT_GROW = "field-sizing-content min-h-[3.25rem] max-h-48 resize-y";
+
 const TRANSLATE_PAIRS: [string, string][] = [
   ["roName", "enName"],
   ["roDescription", "enDescription"],
@@ -117,6 +120,9 @@ export default function ProductForm({
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [pending, setPending] = useState(false);
+
+  // Names and descriptions are shown one language at a time.
+  const [lang, setLang] = useState<"ro" | "en">("ro");
 
   // Only one variant is edited at a time; the list picks which one is shown.
   const [activeVariant, setActiveVariant] = useState(0);
@@ -185,6 +191,7 @@ export default function ProductForm({
     setErrors(next);
     const bad = variantWithError(next);
     if (bad !== null) setActiveVariant(bad);
+    if (next.roName) setLang("ro");
     // Bring the first problem into view (after the right variant is shown).
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const first = form.querySelector<HTMLElement>('[aria-invalid="true"]');
@@ -250,7 +257,7 @@ export default function ProductForm({
       noValidate
       className="flex max-w-2xl flex-col gap-8"
     >
-      <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
+      <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
         <h2 className="font-display text-lg text-taupe-800">General</h2>
 
         <Field label="Categorie principală" required>
@@ -377,61 +384,108 @@ export default function ProductForm({
           />
         </Field>
 
-        <TranslateBar pairs={TRANSLATE_PAIRS} />
+      </section>
 
-        <Field label="Nume (Română)" required error={errors.roName}>
-          <input
-            name="roName"
-            defaultValue={d.roName}
-            aria-invalid={invalid("roName")}
-            className={controlClass(!!errors.roName)}
-          />
-        </Field>
+      <section className="overflow-hidden rounded-2xl border-2 border-gold-600 bg-white shadow-md">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-choc px-6 py-3 text-cream-50">
+          <h2 className="font-display text-xl">Nume și descrieri</h2>
+          <div
+            role="tablist"
+            aria-label="Limba textelor"
+            className="flex rounded-full bg-white/10 p-1 text-sm font-semibold"
+          >
+            {(
+              [
+                ["ro", "Română"],
+                ["en", "Engleză"],
+              ] as const
+            ).map(([code, label]) => (
+              <button
+                key={code}
+                type="button"
+                role="tab"
+                aria-selected={lang === code}
+                onClick={() => setLang(code)}
+                className={`rounded-full px-5 py-1.5 transition-colors ${
+                  lang === code
+                    ? "bg-gold-400 text-choc"
+                    : "text-cream-100 hover:bg-white/10"
+                }`}
+              >
+                {label}
+                {code === "ro" && errors.roName && (
+                  <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-red-500" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <Field
-          label="Descriere scurtă (Română)"
-          hint="Apare pe card și în Google."
-        >
-          <textarea
-            name="roDescription"
-            defaultValue={d.roDescription}
-            rows={3}
-            className={controlClass()}
-          />
-        </Field>
+        <div className="flex flex-col gap-4 p-6">
+          <TranslateBar pairs={TRANSLATE_PAIRS} />
 
-        <RichTextField
-          name="roLongDescription"
-          label="Descriere detaliată (Română)"
-          hint="Apare pe pagina produsului. Rândurile noi se păstrează."
-          defaultValue={d.roLongDescription}
-        />
+          <div className={lang === "ro" ? "flex flex-col gap-4" : "hidden"}>
+            <Field label="Nume (Română)" required error={errors.roName}>
+              <input
+                name="roName"
+                defaultValue={d.roName}
+                aria-invalid={invalid("roName")}
+                className={controlClass(!!errors.roName)}
+              />
+            </Field>
 
-        <Field
-          label="Nume (Engleză)"
-          hint="Opțional — dacă lipsește, se afișează numele în română."
-        >
-          <input
-            name="enName"
-            defaultValue={d.enName}
-            className={controlClass()}
-          />
-        </Field>
+            <Field
+              label="Descriere scurtă (Română)"
+              hint="Apare pe card și în Google. Câmpul crește singur cu textul."
+            >
+              <textarea
+                name="roDescription"
+                defaultValue={d.roDescription}
+                rows={2}
+                className={controlClass(false, TEXT_GROW)}
+              />
+            </Field>
 
-        <Field label="Descriere scurtă (Engleză)">
-          <textarea
-            name="enDescription"
-            defaultValue={d.enDescription}
-            rows={3}
-            className={controlClass()}
-          />
-        </Field>
+            <RichTextField
+              name="roLongDescription"
+              label="Descriere detaliată (Română)"
+              hint="Apare pe pagina produsului. Rândurile noi se păstrează."
+              defaultValue={d.roLongDescription}
+            />
+          </div>
 
-        <RichTextField
-          name="enLongDescription"
-          label="Descriere detaliată (Engleză)"
-          defaultValue={d.enLongDescription}
-        />
+          <div className={lang === "en" ? "flex flex-col gap-4" : "hidden"}>
+            <Field
+              label="Nume (Engleză)"
+              hint="Opțional: dacă lipsește, se afișează numele în română."
+            >
+              <input
+                name="enName"
+                defaultValue={d.enName}
+                className={controlClass()}
+              />
+            </Field>
+
+            <Field label="Descriere scurtă (Engleză)">
+              <textarea
+                name="enDescription"
+                defaultValue={d.enDescription}
+                rows={2}
+                className={controlClass(false, TEXT_GROW)}
+              />
+            </Field>
+
+            <RichTextField
+              name="enLongDescription"
+              label="Descriere detaliată (Engleză)"
+              defaultValue={d.enLongDescription}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white p-6 shadow-sm">
+        <h2 className="font-display text-lg text-taupe-800">Preț și afișare</h2>
 
         <Field
           label="Preț (RON)"
@@ -482,7 +536,7 @@ export default function ProductForm({
       </section>
 
       <section
-        className={`flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6 ${showColors ? "" : "hidden"}`}
+        className={`flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6 ${showColors ? "" : "hidden"}`}
       >
         <div>
           <h2 className="font-display text-lg text-taupe-800">
@@ -523,7 +577,7 @@ export default function ProductForm({
         })}
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
+      <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
         <div>
           <h2 className="font-display text-lg text-taupe-800">
             Variante (seturi)
@@ -647,7 +701,7 @@ export default function ProductForm({
         })}
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
+      <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
         <h2 className="font-display text-lg text-taupe-800">Inventar</h2>
 
         <Field label="Cantitate în stoc" required error={errors.quantityOnHand}>

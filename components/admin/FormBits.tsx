@@ -4,10 +4,10 @@ import { useRef, useState } from "react";
 
 // Border / background for an input, red when it has an error.
 export function controlClass(invalid?: boolean, extra = "") {
-  return `rounded-lg border px-3 py-2 text-sm text-taupe-800 outline-none ${
+  return `rounded-lg border px-3 py-2 text-sm text-taupe-800 outline-none shadow-[inset_0_1px_2px_rgba(60,40,25,0.10)] transition-shadow focus:ring-2 ${
     invalid
-      ? "border-red-500 bg-red-50 focus:border-red-600"
-      : "border-cream-200 focus:border-salamander-400"
+      ? "border-red-500 bg-red-50 focus:border-red-600 focus:ring-red-200"
+      : "border-taupe-400 bg-white focus:border-salamander-500 focus:ring-salamander-200"
   } ${extra}`;
 }
 

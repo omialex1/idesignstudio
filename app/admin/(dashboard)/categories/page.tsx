@@ -30,7 +30,7 @@ export default async function AdminCategoriesPage() {
         .
       </p>
 
-      <div className="overflow-x-auto rounded-2xl border border-cream-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-cream-300 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-cream-200 text-taupe-500">
             <tr>

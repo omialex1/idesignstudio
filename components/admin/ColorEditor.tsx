@@ -105,7 +105,7 @@ function ColorRow({
     <form
       key={formKey}
       onSubmit={handleSubmit}
-      className="flex flex-col gap-2 rounded-xl border border-cream-200 bg-white p-4"
+      className="flex flex-col gap-2 rounded-xl border border-cream-300 bg-white shadow-sm p-4"
     >
       <div className="flex flex-wrap items-start gap-3">
         <Swatch hex={hex} slug={item?.slug} photo={item?.swatchImage && pickerValue === normalizeHex(item.hex)} />
@@ -148,7 +148,7 @@ function ColorRow({
               value={pickerValue}
               onChange={(e) => setHex(e.target.value.toUpperCase())}
               aria-label="Alege culoarea din paletă"
-              className="h-10 w-12 cursor-pointer rounded-lg border border-cream-200 bg-white p-1"
+              className="h-10 w-12 cursor-pointer rounded-lg border border-cream-300 bg-white shadow-sm p-1"
             />
             <input
               name="hex"
@@ -248,7 +248,7 @@ export default function ColorEditor({
 
   return (
     <div className="flex flex-col gap-5">
-      <label className="flex items-start gap-3 rounded-2xl border border-cream-200 bg-white p-5 text-sm text-taupe-700">
+      <label className="flex items-start gap-3 rounded-2xl border border-cream-300 bg-white shadow-sm p-5 text-sm text-taupe-700">
         <input
           type="checkbox"
           checked={enabled}

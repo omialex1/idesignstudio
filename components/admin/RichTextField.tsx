@@ -11,7 +11,7 @@ export default function RichTextField({
   label,
   hint,
   defaultValue,
-  rows = 10,
+  rows = 4,
 }: {
   name: string;
   label: string;
@@ -76,7 +76,7 @@ export default function RichTextField({
   }
 
   const toolButton =
-    "flex h-8 w-8 items-center justify-center rounded-md border border-cream-200 bg-white text-sm text-taupe-800 transition-colors hover:bg-cream-100";
+    "flex h-8 w-8 items-center justify-center rounded-md border border-cream-300 bg-white shadow-sm text-sm text-taupe-800 transition-colors hover:bg-cream-100";
 
   return (
     <div className="flex flex-col gap-1.5 text-sm">
@@ -116,7 +116,10 @@ export default function RichTextField({
         rows={rows}
         onInput={(e) => setValue(e.currentTarget.value)}
         onKeyDown={onKeyDown}
-        className={controlClass()}
+        className={controlClass(
+          false,
+          "field-sizing-content min-h-24 max-h-80 resize-y",
+        )}
       />
 
       {value.includes("*") && (

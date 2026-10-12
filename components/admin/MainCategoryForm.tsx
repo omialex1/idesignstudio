@@ -110,7 +110,7 @@ export default function MainCategoryForm({
       onSubmit={handleSubmit}
       onInput={clearError}
       noValidate
-      className="flex max-w-2xl flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6"
+      className="flex max-w-2xl flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6"
     >
       {slugLocked ? (
         <div className="flex flex-col gap-1 text-sm">

@@ -76,7 +76,7 @@ export default function ProductImageManager({
   }
 
   return (
-    <section className="flex max-w-2xl flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
+    <section className="flex max-w-2xl flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
       <div>
         <h2 className="font-display text-lg text-taupe-800">Fotografii</h2>
         <p className="mt-1 text-xs text-taupe-400">

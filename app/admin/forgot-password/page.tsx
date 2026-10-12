@@ -18,7 +18,7 @@ export default function AdminForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-cream-50 px-6">
-      <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8 shadow-sm">
+      <div className="w-full max-w-sm rounded-2xl border border-cream-300 bg-white shadow-sm p-8 shadow-sm">
         <p className="font-display text-xl text-taupe-800">
           iDesignStudio<span className="text-salamander-500">.ro</span>
         </p>

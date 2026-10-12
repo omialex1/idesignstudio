@@ -106,7 +106,7 @@ export default function SubcategoryForm({
       onSubmit={handleSubmit}
       onInput={clearError}
       noValidate
-      className="flex max-w-2xl flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6"
+      className="flex max-w-2xl flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6"
     >
       <Field label="Categorie principală" required error={errors.mainCategoryId}>
         <select

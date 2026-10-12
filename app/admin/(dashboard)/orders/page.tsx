@@ -10,7 +10,7 @@ export default async function AdminOrdersPage() {
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-2xl text-taupe-800">Comenzi</h1>
 
-      <div className="overflow-x-auto rounded-2xl border border-cream-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-cream-300 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-cream-200 text-taupe-500">
             <tr>
