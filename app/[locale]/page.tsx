@@ -130,17 +130,26 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[92px] pb-24 sm:px-6 sm:pt-28 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-24 sm:px-6 sm:pt-24 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
           {/* gradient frame: champagne gold fading to terracotta */}
           <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-            <div className="relative aspect-[520/380] overflow-hidden rounded-[calc(1.75rem-3px)]">
+            <div className="relative aspect-[880/1214] overflow-hidden rounded-[calc(1.75rem-3px)] bg-[#e4d3b8] sm:aspect-[520/380]">
+              {/* the whole photo is shown (fit to the frame); a blurred copy fills the sides */}
+              <Image
+                src="/images/hero-flatlay.jpg"
+                alt=""
+                fill
+                sizes="96px"
+                className="scale-150 object-cover blur-2xl saturate-110"
+                aria-hidden="true"
+              />
               <Image
                 src="/images/hero-flatlay.jpg"
                 alt={t("heroPhotoAlt")}
                 fill
                 priority
                 sizes="(min-width: 1024px) 620px, 92vw"
-                className="hero-zoom object-cover object-[50%_32%]"
+                className="hero-zoom object-contain"
               />
             </div>
           </div>
