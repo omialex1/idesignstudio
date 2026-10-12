@@ -146,7 +146,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           </div>
 
           <div className="flex flex-col items-center text-center text-cream-50">
-            <h1 className="hero-rise font-display text-3xl leading-[1.1] italic [text-shadow:0_2px_24px_rgba(0,0,0,0.4)] sm:text-4xl">
+            <h1 className="hero-rise font-display text-xl leading-[1.15] italic [text-shadow:0_2px_24px_rgba(0,0,0,0.4)] sm:text-2xl">
               {t("heroTitle")}
             </h1>
             <span
