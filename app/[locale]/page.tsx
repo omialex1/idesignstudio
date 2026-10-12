@@ -31,13 +31,10 @@ const iconProps = {
   "aria-hidden": true,
 };
 
-// Corner of the photo each box belongs to: centred on the photo's edge, so half
-// of it is inside the photo, and always inside the photo's height.
+// The four trust points shown under the hero title, one after another.
 const HERO_POINTS = [
   {
     key: "trustMade",
-    position: "md:top-7 md:left-0 md:-translate-x-1/2",
-    late: false,
     icon: (
       <svg {...iconProps}>
         <path d="M3 21l3.5-.9L19 7.6a2.1 2.1 0 0 0-3-3L3.9 17 3 21z" />
@@ -47,8 +44,6 @@ const HERO_POINTS = [
   },
   {
     key: "trustColors",
-    position: "md:top-7 md:right-0 md:translate-x-1/2",
-    late: false,
     icon: (
       <svg {...iconProps}>
         <path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-1.8 0-1.2-.9-1.4-.9-2.4 0-.9.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z" />
@@ -60,8 +55,6 @@ const HERO_POINTS = [
   },
   {
     key: "trustShip",
-    position: "md:top-[calc(100%_-_5.75rem)] md:left-0 md:-translate-x-1/2",
-    late: true,
     icon: (
       <svg {...iconProps}>
         <path d="M2 6h11v10H2z" />
@@ -73,8 +66,6 @@ const HERO_POINTS = [
   },
   {
     key: "trustPay",
-    position: "md:top-[calc(100%_-_5.75rem)] md:right-0 md:translate-x-1/2",
-    late: true,
     icon: (
       <svg {...iconProps}>
         <path d="M12 3l7.5 3v5.5c0 4.6-3.1 8.2-7.5 9.5-4.4-1.3-7.5-4.9-7.5-9.5V6L12 3z" />
@@ -139,39 +130,45 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pt-[92px] pb-24 sm:px-6 sm:pt-28">
-          <h1 className="sr-only">{t("heroTitle")}</h1>
-
-          <div className="relative w-full max-w-[520px]">
-            {/* gradient frame: champagne gold fading to terracotta */}
-            <div className="hero-rise rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-              <div className="relative aspect-[520/380] overflow-hidden rounded-[calc(1.75rem-3px)]">
-                <Image
-                  src="/images/hero-flatlay.jpg"
-                  alt={t("heroPhotoAlt")}
-                  fill
-                  priority
-                  sizes="(min-width: 640px) 520px, 92vw"
-                  className="hero-zoom object-cover object-[50%_32%]"
-                />
-              </div>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[92px] pb-24 sm:px-6 sm:pt-28 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
+          {/* gradient frame: champagne gold fading to terracotta */}
+          <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+            <div className="relative aspect-[520/380] overflow-hidden rounded-[calc(1.75rem-3px)]">
+              <Image
+                src="/images/hero-flatlay.jpg"
+                alt={t("heroPhotoAlt")}
+                fill
+                priority
+                sizes="(min-width: 1024px) 620px, 92vw"
+                className="hero-zoom object-cover object-[50%_32%]"
+              />
             </div>
+          </div>
 
-            {/* four boxes: on wide screens each one sits half inside a corner of the photo */}
-            <ul className="mt-4 grid grid-cols-2 gap-3 md:contents">
-              {HERO_POINTS.map((point) => (
+          <div className="flex flex-col items-center text-center text-cream-50">
+            <h1 className="hero-rise font-display text-3xl leading-[1.1] italic [text-shadow:0_2px_24px_rgba(0,0,0,0.4)] sm:text-4xl">
+              {t("heroTitle")}
+            </h1>
+            <span
+              className="hero-rise my-5 block h-px w-14 bg-gold-400"
+              aria-hidden="true"
+            />
+            {/* the four points appear one after another */}
+            <ul className="flex w-full max-w-[300px] flex-col gap-3">
+              {HERO_POINTS.map((point, i) => (
                 <li
                   key={point.key}
-                  className={`${point.late ? "hero-rise-late" : "hero-rise"} flex items-center gap-3 rounded-full border border-gold-400/50 bg-choc/60 py-2 pr-4 pl-2 text-cream-50 shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-md md:absolute md:w-[248px] md:py-[11px] md:pr-5 md:pl-[11px] ${point.position}`}
+                  style={{ animationDelay: `${0.45 + i * 0.18}s` }}
+                  className="hero-rise flex items-center gap-3 rounded-full border border-gold-400/50 bg-choc/60 py-[10px] pr-5 pl-[10px] text-left shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-md"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-400 text-choc md:h-10 md:w-10">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-400 text-choc">
                     {point.icon}
                   </span>
                   <span className="min-w-0 leading-tight">
-                    <span className="block text-[13px] font-semibold md:text-sm">
+                    <span className="block text-sm font-semibold">
                       {t(`${point.key}Title`)}
                     </span>
-                    <span className="block text-[11px] text-cream-200 md:text-xs">
+                    <span className="block text-xs text-cream-200">
                       {t(`${point.key}Body`)}
                     </span>
                   </span>
