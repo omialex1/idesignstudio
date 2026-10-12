@@ -1,9 +1,13 @@
 import { colorLabel } from "@/lib/colors";
 
+type ColorLabels = Record<string, { ro?: string; en?: string }>;
+
 type Choice = {
   component?: string | null;
   componentName?: string | null;
   colors: string[];
+  // colour names saved with the choice (needed for colours made in the admin)
+  labels?: ColorLabels;
 };
 
 type ItemOptions = {
@@ -26,6 +30,12 @@ function parseChoices(value: unknown): Choice[] {
   );
 }
 
+function nameOf(id: string, locale: string, labels?: ColorLabels) {
+  const saved = labels?.[id];
+  const own = locale === "en" ? saved?.en : saved?.ro;
+  return own || colorLabel(id, locale);
+}
+
 // One short line describing the chosen options, e.g.
 // "Mare · Cutie: Alb os · Capac: Caramel · Notă: capacul alb".
 export function itemDetails(item: ItemOptions, locale: string): string {
@@ -36,7 +46,9 @@ export function itemDetails(item: ItemOptions, locale: string): string {
   const choices = parseChoices(item.colorChoices);
   if (choices.length > 0) {
     for (const choice of choices) {
-      const names = choice.colors.map((c) => colorLabel(c, locale)).join(", ");
+      const names = choice.colors
+        .map((c) => nameOf(c, locale, choice.labels))
+        .join(", ");
       const label = choice.component ?? choice.componentName ?? null;
       parts.push(`${label ?? (en ? "Colours" : "Culori")}: ${names}`);
     }

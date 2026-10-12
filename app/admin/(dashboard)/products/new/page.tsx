@@ -1,10 +1,15 @@
-import { getCategoryOptions, getMainCategoryOptions } from "@/lib/admin/queries";
+import {
+  getCategoryOptions,
+  getColorMainIds,
+  getMainCategoryOptions,
+} from "@/lib/admin/queries";
 import NewProductForm from "@/components/admin/NewProductForm";
 
 export default async function NewProductPage() {
-  const [categories, mainCategories] = await Promise.all([
+  const [categories, mainCategories, colorMainIds] = await Promise.all([
     getCategoryOptions(),
     getMainCategoryOptions(),
+    getColorMainIds(),
   ]);
 
   return (
@@ -13,6 +18,7 @@ export default async function NewProductPage() {
       <NewProductForm
         categories={categories}
         mainCategories={mainCategories}
+        colorMainIds={colorMainIds}
       />
     </div>
   );

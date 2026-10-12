@@ -190,6 +190,19 @@ function readProductForm(formData: FormData) {
 
 type ProductFormData = ReturnType<typeof readProductForm>;
 
+// Colour choices exist only in categories that use colours (3D prints). For any
+// other category the product gets no colour option and no colour pieces.
+async function applyColorRules(data: ProductFormData) {
+  const category = await prisma.category.findUnique({
+    where: { id: data.categoryId },
+    select: { mainCategory: { select: { usesColors: true } } },
+  });
+  if (category?.mainCategory?.usesColors) return;
+  data.hasColorOptions = false;
+  data.productPieces = [];
+  for (const variant of data.variants) variant.pieces = [];
+}
+
 // Writes the colour pieces: those of each variant, or the product's own pieces
 // when it has no variants. Existing pieces keep their id, so customers' carts
 // stay valid.
@@ -243,6 +256,7 @@ export async function createProduct(
   if (hasErrors(errors)) return { errors };
 
   const data = readProductForm(formData);
+  await applyColorRules(data);
 
   const created = await prisma.product.create({
     data: {
@@ -310,6 +324,7 @@ export async function updateProduct(
   if (hasErrors(errors)) return { errors };
 
   const data = readProductForm(formData);
+  await applyColorRules(data);
 
   const updated = await prisma.product.update({
     where: { id: productId },

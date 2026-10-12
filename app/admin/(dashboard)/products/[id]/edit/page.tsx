@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import {
   getCategoryOptions,
+  getColorMainIds,
   getMainCategoryOptions,
   getProductForEdit,
 } from "@/lib/admin/queries";
@@ -17,10 +18,11 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
   const { created, photoError } = await searchParams;
-  const [product, categories, mainCategories] = await Promise.all([
+  const [product, categories, mainCategories, colorMainIds] = await Promise.all([
     getProductForEdit(id),
     getCategoryOptions(),
     getMainCategoryOptions(),
+    getColorMainIds(),
   ]);
 
   if (!product) notFound();
@@ -49,6 +51,7 @@ export default async function EditProductPage({
         onSubmit={boundUpdate}
         categories={categories}
         mainCategories={mainCategories}
+        colorMainIds={colorMainIds}
         submitLabel="Salvează modificările"
         defaultValues={{
           categoryId: product.categoryId,

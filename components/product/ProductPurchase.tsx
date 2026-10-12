@@ -10,12 +10,40 @@ import {
 import { formatPrice } from "@/lib/format";
 import {
   ALL_COMPONENTS_ID,
-  COLORS,
   DEFAULT_COMPONENT_ID,
   MAX_COLORS,
-  colorLabel,
-  colorSwatchUrl,
 } from "@/lib/colors";
+import type { PaletteColor } from "@/lib/db/colors";
+
+// A round colour sample: the texture photo when there is one, else the colour.
+function Swatch({
+  color,
+  label = "",
+  className,
+}: {
+  color: PaletteColor | undefined;
+  label?: string;
+  className: string;
+}) {
+  if (color?.swatchUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={color.swatchUrl}
+        alt={label}
+        className={`rounded-full object-cover ${className}`}
+      />
+    );
+  }
+  return (
+    <span
+      role={label ? "img" : undefined}
+      aria-label={label || undefined}
+      className={`inline-block rounded-full ${className}`}
+      style={{ background: color?.hex ?? "#CCCCCC" }}
+    />
+  );
+}
 
 type ColorComponent = { id: string; name: string | null; maxColors: number };
 type Variant = {
@@ -40,6 +68,7 @@ export default function ProductPurchase({
   variants,
   hasColorOptions,
   components,
+  colors,
 }: {
   productId: string;
   slug: string;
@@ -54,11 +83,18 @@ export default function ProductPurchase({
   variants: Variant[];
   hasColorOptions: boolean;
   components: ColorComponent[];
+  // the colours of this product's category, in the order set in the admin
+  colors: PaletteColor[];
 }) {
   const t = useTranslations("Shop");
   const tCart = useTranslations("Cart");
   const locale = useLocale();
   const addItem = useCartStore((state) => state.addItem);
+  const colorById = new Map(colors.map((c) => [c.id, c]));
+  const colorName = (id: string) => {
+    const c = colorById.get(id);
+    return c ? (locale === "en" ? c.en : c.ro) : id;
+  };
 
   // A product with colour options but no listed components gets one generic
   // target for the whole product.
@@ -149,6 +185,12 @@ export default function ProductPurchase({
         componentId: p.id,
         componentName: p.name,
         colors: picked[p.id] ?? [],
+        labels: Object.fromEntries(
+          (picked[p.id] ?? []).map((id) => [
+            id,
+            { ro: colorById.get(id)?.ro ?? id, en: colorById.get(id)?.en ?? id },
+          ]),
+        ),
       })),
       colorNote: null,
       slug,
@@ -255,12 +297,11 @@ export default function ProductPurchase({
                       {shown.length > 0 ? (
                         <span className="flex -space-x-1">
                           {shown.map((c) => (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <Swatch
                               key={c}
-                              src={colorSwatchUrl(c)}
-                              alt={colorLabel(c, locale)}
-                              className="h-5 w-5 rounded-full object-cover ring-1 ring-white"
+                              color={colorById.get(c)}
+                              label={colorName(c)}
+                              className="h-5 w-5 ring-1 ring-white"
                             />
                           ))}
                         </span>
@@ -288,9 +329,9 @@ export default function ProductPurchase({
           </p>
 
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">
-            {COLORS.map((color) => {
+            {colors.map((color) => {
               const isSelected = (picked[active.id] ?? []).includes(color.id);
-              const label = colorLabel(color.id, locale);
+              const label = colorName(color.id);
               return (
                 <button
                   key={color.id}
@@ -300,11 +341,9 @@ export default function ProductPurchase({
                   onClick={() => toggleColor(color.id)}
                   className="flex flex-col items-center gap-1 text-center"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={colorSwatchUrl(color.id)}
-                    alt=""
-                    className={`h-11 w-11 rounded-full object-cover transition-shadow ${
+                  <Swatch
+                    color={color}
+                    className={`h-11 w-11 transition-shadow ${
                       isSelected
                         ? "ring-2 ring-salamander-500 ring-offset-2"
                         : "ring-1 ring-cream-300"

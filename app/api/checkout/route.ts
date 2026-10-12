@@ -10,7 +10,6 @@ import {
   DEFAULT_COMPONENT_ID,
   MAX_COLORS,
   MAX_COLOR_NOTE_LENGTH,
-  isColorId,
 } from "@/lib/colors";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,7 +37,7 @@ function parseColorChoices(value: unknown): ColorChoiceInput[] | null {
       !componentId ||
       !Array.isArray(colors) ||
       colors.length > MAX_COLORS ||
-      !colors.every(isColorId) ||
+      !colors.every((c) => typeof c === "string" && c.length > 0 && c.length <= 80) ||
       new Set(colors).size !== colors.length ||
       choices.some((c) => c.componentId === componentId)
     ) {
@@ -173,6 +172,32 @@ export async function POST(request: NextRequest) {
   }
   const productById = new Map(products.map((p) => [p.id, p]));
 
+  // Colours customers may pick, per main category. Categories without colours
+  // (anything but the 3D-printed items) accept no colour choice at all.
+  const mainIds = [
+    ...new Set(
+      products
+        .map((p) => p.category.mainCategoryId)
+        .filter((id): id is string => !!id),
+    ),
+  ];
+  const paletteRows = await prisma.color.findMany({
+    where: {
+      mainCategoryId: { in: mainIds },
+      isActive: true,
+      mainCategory: { usesColors: true },
+    },
+  });
+  const paletteByMain = new Map<
+    string,
+    Map<string, { ro: string; en: string }>
+  >();
+  for (const c of paletteRows) {
+    const palette = paletteByMain.get(c.mainCategoryId) ?? new Map();
+    palette.set(c.slug, { ro: c.nameRo, en: c.nameEn });
+    paletteByMain.set(c.mainCategoryId, palette);
+  }
+
   for (const product of products) {
     const available =
       (product.inventory?.quantityOnHand ?? 0) -
@@ -194,7 +219,11 @@ export async function POST(request: NextRequest) {
     code: string;
     category: string;
     variantName: string | null;
-    colorChoices: { component: string | null; colors: string[] }[];
+    colorChoices: {
+      component: string | null;
+      colors: string[];
+      labels: Record<string, { ro: string; en: string }>;
+    }[];
     colorNote: string | null;
     unitPriceCents: number;
     quantity: number;
@@ -217,7 +246,9 @@ export async function POST(request: NextRequest) {
     const pieces = product.components.filter((c) =>
       variant ? c.variantId === variant.id : !c.variantId,
     );
-    const expected = product.hasColorOptions
+    const palette = paletteByMain.get(product.category.mainCategoryId ?? "");
+    const colorsEnabled = product.hasColorOptions && !!palette && palette.size > 0;
+    const expected = colorsEnabled
       ? pieces.length > 0
         ? pieces.map((c) => ({
             id: c.id,
@@ -226,7 +257,21 @@ export async function POST(request: NextRequest) {
           }))
         : [{ id: DEFAULT_COMPONENT_ID, max: MAX_COLORS, name: null }]
       : [];
-    const orderChoices: { component: string | null; colors: string[] }[] = [];
+    const orderChoices: {
+      component: string | null;
+      colors: string[];
+      labels: Record<string, { ro: string; en: string }>;
+    }[] = [];
+    // every picked colour must belong to this category's palette
+    const labelsFor = (ids: string[]) => {
+      const labels: Record<string, { ro: string; en: string }> = {};
+      for (const id of ids) {
+        const found = palette?.get(id);
+        if (found) labels[id] = found;
+      }
+      return labels;
+    };
+    const inPalette = (ids: string[]) => ids.every((id) => palette?.has(id));
     // Either one choice per component, or one choice for the whole set.
     const wholeSet =
       expected.length >= 2 &&
@@ -234,15 +279,20 @@ export async function POST(request: NextRequest) {
       line.colorChoices[0].componentId === ALL_COMPONENTS_ID
         ? line.colorChoices[0]
         : null;
-    let colorsValid = product.hasColorOptions || !line.colorNote;
+    let colorsValid = colorsEnabled || !line.colorNote;
     if (wholeSet) {
       const maxAll = MAX_COLORS;
-      if (wholeSet.colors.length < 1 || wholeSet.colors.length > maxAll) {
+      if (
+        wholeSet.colors.length < 1 ||
+        wholeSet.colors.length > maxAll ||
+        !inPalette(wholeSet.colors)
+      ) {
         colorsValid = false;
       } else {
         orderChoices.push({
           component: locale === "en" ? "Whole set" : "Tot setul",
           colors: wholeSet.colors,
+          labels: labelsFor(wholeSet.colors),
         });
       }
     } else {
@@ -254,12 +304,17 @@ export async function POST(request: NextRequest) {
         if (
           !choice ||
           choice.colors.length < 1 ||
-          choice.colors.length > component.max
+          choice.colors.length > component.max ||
+          !inPalette(choice.colors)
         ) {
           colorsValid = false;
           break;
         }
-        orderChoices.push({ component: component.name, colors: choice.colors });
+        orderChoices.push({
+          component: component.name,
+          colors: choice.colors,
+          labels: labelsFor(choice.colors),
+        });
       }
     }
     if (!colorsValid) {

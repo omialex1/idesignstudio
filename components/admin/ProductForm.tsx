@@ -79,6 +79,7 @@ export default function ProductForm({
   onSubmit,
   categories,
   mainCategories,
+  colorMainIds = [],
   defaultValues,
   submitLabel,
   extra,
@@ -88,6 +89,8 @@ export default function ProductForm({
   onSubmit: (formData: FormData) => Promise<unknown>;
   categories: CategoryOption[];
   mainCategories: MainCategoryOption[];
+  // main categories whose products are made in a colour the customer picks
+  colorMainIds?: string[];
   defaultValues?: ProductFormDefaults;
   submitLabel: string;
   // Extra sections shown just above the submit button (e.g. photos).
@@ -115,6 +118,12 @@ export default function ProductForm({
   const [errors, setErrors] = useState<FormErrors>({});
   const [pending, setPending] = useState(false);
 
+  // Only one variant is edited at a time; the list picks which one is shown.
+  const [activeVariant, setActiveVariant] = useState(0);
+  const [variantNames, setVariantNames] = useState<string[]>(() =>
+    Array.from({ length: VARIANT_SLOTS }, (_, i) => d.variants[i]?.nameRo ?? ""),
+  );
+
   // Two steps: main category (one of the four), then one of its subcategories.
   // Only the subcategory is saved; the main category follows from it.
   const [line, setLine] = useState<string>(
@@ -125,6 +134,8 @@ export default function ProductForm({
   const [created, setCreated] = useState<CategoryOption[]>([]);
   const allCategories = [...categories, ...created];
   const subcategories = allCategories.filter((c) => c.mainCategoryId === line);
+  // Colour choices exist only for categories that use colours (3D prints).
+  const showColors = colorMainIds.includes(line);
   const [adding, setAdding] = useState(false);
   const [newNameRo, setNewNameRo] = useState("");
   const [newNameEn, setNewNameEn] = useState("");
@@ -162,14 +173,24 @@ export default function ProductForm({
     }
   }
 
+  function variantWithError(errs: FormErrors): number | null {
+    for (const key of Object.keys(errs)) {
+      const m = /^variant\w*?(\d+)(?:_\d+)?$/.exec(key);
+      if (m) return Number(m[1]);
+    }
+    return null;
+  }
+
   function showErrors(next: FormErrors, form: HTMLFormElement) {
     setErrors(next);
-    // Bring the first problem into view.
-    requestAnimationFrame(() => {
+    const bad = variantWithError(next);
+    if (bad !== null) setActiveVariant(bad);
+    // Bring the first problem into view (after the right variant is shown).
+    requestAnimationFrame(() => requestAnimationFrame(() => {
       const first = form.querySelector<HTMLElement>('[aria-invalid="true"]');
       first?.scrollIntoView({ behavior: "smooth", block: "center" });
       first?.focus({ preventScroll: true });
-    });
+    }));
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -205,6 +226,12 @@ export default function ProductForm({
   // Typing in a field clears its error message.
   function clearError(e: React.FormEvent<HTMLFormElement>) {
     const name = (e.target as HTMLInputElement).name;
+    const variantName = /^variantNameRo(\d+)$/.exec(name ?? "");
+    if (variantName) {
+      const index = Number(variantName[1]);
+      const value = (e.target as HTMLInputElement).value;
+      setVariantNames((list) => list.map((n, i) => (i === index ? value : n)));
+    }
     if (name && errors[name]) {
       setErrors((current) => {
         const rest = { ...current };
@@ -423,15 +450,25 @@ export default function ProductForm({
           />
         </Field>
 
-        <label className="flex items-center gap-2 text-sm text-taupe-700">
-          <input
-            type="checkbox"
-            name="hasColorOptions"
-            defaultChecked={d.hasColorOptions}
-            className="h-4 w-4 rounded border-cream-200"
-          />
-          Clientul alege culorile (produs făcut la comandă)
-        </label>
+        {showColors ? (
+          <label className="flex items-center gap-2 text-sm text-taupe-700">
+            <input
+              type="checkbox"
+              name="hasColorOptions"
+              defaultChecked={d.hasColorOptions}
+              className="h-4 w-4 rounded border-cream-200"
+            />
+            Clientul alege culorile (produs făcut la comandă)
+          </label>
+        ) : (
+          line && (
+            <p className="text-xs text-taupe-400">
+              Această categorie nu are culori de ales, deci produsul nu are
+              opțiunea de culoare. Culorile se activează la categorie, în
+              meniul „Culori”.
+            </p>
+          )
+        )}
 
         <label className="flex items-center gap-2 text-sm text-taupe-700">
           <input
@@ -444,7 +481,9 @@ export default function ProductForm({
         </label>
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
+      <section
+        className={`flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6 ${showColors ? "" : "hidden"}`}
+      >
         <div>
           <h2 className="font-display text-lg text-taupe-800">
             Piese și culori (produse fără variante)
@@ -497,6 +536,28 @@ export default function ProductForm({
             folosește. Dacă ai variante, prețul de mai sus se ignoră.
           </p>
         </div>
+        <Field
+          label="Variantă de editat"
+          hint="Se afișează o singură variantă. Alege din listă ca să o editezi pe următoarea; cele neafișate se salvează la fel."
+        >
+          <select
+            value={activeVariant}
+            onChange={(e) => setActiveVariant(Number(e.target.value))}
+            className={controlClass(false, "bg-white")}
+          >
+            {Array.from({ length: VARIANT_SLOTS }, (_, i) => {
+              const bad = variantWithError(errors) === i;
+              const label = variantNames[i]?.trim()
+                ? `Varianta ${i + 1} – ${variantNames[i].trim()}`
+                : `Varianta ${i + 1} (goală)`;
+              return (
+                <option key={i} value={i}>
+                  {bad ? `⚠ ${label}` : label}
+                </option>
+              );
+            })}
+          </select>
+        </Field>
         {Array.from({ length: VARIANT_SLOTS }, (_, i) => {
           const v = d.variants[i];
           const nameError = errors[`variantNameRo${i}`];
@@ -505,7 +566,7 @@ export default function ProductForm({
           return (
             <div
               key={i}
-              className="flex flex-col gap-3 rounded-xl border border-cream-200 p-4"
+              className={`flex flex-col gap-3 rounded-xl border border-cream-200 p-4 ${i === activeVariant ? "" : "hidden"}`}
             >
               <p className="text-sm font-medium text-taupe-700">
                 Varianta {i + 1}
@@ -552,6 +613,7 @@ export default function ProductForm({
               {priceError && <FieldError message={priceError} />}
               {discountError && <FieldError message={discountError} />}
 
+              <div className={showColors ? "flex flex-col gap-3" : "hidden"}>
               <p className="mt-1 text-xs font-medium text-taupe-600">
                 Piese și culori pentru această variantă
               </p>
@@ -579,6 +641,7 @@ export default function ProductForm({
                   </div>
                 );
               })}
+              </div>
             </div>
           );
         })}

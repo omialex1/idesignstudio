@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductDetail } from "@/lib/db/products";
+import { getPaletteColors } from "@/lib/db/colors";
 import { categoryColorClass } from "@/lib/category-colors";
 import ProductPurchase from "@/components/product/ProductPurchase";
 import ProductGallery from "@/components/product/ProductGallery";
@@ -33,6 +34,11 @@ export default async function ProductDetailPage({
   }
 
   const t = await getTranslations("Shop");
+  // Colours are only offered in categories that use them (3D-printed items).
+  const colors =
+    main.usesColors && product.hasColorOptions
+      ? await getPaletteColors(main.id)
+      : [];
   const inStock = product.quantityOnHand > 0;
   const basePath = `/${main.slug}`;
 
@@ -167,7 +173,8 @@ export default async function ProductDetailPage({
             inStock={inStock}
             imageUrl={product.images[0]?.url ?? null}
             variants={product.variants}
-            hasColorOptions={product.hasColorOptions}
+            hasColorOptions={colors.length > 0}
+            colors={colors}
             components={product.components}
           />
         </div>

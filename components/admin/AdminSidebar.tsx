@@ -8,6 +8,7 @@ const navLinks = [
   { href: "/admin/products", label: "Produse", exact: false },
   { href: "/admin/categories", label: "Categorii", exact: false },
   { href: "/admin/subcategories", label: "Subcategorii", exact: false },
+  { href: "/admin/colors", label: "Culori", exact: false },
   { href: "/admin/orders", label: "Comenzi", exact: false },
 ];
 

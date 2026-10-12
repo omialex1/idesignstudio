@@ -10,9 +10,11 @@ type CategoryOption = { id: string; name: string; mainCategoryId: string };
 export default function NewProductForm({
   categories,
   mainCategories,
+  colorMainIds,
 }: {
   categories: CategoryOption[];
   mainCategories: { id: string; name: string }[];
+  colorMainIds: string[];
 }) {
   const router = useRouter();
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
@@ -43,6 +45,7 @@ export default function NewProductForm({
       onSubmit={handleCreate}
       categories={categories}
       mainCategories={mainCategories}
+      colorMainIds={colorMainIds}
       submitLabel="Creează produs"
       extra={<PhotoPicker photos={photos} onChange={setPhotos} />}
     />

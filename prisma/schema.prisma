@@ -28,10 +28,35 @@ model MainCategory {
   sortOrder    Int                       @default(0)
   // Key into lib/category-colors.ts: colour of the placeholder tiles.
   color        String                    @default("salamander")
+  // True when products here are made to order in a colour the customer picks
+  // (3D-printed items). Only such categories show colours, in admin and shop.
+  usesColors   Boolean                   @default(false)
   createdAt    DateTime                  @default(now())
   updatedAt    DateTime                  @updatedAt
   translations MainCategoryTranslation[]
   categories   Category[]
+  colors       Color[]
+}
+
+// A colour customers can pick for products of one main category (a filament
+// colour for 3D prints). `slug` is stored on orders, so it never changes.
+model Color {
+  id             String       @id @default(cuid())
+  slug           String       @unique
+  mainCategoryId String
+  mainCategory   MainCategory @relation(fields: [mainCategoryId], references: [id], onDelete: Cascade)
+  nameRo         String
+  nameEn         String
+  // "#RRGGBB"; drawn as a round swatch unless a photo swatch exists
+  hex            String
+  // true: use the texture photo public/colors/<slug>.webp instead of the hex
+  swatchImage    Boolean      @default(false)
+  sortOrder      Int          @default(0)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([mainCategoryId])
 }
 
 model MainCategoryTranslation {

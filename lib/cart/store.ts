@@ -5,6 +5,8 @@ export type CartColorChoice = {
   componentId: string;
   componentName: string | null;
   colors: string[];
+  // names of the chosen colours, so custom colours show right in the cart
+  labels?: Record<string, { ro: string; en: string }>;
 };
 
 export type CartItem = {

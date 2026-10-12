@@ -101,6 +101,15 @@ export async function getMainCategoryOptions() {
   }));
 }
 
+// Main categories whose products are made in a colour the customer picks.
+export async function getColorMainIds(): Promise<string[]> {
+  const rows = await prisma.mainCategory.findMany({
+    where: { usesColors: true },
+    select: { id: true },
+  });
+  return rows.map((r) => r.id);
+}
+
 export async function getOrdersForAdmin() {
   return prisma.order.findMany({
     include: { items: true },

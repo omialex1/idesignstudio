@@ -9,12 +9,15 @@ export type MainCategory = {
   headline: string | null;
   description: string | null;
   colorKey: string;
+  // products here are made to order in a colour the customer picks
+  usesColors: boolean;
 };
 
 type Row = {
   id: string;
   slug: string;
   color: string;
+  usesColors: boolean;
   translations: {
     locale: string;
     name: string;
@@ -34,6 +37,7 @@ function localize(row: Row, locale: string): MainCategory {
     headline: t?.headline ?? null,
     description: t?.description ?? null,
     colorKey: row.color,
+    usesColors: row.usesColors,
   };
 }
 
