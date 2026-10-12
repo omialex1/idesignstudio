@@ -114,7 +114,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       <section className="relative -mt-[68px] overflow-hidden bg-choc">
         {/* soft blurred copy of the photo as the backdrop, fading into the page */}
         <Image
-          src="/images/hero-flatlay.jpg"
+          src="/images/hero-wide.jpg"
           alt=""
           fill
           sizes="96px"
@@ -126,30 +126,30 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           aria-hidden="true"
         />
         <div
-          className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-cream-50"
+          className="absolute inset-x-0 bottom-0 h-28 [background:linear-gradient(to_bottom,rgba(251,245,233,0)_0%,rgba(251,245,233,0.03)_14%,rgba(251,245,233,0.1)_28%,rgba(251,245,233,0.24)_44%,rgba(251,245,233,0.46)_60%,rgba(251,245,233,0.72)_78%,rgba(251,245,233,0.92)_92%,#fbf5e9_100%)]"
+          aria-hidden="true"
+        />
+        {/* progressively stronger blur towards the bottom edge */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-28 backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_100%)]"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-x-0 bottom-0 h-14 backdrop-blur-md [mask-image:linear-gradient(to_bottom,transparent_0%,black_100%)]"
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-24 sm:px-6 sm:pt-24 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-28 sm:px-6 sm:pt-24 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
           {/* gradient frame: champagne gold fading to terracotta */}
           <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-            <div className="relative aspect-[880/1214] overflow-hidden rounded-[calc(1.75rem-3px)] bg-[#e4d3b8] sm:aspect-[520/380]">
-              {/* the whole photo is shown (fit to the frame); a blurred copy fills the sides */}
+            <div className="relative aspect-[520/380] overflow-hidden rounded-[calc(1.75rem-3px)]">
               <Image
-                src="/images/hero-flatlay.jpg"
-                alt=""
-                fill
-                sizes="96px"
-                className="scale-150 object-cover blur-2xl saturate-110"
-                aria-hidden="true"
-              />
-              <Image
-                src="/images/hero-flatlay.jpg"
+                src="/images/hero-wide.jpg"
                 alt={t("heroPhotoAlt")}
                 fill
                 priority
                 sizes="(min-width: 1024px) 620px, 92vw"
-                className="hero-zoom object-contain"
+                className="hero-zoom object-cover object-[0%_50%]"
               />
             </div>
           </div>
