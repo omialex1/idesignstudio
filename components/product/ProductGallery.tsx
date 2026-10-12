@@ -191,14 +191,14 @@ export default function ProductGallery({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative rounded border border-cream-200 bg-paper p-3 shadow-[0_8px_22px_rgba(60,40,25,0.10)]">
+      <div className="relative rounded-2xl border border-cream-200 bg-paper p-3 shadow-[0_8px_22px_rgba(60,40,25,0.10)]">
         <div
           ref={track}
           onScroll={handleScroll}
           onKeyDown={many ? handleKeyDown : undefined}
           tabIndex={many ? 0 : undefined}
           aria-roledescription={many ? "carousel" : undefined}
-          className="flex snap-x snap-mandatory overflow-x-auto rounded-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory overflow-x-auto rounded-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {images.map((url, index) => (
             <button
