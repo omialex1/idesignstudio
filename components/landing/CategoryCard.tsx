@@ -22,6 +22,7 @@ export default async function CategoryCard({
       eyebrow={main.name}
       description={category.description}
       cta={tHome("viewCollection")}
+      textured
     />
   );
 }

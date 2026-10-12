@@ -19,6 +19,7 @@ export default function ProductTile({
   eyebrow,
   description,
   cta,
+  textured = false,
 }: {
   href: string;
   name: string;
@@ -29,14 +30,22 @@ export default function ProductTile({
   eyebrow?: string;
   description?: string | null;
   cta?: string;
+  // soft blurred photo background (a portion of the hero backdrop) instead of plain paper
+  textured?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col rounded border border-cream-200 bg-paper px-4 pt-5 text-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)]"
+      className={`group flex h-full flex-col rounded border border-cream-200 px-4 pt-5 text-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)] ${
+        textured ? "bg-[url(/images/card-bg.jpg)] bg-cover bg-center" : "bg-paper"
+      }`}
     >
       <div className="mx-auto w-[calc(100%-12px)]">
-        <div className="relative aspect-square overflow-hidden rounded-full ring-1 ring-gold-600 ring-offset-[5px] ring-offset-paper">
+        <div
+          className={`relative aspect-square overflow-hidden rounded-full ring-1 ring-gold-600 ring-offset-[5px] ${
+            textured ? "ring-offset-transparent" : "ring-offset-paper"
+          }`}
+        >
           {imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
