@@ -7,6 +7,7 @@ import { slugify } from "@/lib/admin/slug";
 import { isAdminAuthenticated } from "@/lib/admin/auth";
 import {
   PIECE_SLOTS,
+  TIER_SLOTS,
   VARIANT_SLOTS,
   hasErrors,
   productPieceSort,
@@ -15,6 +16,7 @@ import {
   type FormErrors,
 } from "@/lib/admin/form-validation";
 import { finalPriceCents } from "@/lib/pricing";
+import { rangeLabel, tierRanges } from "@/lib/tiers";
 
 async function assertAdmin() {
   if (!(await isAdminAuthenticated())) throw new Error("unauthorized");
@@ -106,6 +108,7 @@ function readVariants(formData: FormData) {
     nameEn: string | null;
     priceCents: number;
     discountPercent: number;
+    minQuantity: number | null;
     pieces: PieceInput[];
   }[] = [];
   for (let i = 0; i < VARIANT_SLOTS; i++) {
@@ -113,7 +116,10 @@ function readVariants(formData: FormData) {
     const nameEn = String(formData.get(`variantNameEn${i}`) || "").trim();
     const price = parseFloat(String(formData.get(`variantPriceRon${i}`) || ""));
     if (!nameRo || !Number.isFinite(price) || price < 0) continue;
-    const discount = parseInt(String(formData.get(`variantDiscount${i}`) || "0"), 10);
+    const discount = parseInt(
+      String(formData.get(`variantDiscount${i}`) || "0"),
+      10,
+    );
 
     const pieces: PieceInput[] = [];
     for (let j = 0; j < PIECE_SLOTS; j++) {
@@ -135,10 +141,40 @@ function readVariants(formData: FormData) {
       nameEn: nameEn || null,
       priceCents: Math.round(price * 100),
       discountPercent: Number.isFinite(discount) ? discount : 0,
+      minQuantity: null,
       pieces,
     });
   }
   return variants;
+}
+
+// Quantity tiers are stored as variant rows with a minimum quantity; their
+// names ("50–99 buc") are made from the ranges.
+function readTiers(formData: FormData) {
+  const rows: { minQuantity: number; priceCents: number }[] = [];
+  for (let i = 0; i < TIER_SLOTS; i++) {
+    const min = parseInt(String(formData.get(`tierMin${i}`) || ""), 10);
+    const price = parseFloat(String(formData.get(`tierPriceRon${i}`) || ""));
+    if (
+      !Number.isInteger(min) ||
+      min < 1 ||
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
+      continue;
+    }
+    rows.push({ minQuantity: min, priceCents: Math.round(price * 100) });
+  }
+  return tierRanges(rows).map((range, i) => ({
+    sortOrder: i,
+    nameRo: rangeLabel(range, "ro"),
+    nameEn: rangeLabel(range, "en"),
+    priceCents: range.priceCents,
+    discountPercent: 0,
+    minQuantity: rows.slice().sort((a, b) => a.minQuantity - b.minQuantity)[i]
+      .minQuantity,
+    pieces: [] as PieceInput[],
+  }));
 }
 
 function readProductForm(formData: FormData) {
@@ -146,23 +182,36 @@ function readProductForm(formData: FormData) {
   const slugInput = String(formData.get("slug") || "").trim();
   const roName = String(formData.get("roName") || "").trim();
   const roDescription = String(formData.get("roDescription") || "").trim();
-  const roLongDescription = String(formData.get("roLongDescription") || "").trim();
-  const enLongDescription = String(formData.get("enLongDescription") || "").trim();
+  const roLongDescription = String(
+    formData.get("roLongDescription") || "",
+  ).trim();
+  const enLongDescription = String(
+    formData.get("enLongDescription") || "",
+  ).trim();
   const enName = String(formData.get("enName") || "").trim();
   const enDescription = String(formData.get("enDescription") || "").trim();
   const priceRon = parseFloat(String(formData.get("priceRon") || ""));
-  const quantityOnHand = parseInt(String(formData.get("quantityOnHand") || "0"), 10);
-  const lowStockThreshold = parseInt(String(formData.get("lowStockThreshold") || "5"), 10);
+  const quantityOnHand = parseInt(
+    String(formData.get("quantityOnHand") || "0"),
+    10,
+  );
+  const lowStockThreshold = parseInt(
+    String(formData.get("lowStockThreshold") || "5"),
+    10,
+  );
   const isActive = formData.get("isActive") === "on";
   const hasColorOptions = formData.get("hasColorOptions") === "on";
-  const variants = readVariants(formData);
-  const productPieces = readProductPieces(formData);
+  const tieredPricing = formData.get("tieredPricing") === "on";
+  const variants = tieredPricing ? readTiers(formData) : readVariants(formData);
+  const productPieces = tieredPricing ? [] : readProductPieces(formData);
 
   // With variants, the product price is the cheapest price a customer pays
   // ("from X"), after any discount.
   const priceCents = variants.length
     ? Math.min(
-        ...variants.map((v) => finalPriceCents(v.priceCents, v.discountPercent)),
+        ...variants.map((v) =>
+          finalPriceCents(v.priceCents, v.discountPercent),
+        ),
       )
     : Math.round(priceRon * 100);
   if (!Number.isFinite(priceCents) || priceCents < 0) {
@@ -180,10 +229,13 @@ function readProductForm(formData: FormData) {
     enLongDescription: enLongDescription || null,
     priceCents,
     hasColorOptions,
+    tieredPricing,
     variants,
     productPieces,
     quantityOnHand: Number.isFinite(quantityOnHand) ? quantityOnHand : 0,
-    lowStockThreshold: Number.isFinite(lowStockThreshold) ? lowStockThreshold : 5,
+    lowStockThreshold: Number.isFinite(lowStockThreshold)
+      ? lowStockThreshold
+      : 5,
     isActive,
   };
 }
@@ -211,9 +263,12 @@ async function savePieces(
   data: ProductFormData,
   dbVariants: { id: string; sortOrder: number }[],
 ) {
-  const rows: (PieceInput & { variantId: string | null })[] = data.variants.length
+  const rows: (PieceInput & { variantId: string | null })[] = data.variants
+    .length
     ? data.variants.flatMap((v) => {
-        const variantId = dbVariants.find((d) => d.sortOrder === v.sortOrder)?.id;
+        const variantId = dbVariants.find(
+          (d) => d.sortOrder === v.sortOrder,
+        )?.id;
         return variantId ? v.pieces.map((p) => ({ ...p, variantId })) : [];
       })
     : data.productPieces.map((p) => ({ ...p, variantId: null }));
@@ -266,6 +321,7 @@ export async function createProduct(
       currency: "RON",
       isActive: data.isActive,
       hasColorOptions: data.hasColorOptions,
+      tieredPricing: data.tieredPricing,
       variants: {
         create: data.variants.map((v) => ({
           sortOrder: v.sortOrder,
@@ -273,6 +329,7 @@ export async function createProduct(
           nameEn: v.nameEn,
           priceCents: v.priceCents,
           discountPercent: v.discountPercent,
+          minQuantity: v.minQuantity,
         })),
       },
       translations: {
@@ -334,8 +391,11 @@ export async function updateProduct(
       priceCents: data.priceCents,
       isActive: data.isActive,
       hasColorOptions: data.hasColorOptions,
+      tieredPricing: data.tieredPricing,
       variants: {
-        deleteMany: { sortOrder: { notIn: data.variants.map((v) => v.sortOrder) } },
+        deleteMany: {
+          sortOrder: { notIn: data.variants.map((v) => v.sortOrder) },
+        },
         upsert: data.variants.map((v) => ({
           where: { productId_sortOrder: { productId, sortOrder: v.sortOrder } },
           create: {
@@ -344,12 +404,14 @@ export async function updateProduct(
             nameEn: v.nameEn,
             priceCents: v.priceCents,
             discountPercent: v.discountPercent,
+            minQuantity: v.minQuantity,
           },
           update: {
             nameRo: v.nameRo,
             nameEn: v.nameEn,
             priceCents: v.priceCents,
             discountPercent: v.discountPercent,
+            minQuantity: v.minQuantity,
           },
         })),
       },

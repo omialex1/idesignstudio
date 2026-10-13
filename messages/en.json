@@ -36,7 +36,16 @@
     "wholeSet": "Whole set",
     "colorsForSet": "Colours for the whole set",
     "colorsTargetHint": "Choose what you are setting colours for: each component separately or the whole set.",
-    "pickColorAll": "Pick colours for every component, or for the whole set."
+    "pickColorAll": "Pick colours for every component, or for the whole set.",
+    "quantityLabel": "How many pieces do you want?",
+    "quantityHint": "Type the number of pieces; the price is picked automatically.",
+    "tiersHeading": "Prices by quantity",
+    "tiersNote": "For information only: the price per piece is set automatically by how many pieces you order.",
+    "yourPrice": "Your price: {price} / pc",
+    "totalFor": "Total for {qty} pcs: {total}",
+    "maxAvailable": "Up to {max} pcs available right now.",
+    "minOrder": "Minimum order: {min} pcs.",
+    "perPiece": "/ pc"
   },
   "Cart": {
     "cartLabel": "Shopping cart",
@@ -51,7 +60,8 @@
     "added": "Added to cart",
     "shippingNote": "Shipping is 19.99 RON, free for orders of 200 RON or more. Cash on delivery: +3.99 RON.",
     "close": "Close",
-    "viewCart": "View cart"
+    "viewCart": "View cart",
+    "quantity": "Quantity"
   },
   "Account": {
     "accountLabel": "Account",
@@ -218,7 +228,8 @@
     "returnCodBody": "You pay the courier in cash on delivery. We've sent you a confirmation email. Items are made to order and we'll let you know when they ship.",
     "remove": "Remove",
     "decreaseQuantity": "Decrease quantity",
-    "increaseQuantity": "Increase quantity"
+    "increaseQuantity": "Increase quantity",
+    "quantity": "Quantity"
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",

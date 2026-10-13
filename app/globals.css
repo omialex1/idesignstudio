@@ -152,3 +152,39 @@ body {
     scroll-behavior: smooth;
   }
 }
+
+/* The text cursor (I-beam) belongs to fields where you can type. Everywhere else
+   the pointer is an arrow, and a hand over things you can click. */
+@layer base {
+  body {
+    cursor: default;
+  }
+  a,
+  button,
+  summary,
+  select,
+  label[for],
+  [role="button"],
+  [role="tab"],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="color"],
+  input[type="file"],
+  input[type="range"],
+  input[type="submit"],
+  input[type="button"] {
+    cursor: pointer;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]):not([type="range"]):not([type="submit"]):not([type="button"]),
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+  }
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}

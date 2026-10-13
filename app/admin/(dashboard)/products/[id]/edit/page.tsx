@@ -66,6 +66,13 @@ export default async function EditProductPage({
             ? ""
             : (product.priceCents / 100).toFixed(2),
           hasColorOptions: product.hasColorOptions,
+          tieredPricing: product.tieredPricing,
+          tiers: product.tieredPricing
+            ? product.variants.map((v) => ({
+                min: String(v.minQuantity ?? ""),
+                priceRon: (v.priceCents / 100).toFixed(2),
+              }))
+            : [],
           components: product.components
             .filter((c) => !c.variantId)
             .map((c) => ({
@@ -73,7 +80,7 @@ export default async function EditProductPage({
               nameEn: c.nameEn ?? "",
               maxColors: c.maxColors,
             })),
-          variants: product.variants.map((v) => ({
+          variants: (product.tieredPricing ? [] : product.variants).map((v) => ({
             nameRo: v.nameRo,
             nameEn: v.nameEn ?? "",
             priceRon: (v.priceCents / 100).toFixed(2),

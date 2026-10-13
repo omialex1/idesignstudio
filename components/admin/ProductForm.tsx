@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   PIECE_SLOTS,
+  TIER_SLOTS,
   VARIANT_SLOTS,
   hasErrors,
   validateProductForm,
@@ -34,6 +35,8 @@ export type VariantDefaults = {
   pieces: PieceDefaults[];
 };
 
+export type TierDefaults = { min: string; priceRon: string };
+
 export type ProductFormDefaults = {
   categoryId: string;
   slug: string;
@@ -45,6 +48,8 @@ export type ProductFormDefaults = {
   enLongDescription: string;
   priceRon: string;
   hasColorOptions: boolean;
+  tieredPricing: boolean;
+  tiers: TierDefaults[];
   variants: VariantDefaults[];
   components: PieceDefaults[];
   quantityOnHand: number;
@@ -59,22 +64,19 @@ const TRANSLATE_PAIRS: [string, string][] = [
   ["roName", "enName"],
   ["roDescription", "enDescription"],
   ["roLongDescription", "enLongDescription"],
-  ...Array.from(
-    { length: VARIANT_SLOTS },
-    (_, i): [string, string] => [`variantNameRo${i}`, `variantNameEn${i}`],
-  ),
-  ...Array.from(
-    { length: PIECE_SLOTS },
-    (_, i): [string, string] => [`componentNameRo${i}`, `componentNameEn${i}`],
-  ),
+  ...Array.from({ length: VARIANT_SLOTS }, (_, i): [string, string] => [
+    `variantNameRo${i}`,
+    `variantNameEn${i}`,
+  ]),
+  ...Array.from({ length: PIECE_SLOTS }, (_, i): [string, string] => [
+    `componentNameRo${i}`,
+    `componentNameEn${i}`,
+  ]),
   ...Array.from({ length: VARIANT_SLOTS }, (_, i) =>
-    Array.from(
-      { length: PIECE_SLOTS },
-      (_, j): [string, string] => [
-        `variantPieceNameRo${i}_${j}`,
-        `variantPieceNameEn${i}_${j}`,
-      ],
-    ),
+    Array.from({ length: PIECE_SLOTS }, (_, j): [string, string] => [
+      `variantPieceNameRo${i}_${j}`,
+      `variantPieceNameEn${i}_${j}`,
+    ]),
   ).flat(),
 ];
 
@@ -111,6 +113,8 @@ export default function ProductForm({
     enLongDescription: "",
     priceRon: "",
     hasColorOptions: true,
+    tieredPricing: false,
+    tiers: [],
     variants: [],
     components: [],
     quantityOnHand: 0,
@@ -118,6 +122,7 @@ export default function ProductForm({
     isActive: true,
   };
 
+  const [tiered, setTiered] = useState(d.tieredPricing);
   const [errors, setErrors] = useState<FormErrors>({});
   const [pending, setPending] = useState(false);
 
@@ -127,7 +132,10 @@ export default function ProductForm({
   // Only one variant is edited at a time; the list picks which one is shown.
   const [activeVariant, setActiveVariant] = useState(0);
   const [variantNames, setVariantNames] = useState<string[]>(() =>
-    Array.from({ length: VARIANT_SLOTS }, (_, i) => d.variants[i]?.nameRo ?? ""),
+    Array.from(
+      { length: VARIANT_SLOTS },
+      (_, i) => d.variants[i]?.nameRo ?? "",
+    ),
   );
 
   // Two steps: main category (one of the four), then one of its subcategories.
@@ -153,11 +161,7 @@ export default function ProductForm({
     setCreating(true);
     setCreateError(null);
     try {
-      const result = await createSubcategoryAction(
-        line,
-        newNameRo,
-        newNameEn,
-      );
+      const result = await createSubcategoryAction(line, newNameRo, newNameEn);
       if ("error" in result) {
         setCreateError(result.error);
         return;
@@ -193,11 +197,13 @@ export default function ProductForm({
     if (bad !== null) setActiveVariant(bad);
     if (next.roName) setLang("ro");
     // Bring the first problem into view (after the right variant is shown).
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const first = form.querySelector<HTMLElement>('[aria-invalid="true"]');
-      first?.scrollIntoView({ behavior: "smooth", block: "center" });
-      first?.focus({ preventScroll: true });
-    }));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const first = form.querySelector<HTMLElement>('[aria-invalid="true"]');
+        first?.scrollIntoView({ behavior: "smooth", block: "center" });
+        first?.focus({ preventScroll: true });
+      }),
+    );
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -215,8 +221,7 @@ export default function ProductForm({
     setPending(true);
     try {
       const result = (await onSubmit(formData)) as
-        | { errors?: FormErrors }
-        | undefined;
+        { errors?: FormErrors } | undefined;
       if (result?.errors && hasErrors(result.errors)) {
         showErrors(result.errors, form);
       }
@@ -285,7 +290,10 @@ export default function ProductForm({
             onChange={(e) => setSubcategoryId(e.target.value)}
             disabled={!line || subcategories.length === 0}
             aria-invalid={invalid("categoryId")}
-            className={controlClass(!!errors.categoryId, "bg-white disabled:opacity-60")}
+            className={controlClass(
+              !!errors.categoryId,
+              "bg-white disabled:opacity-60",
+            )}
           >
             <option value="">
               {!line
@@ -383,7 +391,6 @@ export default function ProductForm({
             className={controlClass(!!errors.slug)}
           />
         </Field>
-
       </section>
 
       <section className="overflow-hidden rounded-2xl border-2 border-gold-600 bg-white shadow-md">
@@ -487,22 +494,83 @@ export default function ProductForm({
       <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white p-6 shadow-sm">
         <h2 className="font-display text-lg text-taupe-800">Preț și afișare</h2>
 
-        <Field
-          label="Preț (RON)"
-          required
-          hint="Lasă gol doar dacă produsul are variante cu preț propriu (mai jos)."
-          error={errors.priceRon}
-        >
+        <label className="flex items-center gap-2 text-sm text-taupe-700">
           <input
-            name="priceRon"
-            type="number"
-            step="0.01"
-            min="0"
-            defaultValue={d.priceRon}
-            aria-invalid={invalid("priceRon")}
-            className={controlClass(!!errors.priceRon)}
+            type="checkbox"
+            name="tieredPricing"
+            checked={tiered}
+            onChange={(e) => setTiered(e.target.checked)}
+            className="h-4 w-4 rounded border-cream-200"
           />
-        </Field>
+          Preț pe cantitate (ex: invitații – clientul scrie câte bucăți vrea,
+          iar prețul se alege automat)
+        </label>
+
+        {tiered && (
+          <div className="flex flex-col gap-3 rounded-xl border border-cream-200 p-4">
+            <p className="text-xs text-taupe-400">
+              Fiecare nivel: de la câte bucăți începe și prețul pe bucată.
+              Nivelul se termină unde începe următorul. Clientul vede nivelurile
+              doar ca informare. Variantele și piesele de mai jos nu se
+              folosesc.
+            </p>
+            {Array.from({ length: TIER_SLOTS }, (_, i) => {
+              const tier = d.tiers[i];
+              const minError = errors[`tierMin${i}`];
+              const priceError = errors[`tierPriceRon${i}`];
+              return (
+                <div key={i} className="flex flex-col gap-1.5">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      name={`tierMin${i}`}
+                      type="number"
+                      min="1"
+                      step="1"
+                      defaultValue={tier?.min ?? ""}
+                      placeholder={`Nivel ${i + 1}: de la câte buc.`}
+                      aria-invalid={invalid(`tierMin${i}`)}
+                      className={controlClass(!!minError)}
+                    />
+                    <input
+                      name={`tierPriceRon${i}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      defaultValue={tier?.priceRon ?? ""}
+                      placeholder="Preț / buc (RON)"
+                      aria-invalid={invalid(`tierPriceRon${i}`)}
+                      className={controlClass(!!priceError)}
+                    />
+                  </div>
+                  {minError && <FieldError message={minError} />}
+                  {priceError && <FieldError message={priceError} />}
+                </div>
+              );
+            })}
+            <p className="text-xs text-taupe-400">
+              Stocul de mai jos limitează câte bucăți poate comanda clientul.
+            </p>
+          </div>
+        )}
+
+        <div className={tiered ? "hidden" : ""}>
+          <Field
+            label="Preț (RON)"
+            required
+            hint="Lasă gol doar dacă produsul are variante cu preț propriu (mai jos)."
+            error={errors.priceRon}
+          >
+            <input
+              name="priceRon"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={d.priceRon}
+              aria-invalid={invalid("priceRon")}
+              className={controlClass(!!errors.priceRon)}
+            />
+          </Field>
+        </div>
 
         {showColors ? (
           <label className="flex items-center gap-2 text-sm text-taupe-700">
@@ -518,8 +586,8 @@ export default function ProductForm({
           line && (
             <p className="text-xs text-taupe-400">
               Această categorie nu are culori de ales, deci produsul nu are
-              opțiunea de culoare. Culorile se activează la categorie, în
-              meniul „Culori”.
+              opțiunea de culoare. Culorile se activează la categorie, în meniul
+              „Culori”.
             </p>
           )
         )}
@@ -536,7 +604,7 @@ export default function ProductForm({
       </section>
 
       <section
-        className={`flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6 ${showColors ? "" : "hidden"}`}
+        className={`flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6 ${showColors && !tiered ? "" : "hidden"}`}
       >
         <div>
           <h2 className="font-display text-lg text-taupe-800">
@@ -544,11 +612,11 @@ export default function ProductForm({
           </h2>
           <p className="mt-1 text-xs text-taupe-400">
             Pentru produsele la care clientul alege culorile (bifa de mai sus)
-            și care nu au variante. Adaugă fiecare piesă (ex: Ghiveci, Farfurie),
-            iar clientul alege câte o culoare pentru fiecare. Dacă nu adaugi
-            nimic, clientul alege o singură culoare pentru întregul produs. La
-            produsele cu variante, piesele se definesc în fiecare variantă,
-            mai jos.
+            și care nu au variante. Adaugă fiecare piesă (ex: Ghiveci,
+            Farfurie), iar clientul alege câte o culoare pentru fiecare. Dacă nu
+            adaugi nimic, clientul alege o singură culoare pentru întregul
+            produs. La produsele cu variante, piesele se definesc în fiecare
+            variantă, mai jos.
           </p>
         </div>
         {Array.from({ length: PIECE_SLOTS }, (_, i) => {
@@ -577,7 +645,9 @@ export default function ProductForm({
         })}
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
+      <section
+        className={`flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6 ${tiered ? "hidden" : ""}`}
+      >
         <div>
           <h2 className="font-display text-lg text-taupe-800">
             Variante (seturi)
@@ -668,33 +738,33 @@ export default function ProductForm({
               {discountError && <FieldError message={discountError} />}
 
               <div className={showColors ? "flex flex-col gap-3" : "hidden"}>
-              <p className="mt-1 text-xs font-medium text-taupe-600">
-                Piese și culori pentru această variantă
-              </p>
-              {Array.from({ length: PIECE_SLOTS }, (_, j) => {
-                const piece = v?.pieces[j];
-                const pieceError = errors[`variantPieceNameRo${i}_${j}`];
-                return (
-                  <div key={j} className="flex flex-col gap-1.5">
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        name={`variantPieceNameRo${i}_${j}`}
-                        defaultValue={piece?.nameRo ?? ""}
-                        placeholder={`Piesa ${j + 1} (Română)`}
-                        aria-invalid={invalid(`variantPieceNameRo${i}_${j}`)}
-                        className={controlClass(!!pieceError)}
-                      />
-                      <input
-                        name={`variantPieceNameEn${i}_${j}`}
-                        defaultValue={piece?.nameEn ?? ""}
-                        placeholder="(Engleză)"
-                        className={controlClass()}
-                      />
+                <p className="mt-1 text-xs font-medium text-taupe-600">
+                  Piese și culori pentru această variantă
+                </p>
+                {Array.from({ length: PIECE_SLOTS }, (_, j) => {
+                  const piece = v?.pieces[j];
+                  const pieceError = errors[`variantPieceNameRo${i}_${j}`];
+                  return (
+                    <div key={j} className="flex flex-col gap-1.5">
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          name={`variantPieceNameRo${i}_${j}`}
+                          defaultValue={piece?.nameRo ?? ""}
+                          placeholder={`Piesa ${j + 1} (Română)`}
+                          aria-invalid={invalid(`variantPieceNameRo${i}_${j}`)}
+                          className={controlClass(!!pieceError)}
+                        />
+                        <input
+                          name={`variantPieceNameEn${i}_${j}`}
+                          defaultValue={piece?.nameEn ?? ""}
+                          placeholder="(Engleză)"
+                          className={controlClass()}
+                        />
+                      </div>
+                      {pieceError && <FieldError message={pieceError} />}
                     </div>
-                    {pieceError && <FieldError message={pieceError} />}
-                  </div>
-                );
-              })}
+                  );
+                })}
               </div>
             </div>
           );

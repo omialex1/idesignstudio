@@ -8,8 +8,8 @@ import { useCartStore } from "@/lib/cart/store";
 import { itemDetails } from "@/lib/orders/item-details";
 import { formatPrice } from "@/lib/format";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
-
-const MAX_QUANTITY_PER_ITEM = 20;
+import { maxQuantityFor, rangeLabel } from "@/lib/tiers";
+import QuantityControl from "@/components/cart/QuantityControl";
 
 const emptyForm = {
   firstName: "",
@@ -332,6 +332,16 @@ export default function CheckoutPage() {
                           {itemDetails(item, locale)}
                         </span>
                       )}
+                      {item.tierRange && (
+                        <span className="block text-xs text-taupe-500">
+                          {rangeLabel(
+                            { ...item.tierRange, priceCents: item.priceCents },
+                            locale,
+                          )}
+                          {" · "}
+                          {formatPrice(item.priceCents, item.currency, locale)}
+                        </span>
+                      )}
                     </span>
                     <span className="whitespace-nowrap">
                       {formatPrice(
@@ -342,30 +352,13 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        aria-label={t("decreaseQuantity")}
-                        onClick={() =>
-                          updateQuantity(item.lineId, item.quantity - 1)
-                        }
-                        className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
-                      >
-                        −
-                      </button>
-                      <span className="w-6 text-center">{item.quantity}</span>
-                      <button
-                        type="button"
-                        aria-label={t("increaseQuantity")}
-                        disabled={item.quantity >= MAX_QUANTITY_PER_ITEM}
-                        onClick={() =>
-                          updateQuantity(item.lineId, item.quantity + 1)
-                        }
-                        className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100 disabled:opacity-40"
-                      >
-                        +
-                      </button>
-                    </div>
+                    <QuantityControl
+                      value={item.quantity}
+                      max={maxQuantityFor(item.tiers)}
+                      allowRemove
+                      label={t("quantity")}
+                      onChange={(q) => updateQuantity(item.lineId, q)}
+                    />
                     <button
                       type="button"
                       onClick={() => removeItem(item.lineId)}

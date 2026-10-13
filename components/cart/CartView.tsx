@@ -6,6 +6,8 @@ import { useCartStore } from "@/lib/cart/store";
 import { formatPrice } from "@/lib/format";
 import { categoryColorClass } from "@/lib/category-colors";
 import { itemDetails } from "@/lib/orders/item-details";
+import { maxQuantityFor, rangeLabel } from "@/lib/tiers";
+import QuantityControl from "./QuantityControl";
 
 export default function CartView() {
   const t = useTranslations("Cart");
@@ -83,32 +85,25 @@ export default function CartView() {
                   )}
                   <span className="text-sm text-taupe-600">
                     {formatPrice(item.priceCents, item.currency, locale)}
+                    {item.tierRange && (
+                      <span className="text-taupe-500">
+                        {" · "}
+                        {rangeLabel(
+                          { ...item.tierRange, priceCents: item.priceCents },
+                          locale,
+                        )}
+                      </span>
+                    )}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateQuantity(item.lineId, item.quantity - 1)
-                    }
-                    className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
-                  >
-                    −
-                  </button>
-                  <span className="w-6 text-center text-sm">
-                    {item.quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateQuantity(item.lineId, item.quantity + 1)
-                    }
-                    className="h-7 w-7 rounded-full border border-cream-200 text-taupe-700 hover:bg-cream-100"
-                  >
-                    +
-                  </button>
-                </div>
+                <QuantityControl
+                  value={item.quantity}
+                  max={maxQuantityFor(item.tiers)}
+                  allowRemove
+                  label={t("quantity")}
+                  onChange={(q) => updateQuantity(item.lineId, q)}
+                />
 
                 <span className="w-24 text-right font-medium text-taupe-800">
                   {formatPrice(

@@ -162,22 +162,20 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               className="hero-rise my-5 block h-px w-14 bg-gold-600"
               aria-hidden="true"
             />
-            {/* the four points appear one after another */}
-            <ul className="flex w-full max-w-[300px] flex-col gap-3">
+            {/* four plain facts, no boxes and no buttons: they only inform */}
+            <ul className="w-full max-w-[300px] divide-y divide-gold-600/30">
               {HERO_POINTS.map((point, i) => (
                 <li
                   key={point.key}
                   style={{ animationDelay: `${0.45 + i * 0.18}s` }}
-                  className="hero-rise flex items-center gap-3 rounded-full border border-gold-400/50 bg-choc/60 py-[10px] pr-5 pl-[10px] text-left text-cream-50 shadow-[0_3px_10px_rgba(60,40,25,0.14)] backdrop-blur-md"
+                  className="hero-rise flex items-center gap-3 py-3 text-left"
                 >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-400 text-choc">
-                    {point.icon}
-                  </span>
+                  <span className="shrink-0 text-gold-600">{point.icon}</span>
                   <span className="min-w-0 leading-tight">
-                    <span className="block text-sm font-semibold">
+                    <span className="block text-sm font-semibold text-taupe-800">
                       {t(`${point.key}Title`)}
                     </span>
-                    <span className="block text-xs text-cream-200">
+                    <span className="block text-xs text-taupe-600">
                       {t(`${point.key}Body`)}
                     </span>
                   </span>

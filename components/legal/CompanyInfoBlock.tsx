@@ -10,7 +10,7 @@ export default async function CompanyInfoBlock({
 
   return (
     <div
-      className={`flex flex-col gap-1 text-sm ${dark ? "text-cream-200" : "text-taupe-600"}`}
+      className={`flex flex-col gap-1 text-sm ${dark ? "text-cream-50" : "text-taupe-600"}`}
     >
       <p className={`font-semibold ${dark ? "text-cream-50" : "text-taupe-800"}`}>
         {t("companyName")}
@@ -23,7 +23,7 @@ export default async function CompanyInfoBlock({
         {t("companyEmailLabel")}{" "}
         <a
           href={`mailto:${t("companyEmail")}`}
-          className={`hover:underline ${dark ? "text-gold-400" : "text-salamander-600"}`}
+          className={`hover:underline ${dark ? "text-cream-50 underline" : "text-salamander-600"}`}
         >
           {t("companyEmail")}
         </a>

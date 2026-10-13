@@ -1,3 +1,4 @@
+import { sortTiers, type PriceTier } from "@/lib/tiers";
 import { prisma } from "@/lib/db/client";
 import { finalPriceCents } from "@/lib/pricing";
 
@@ -117,15 +118,35 @@ export async function getProductDetail(productSlug: string, locale: string) {
     product.category.translations.find((t) => t.locale === locale) ??
     product.category.translations.find((t) => t.locale === "ro");
 
+  // Tiered products (e.g. invitations): the "variants" are price tiers that the
+  // customer reads but does not pick.
+  const tiers: PriceTier[] = product.tieredPricing
+    ? sortTiers(
+        product.variants
+          .filter((v) => v.minQuantity !== null)
+          .map((v) => ({
+            minQuantity: v.minQuantity as number,
+            priceCents: v.priceCents,
+          })),
+      )
+    : [];
+
   return {
     ...translateProduct(product, locale),
     images: product.images,
     hasColorOptions: product.hasColorOptions,
+    tieredPricing: product.tieredPricing && tiers.length > 0,
+    tiers,
+    availableQuantity: Math.max(
+      0,
+      (product.inventory?.quantityOnHand ?? 0) -
+        (product.inventory?.reservedQty ?? 0),
+    ),
     // Pieces of a product without variants (variants carry their own).
     components: product.components
       .filter((c) => !c.variantId)
       .map((c) => toPiece(c, locale)),
-    variants: product.variants.map((v) => ({
+    variants: (product.tieredPricing ? [] : product.variants).map((v) => ({
       id: v.id,
       name: locale === "en" ? (v.nameEn ?? v.nameRo) : v.nameRo,
       // What the customer pays, after the variant's discount.

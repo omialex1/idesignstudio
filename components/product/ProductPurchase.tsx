@@ -15,6 +15,13 @@ import {
 } from "@/lib/colors";
 import type { PaletteColor } from "@/lib/db/colors";
 import { swatchStyle } from "@/lib/colors-shared";
+import {
+  firstTierMin,
+  rangeLabel,
+  tierFor,
+  tierRanges,
+  type PriceTier,
+} from "@/lib/tiers";
 
 // A round colour sample: the texture photo when there is one, else the colour.
 function Swatch({
@@ -70,6 +77,8 @@ export default function ProductPurchase({
   hasColorOptions,
   components,
   colors,
+  tiers,
+  availableQuantity,
 }: {
   productId: string;
   slug: string;
@@ -86,6 +95,9 @@ export default function ProductPurchase({
   components: ColorComponent[];
   // the colours of this product's category, in the order set in the admin
   colors: PaletteColor[];
+  // price tiers by quantity (invitations); empty for ordinary products
+  tiers: PriceTier[];
+  availableQuantity: number;
 }) {
   const t = useTranslations("Shop");
   const tCart = useTranslations("Cart");
@@ -132,7 +144,27 @@ export default function ProductPurchase({
   const [mode, setMode] = useState<"each" | "set">("each");
   const [justAdded, setJustAdded] = useState(false);
 
-  const unitPrice = variant?.priceCents ?? priceCents;
+  // Tiered products: the customer types a quantity, the price follows it.
+  const tiered = tiers.length > 0;
+  const minQty = tiered ? firstTierMin(tiers) : 1;
+  const maxQty = Math.max(minQty, availableQuantity);
+  const [qtyText, setQtyText] = useState(String(minQty));
+  const qtyNumber = Number(qtyText);
+  const qtyValid =
+    Number.isInteger(qtyNumber) && qtyNumber >= minQty && qtyNumber <= maxQty;
+  const quantity = qtyValid ? qtyNumber : minQty;
+  const activeTier = tiered ? tierFor(tiers, quantity) : null;
+  const ranges = tiered ? tierRanges(tiers) : [];
+  const activeRange = activeTier
+    ? ranges.find(
+        (r) =>
+          r.priceCents === activeTier.priceCents &&
+          quantity >= r.from &&
+          (r.to === null || quantity <= r.to),
+      )
+    : undefined;
+
+  const unitPrice = activeTier?.priceCents ?? variant?.priceCents ?? priceCents;
 
   const wholeSetPicked =
     setTarget !== null &&
@@ -177,35 +209,46 @@ export default function ProductPurchase({
   }
 
   function handleAdd() {
-    if (missingColors) return;
-    addItem({
-      productId,
-      variantId: variant?.id ?? null,
-      variantName: variant?.name ?? null,
-      colorChoices: finalTargets.map((p) => ({
-        componentId: p.id,
-        componentName: p.name,
-        colors: picked[p.id] ?? [],
-        labels: Object.fromEntries(
-          (picked[p.id] ?? []).map((id) => [
-            id,
-            { ro: colorById.get(id)?.ro ?? id, en: colorById.get(id)?.en ?? id },
-          ]),
-        ),
-      })),
-      colorNote: null,
-      slug,
-      categorySlug,
-      mainSlug,
-      colorKey,
-      nameSnapshot: name,
-      priceCents: unitPrice,
-      currency,
-      imageUrl,
-    });
+    if (missingColors || (tiered && !qtyValid)) return;
+    addItem(
+      {
+        productId,
+        variantId: variant?.id ?? null,
+        variantName: variant?.name ?? null,
+        colorChoices: finalTargets.map((p) => ({
+          componentId: p.id,
+          componentName: p.name,
+          colors: picked[p.id] ?? [],
+          labels: Object.fromEntries(
+            (picked[p.id] ?? []).map((id) => [
+              id,
+              {
+                ro: colorById.get(id)?.ro ?? id,
+                en: colorById.get(id)?.en ?? id,
+              },
+            ]),
+          ),
+        })),
+        colorNote: null,
+        slug,
+        categorySlug,
+        mainSlug,
+        colorKey,
+        nameSnapshot: name,
+        priceCents: unitPrice,
+        currency,
+        imageUrl,
+        ...(tiered ? { tiers, tierRange: activeRange } : {}),
+      },
+      tiered ? quantity : 1,
+    );
     window.dispatchEvent(
       new CustomEvent<CartAddedDetail>(CART_ADDED_EVENT, {
-        detail: { name, variantName: variant?.name ?? null, imageUrl: imageUrl ?? null },
+        detail: {
+          name,
+          variantName: variant?.name ?? null,
+          imageUrl: imageUrl ?? null,
+        },
       }),
     );
     setJustAdded(true);
@@ -216,7 +259,78 @@ export default function ProductPurchase({
     <div className="flex flex-col gap-5">
       <p className="font-display text-2xl text-taupe-800">
         {formatPrice(unitPrice, currency, locale)}
+        {tiered && (
+          <span className="ml-1 text-base text-taupe-500">{t("perPiece")}</span>
+        )}
       </p>
+
+      {tiered && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium text-taupe-700">
+            {t("tiersHeading")}
+          </p>
+          {/* plain information, not choices: the active row only follows the quantity */}
+          <dl className="flex flex-col divide-y divide-cream-200 rounded-xl border border-cream-200 bg-white/60 text-sm">
+            {ranges.map((r) => {
+              const on = r === activeRange;
+              return (
+                <div
+                  key={r.from}
+                  className={`flex items-center justify-between px-4 py-2 ${
+                    on
+                      ? "bg-salamander-50 font-semibold text-salamander-700"
+                      : "text-taupe-600"
+                  }`}
+                >
+                  <dt>{rangeLabel(r, locale)}</dt>
+                  <dd>
+                    {formatPrice(r.priceCents, currency, locale)}{" "}
+                    {t("perPiece")}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+          <p className="text-xs text-taupe-500">{t("tiersNote")}</p>
+        </div>
+      )}
+
+      {tiered && inStock && (
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="tiered-quantity"
+            className="text-sm font-medium text-taupe-700"
+          >
+            {t("quantityLabel")}
+          </label>
+          <input
+            id="tiered-quantity"
+            type="text"
+            inputMode="numeric"
+            value={qtyText}
+            onChange={(e) =>
+              setQtyText(e.target.value.replace(/\D/g, "").slice(0, 5))
+            }
+            onFocus={(e) => e.target.select()}
+            className="w-32 rounded-xl border border-cream-300 bg-white px-4 py-2 text-lg text-taupe-800 focus:border-salamander-400 focus:outline-none"
+          />
+          <p className="text-xs text-taupe-500">
+            {!qtyValid
+              ? qtyNumber > maxQty
+                ? t("maxAvailable", { max: maxQty })
+                : t("minOrder", { min: minQty })
+              : t("quantityHint")}
+          </p>
+          {qtyValid && (
+            <p className="text-sm font-semibold text-taupe-800">
+              {t("totalFor", {
+                qty: quantity,
+                total: formatPrice(unitPrice * quantity, currency, locale),
+              })}
+            </p>
+          )}
+        </div>
+      )}
 
       {inStock && variants.length > 0 && (
         <fieldset className="flex flex-col gap-2">
@@ -371,7 +485,7 @@ export default function ProductPurchase({
           <button
             type="button"
             onClick={handleAdd}
-            disabled={missingColors}
+            disabled={missingColors || (tiered && !qtyValid)}
             className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {justAdded ? tCart("added") : tCart("addToCart")}

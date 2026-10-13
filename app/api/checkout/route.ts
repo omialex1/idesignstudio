@@ -6,6 +6,13 @@ import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import { finalPriceCents } from "@/lib/pricing";
 import {
+  DEFAULT_MAX_QUANTITY,
+  TIERED_MAX_QUANTITY,
+  tierFor,
+  tierLabelFor,
+  type PriceTier,
+} from "@/lib/tiers";
+import {
   ALL_COMPONENTS_ID,
   DEFAULT_COMPONENT_ID,
   MAX_COLORS,
@@ -14,7 +21,6 @@ import {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CUI_PATTERN = /^(RO)?\d{2,10}$/;
-const MAX_QUANTITY_PER_ITEM = 20;
 const MAX_DISTINCT_ITEMS = 50;
 
 class OutOfStockError extends Error {
@@ -139,7 +145,7 @@ export async function POST(request: NextRequest) {
       !productId ||
       !Number.isInteger(quantity) ||
       quantity < 1 ||
-      quantity > MAX_QUANTITY_PER_ITEM ||
+      quantity > TIERED_MAX_QUANTITY ||
       colorChoices === null
     ) {
       return NextResponse.json({ error: "invalid_items" }, { status: 400 });
@@ -198,7 +204,25 @@ export async function POST(request: NextRequest) {
     paletteByMain.set(c.mainCategoryId, palette);
   }
 
+  // Tiered products (invitations) may be bought in large numbers; the unit
+  // price follows the total quantity of the product in the order.
+  const tiersOf = (p: (typeof products)[number]): PriceTier[] =>
+    p.tieredPricing
+      ? p.variants
+          .filter((v) => v.minQuantity !== null)
+          .map((v) => ({
+            minQuantity: v.minQuantity as number,
+            priceCents: finalPriceCents(v.priceCents, v.discountPercent),
+          }))
+      : [];
+
   for (const product of products) {
+    const total = quantities.get(product.id)!;
+    const tiers = tiersOf(product);
+    const cap = product.tieredPricing ? TIERED_MAX_QUANTITY : DEFAULT_MAX_QUANTITY;
+    if (total > cap || (product.tieredPricing && !tierFor(tiers, total))) {
+      return NextResponse.json({ error: "invalid_items" }, { status: 400 });
+    }
     const available =
       (product.inventory?.quantityOnHand ?? 0) -
       (product.inventory?.reservedQty ?? 0);
@@ -235,9 +259,13 @@ export async function POST(request: NextRequest) {
       ? product.variants.find((v) => v.id === line.variantId)
       : null;
     // A product with variants needs one of them; one without must not get any.
+    // Tiered products have no choice: the quantity decides the price.
+    const tiered = product.tieredPricing;
     if (
-      (product.variants.length > 0 && !variant) ||
-      (product.variants.length === 0 && line.variantId)
+      tiered
+        ? !!line.variantId
+        : (product.variants.length > 0 && !variant) ||
+          (product.variants.length === 0 && line.variantId)
     ) {
       return NextResponse.json({ error: "unavailable" }, { status: 409 });
     }
@@ -329,16 +357,20 @@ export async function POST(request: NextRequest) {
       name: translation?.name ?? product.slug,
       code: product.slug,
       category: product.category.slug,
-      variantName: variant
-        ? locale === "en"
-          ? (variant.nameEn ?? variant.nameRo)
-          : variant.nameRo
-        : null,
+      variantName: tiered
+        ? tierLabelFor(tiersOf(product), quantities.get(product.id)!, locale)
+        : variant
+          ? locale === "en"
+            ? (variant.nameEn ?? variant.nameRo)
+            : variant.nameRo
+          : null,
       colorChoices: orderChoices,
       colorNote: line.colorNote,
-      unitPriceCents: variant
-        ? finalPriceCents(variant.priceCents, variant.discountPercent)
-        : product.priceCents,
+      unitPriceCents: tiered
+        ? tierFor(tiersOf(product), quantities.get(product.id)!)!.priceCents
+        : variant
+          ? finalPriceCents(variant.priceCents, variant.discountPercent)
+          : product.priceCents,
       quantity: line.quantity,
     });
   }

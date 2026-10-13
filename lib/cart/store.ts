@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { sortTiers, tierFor, tierRanges, type PriceTier } from "@/lib/tiers";
 
 export type CartColorChoice = {
   componentId: string;
@@ -27,6 +28,11 @@ export type CartItem = {
   currency: string;
   quantity: number;
   imageUrl?: string | null;
+  // Tiered products (e.g. invitations): the unit price follows the total
+  // quantity of the product in the cart; priceCents and tierRange are kept up
+  // to date by the store.
+  tiers?: PriceTier[];
+  tierRange?: { from: number; to: number | null };
 };
 
 export type NewCartItem = Omit<CartItem, "quantity" | "lineId">;
@@ -42,6 +48,29 @@ export function buildLineId(
       .join(";"),
     (item.colorNote ?? "").trim().toLowerCase(),
   ].join("|");
+}
+
+// Re-prices tiered lines from the total quantity of their product.
+function reprice(items: CartItem[]): CartItem[] {
+  const totals = new Map<string, number>();
+  for (const item of items) {
+    if (item.tiers?.length) {
+      totals.set(item.productId, (totals.get(item.productId) ?? 0) + item.quantity);
+    }
+  }
+  return items.map((item) => {
+    if (!item.tiers?.length) return item;
+    const total = totals.get(item.productId) ?? item.quantity;
+    const tier = tierFor(item.tiers, total) ?? sortTiers(item.tiers)[0];
+    const range = tierRanges(item.tiers).find(
+      (r) => r.priceCents === tier.priceCents && total >= r.from && (r.to === null || total <= r.to),
+    );
+    return {
+      ...item,
+      priceCents: tier.priceCents,
+      tierRange: range ? { from: range.from, to: range.to } : item.tierRange,
+    };
+  });
 }
 
 type CartState = {
@@ -66,27 +95,32 @@ export const useCartStore = create<CartState>()(
           const existing = state.items.find((i) => i.lineId === lineId);
           if (existing) {
             return {
-              items: state.items.map((i) =>
-                i.lineId === lineId
-                  ? { ...i, quantity: i.quantity + quantity }
-                  : i,
+              items: reprice(
+                state.items.map((i) =>
+                  i.lineId === lineId
+                    ? { ...i, quantity: i.quantity + quantity }
+                    : i,
+                ),
               ),
             };
           }
-          return { items: [...state.items, { ...item, lineId, quantity }] };
+          return {
+            items: reprice([...state.items, { ...item, lineId, quantity }]),
+          };
         }),
       removeItem: (lineId) =>
         set((state) => ({
-          items: state.items.filter((i) => i.lineId !== lineId),
+          items: reprice(state.items.filter((i) => i.lineId !== lineId)),
         })),
       updateQuantity: (lineId, quantity) =>
         set((state) => ({
-          items:
+          items: reprice(
             quantity <= 0
               ? state.items.filter((i) => i.lineId !== lineId)
               : state.items.map((i) =>
                   i.lineId === lineId ? { ...i, quantity } : i,
                 ),
+          ),
         })),
       clear: () => set({ items: [] }),
     }),

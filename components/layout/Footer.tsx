@@ -8,12 +8,17 @@ export default async function Footer() {
   const tLegal = await getTranslations("Legal");
 
   return (
-    <footer className="bg-choc text-cream-200">
+    <footer className="relative isolate overflow-hidden bg-[#91564c] bg-[url(/images/footer-fabric.jpg)] bg-cover bg-center text-cream-50">
+      {/* slight shade so the small text stays easy to read on the lighter folds */}
+      <div
+        className="absolute inset-0 -z-10 bg-[rgba(60,25,20,0.2)]"
+        aria-hidden="true"
+      />
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10">
         <div className="flex flex-col gap-6 sm:flex-row sm:justify-between">
           <div>
             <p className="font-display text-2xl text-cream-50">
-              iDesignStudio<span className="text-gold-400">.ro</span>
+              iDesignStudio<span className="text-gold-300">.ro</span>
             </p>
             <Image
               src="/legal/netopia-visa-mastercard.png"
@@ -43,26 +48,26 @@ export default async function Footer() {
           <div className="flex flex-col gap-2 text-sm">
             <Link
               href="/terms"
-              className="text-cream-200 hover:text-gold-400 hover:underline"
+              className="text-cream-50 hover:underline"
             >
               {tLegal("termsLink")}
             </Link>
             <Link
               href="/privacy"
-              className="text-cream-200 hover:text-gold-400 hover:underline"
+              className="text-cream-50 hover:underline"
             >
               {tLegal("privacyLink")}
             </Link>
             <Link
               href="/withdrawal"
-              className="text-cream-200 hover:text-gold-400 hover:underline"
+              className="text-cream-50 hover:underline"
             >
               {tLegal("withdrawalLink")}
             </Link>
           </div>
         </div>
 
-        <p className="border-t border-white/10 pt-6 text-sm text-cream-300/80">
+        <p className="border-t border-white/20 pt-6 text-sm text-cream-100">
           &copy; {new Date().getFullYear()} iDesignStudio.ro. {t("rights")}
         </p>
       </div>

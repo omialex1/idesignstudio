@@ -32,6 +32,7 @@ export default function Header({
   const [hiddenOn, setHiddenOn] = useState<string | null>(null);
   const visible = hiddenOn !== pathname;
   const bar = useRef<HTMLDivElement>(null);
+  const headerEl = useRef<HTMLElement>(null);
   const autoHide = pathname !== "/";
 
   useEffect(() => {
@@ -69,6 +70,45 @@ export default function Header({
     };
   }, [autoHide, pathname]);
 
+  // The open mobile menu closes when the page is scrolled or swiped, when
+  // something outside it is tapped, and on Escape.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const startY = window.scrollY;
+    let touchY: number | null = null;
+    const close = () => setMenuOpen(false);
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - startY) > 8) close();
+    };
+    const onTouchStart = (e: TouchEvent) => {
+      touchY = e.touches[0]?.clientY ?? null;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchY === null) return;
+      const y = e.touches[0]?.clientY ?? touchY;
+      // finger moving down (swipe down) or clearly up: close
+      if (Math.abs(y - touchY) > 24) close();
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (!headerEl.current?.contains(e.target as Node)) close();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
   const navLinks = categories.map((c) => ({
     href: `/${c.slug}`,
     label: c.name,
@@ -76,6 +116,7 @@ export default function Header({
 
   return (
     <header
+      ref={headerEl}
       onFocusCapture={() => setHiddenOn(null)}
       className={`sticky top-0 z-50 px-3 pt-3 transition-[transform,opacity] duration-500 ease-out motion-reduce:transition-none sm:px-6 ${
         visible ? "" : "pointer-events-none -translate-y-[130%] opacity-0"

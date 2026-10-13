@@ -36,7 +36,16 @@
     "wholeSet": "Tot setul",
     "colorsForSet": "Culori pentru tot setul",
     "colorsTargetHint": "Alege pentru ce vrei să setezi culorile: fiecare componentă separat sau tot setul.",
-    "pickColorAll": "Alege culori pentru toate componentele sau pentru tot setul."
+    "pickColorAll": "Alege culori pentru toate componentele sau pentru tot setul.",
+    "quantityLabel": "Câte bucăți dorești?",
+    "quantityHint": "Scrie numărul de bucăți; prețul se alege automat.",
+    "tiersHeading": "Prețuri în funcție de cantitate",
+    "tiersNote": "Informativ: prețul pe bucată se stabilește automat după câte bucăți comanzi.",
+    "yourPrice": "Prețul tău: {price} / buc",
+    "totalFor": "Total pentru {qty} buc: {total}",
+    "maxAvailable": "Maximum {max} buc disponibile acum.",
+    "minOrder": "Comandă minimă: {min} buc.",
+    "perPiece": "/ buc"
   },
   "Cart": {
     "cartLabel": "Cos de cumparaturi",
@@ -51,7 +60,8 @@
     "added": "Adăugat în coș",
     "shippingNote": "Livrare 19,99 lei, gratuită pentru comenzi de 200 lei sau mai mult. Ramburs: +3,99 lei.",
     "close": "Închide",
-    "viewCart": "Vezi coșul"
+    "viewCart": "Vezi coșul",
+    "quantity": "Cantitate"
   },
   "Account": {
     "accountLabel": "Cont",
@@ -218,7 +228,8 @@
     "returnCodBody": "Plătești curierului, în numerar, la livrare. Ți-am trimis un email de confirmare. Produsele sunt făcute la comandă și te vom anunța când pleacă spre tine.",
     "remove": "Elimină",
     "decreaseQuantity": "Scade cantitatea",
-    "increaseQuantity": "Crește cantitatea"
+    "increaseQuantity": "Crește cantitatea",
+    "quantity": "Cantitate"
   },
   "Withdrawal": {
     "title": "Retragere din contract",

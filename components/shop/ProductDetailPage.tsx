@@ -45,9 +45,11 @@ export default async function ProductDetailPage({
   // Structured data so search engines can show price and availability.
   const url = `${siteUrl()}/${locale}${basePath}/${subcategory}/${product.slug}`;
   const availability = `https://schema.org/${inStock ? "InStock" : "OutOfStock"}`;
-  const prices = product.variants.length
-    ? product.variants.map((v) => v.priceCents)
-    : [product.priceCents];
+  const prices = product.tieredPricing
+    ? product.tiers.map((t) => t.priceCents)
+    : product.variants.length
+      ? product.variants.map((v) => v.priceCents)
+      : [product.priceCents];
   const money = (cents: number) => (cents / 100).toFixed(2);
   // Mirrors the Terms: 14-day withdrawal, customer pays the return shipping.
   const returnPolicy = {
@@ -176,6 +178,8 @@ export default async function ProductDetailPage({
             hasColorOptions={colors.length > 0}
             colors={colors}
             components={product.components}
+            tiers={product.tiers}
+            availableQuantity={product.availableQuantity}
           />
         </div>
       </div>

@@ -107,6 +107,9 @@ model Product {
   currency     String               @default("RON")
   isActive     Boolean              @default(true)
   hasColorOptions Boolean           @default(true)
+  // Price depends on how many pieces are bought: the variants are then price
+  // tiers (minQuantity + unit price) that the customer cannot pick, only read.
+  tieredPricing Boolean             @default(false)
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
   variants     ProductVariant[]
@@ -127,6 +130,8 @@ model ProductVariant {
   priceCents Int
   // Optional % taken off priceCents (used for sets).
   discountPercent Int @default(0)
+  // For tiered products: smallest quantity that gets this unit price.
+  minQuantity Int?
   // Pieces of this variant, each with its own colour choice.
   components ProductComponent[]
 

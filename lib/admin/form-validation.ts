@@ -5,6 +5,8 @@ import { MAX_DISCOUNT_PERCENT } from "@/lib/pricing";
 import { isCategoryColor } from "@/lib/category-colors";
 
 export const VARIANT_SLOTS = 4;
+// Quantity price tiers (invitations): up to this many rows.
+export const TIER_SLOTS = 6;
 // Pieces (parts with their own colour choice) per variant, and per product
 // without variants.
 export const PIECE_SLOTS = 5;
@@ -35,8 +37,35 @@ export function validateProductForm(fd: FormData): FormErrors {
     errors.roName = "Completează numele produsului în română.";
   }
 
+  const tiered = text(fd, "tieredPricing") === "on" || fd.get("tieredPricing") === "on";
+  if (tiered) {
+    const seen = new Set<number>();
+    let rows = 0;
+    for (let i = 0; i < TIER_SLOTS; i++) {
+      const minRaw = text(fd, `tierMin${i}`);
+      const priceRaw = text(fd, `tierPriceRon${i}`);
+      if (minRaw === "" && priceRaw === "") continue;
+      rows += 1;
+      const min = parseInt(minRaw, 10);
+      if (!WHOLE_NUMBER.test(minRaw) || min < 1) {
+        errors[`tierMin${i}`] = "De la câte bucăți: un număr întreg, 1 sau mai mare.";
+      } else if (seen.has(min)) {
+        errors[`tierMin${i}`] = "Există deja un nivel care începe de la acest număr.";
+      } else {
+        seen.add(min);
+      }
+      const price = parseFloat(priceRaw);
+      if (priceRaw === "" || !Number.isFinite(price) || price < 0) {
+        errors[`tierPriceRon${i}`] = "Prețul pe bucată trebuie să fie un număr, 0 sau mai mare.";
+      }
+    }
+    if (rows === 0) {
+      errors.tierMin0 = "Adaugă cel puțin un nivel de preț (de la câte bucăți și prețul pe bucată).";
+    }
+  }
+
   let validVariants = 0;
-  for (let i = 0; i < VARIANT_SLOTS; i++) {
+  for (let i = 0; !tiered && i < VARIANT_SLOTS; i++) {
     const nameRo = text(fd, `variantNameRo${i}`);
     const nameEn = text(fd, `variantNameEn${i}`);
     const priceRaw = text(fd, `variantPriceRon${i}`);
@@ -76,7 +105,7 @@ export function validateProductForm(fd: FormData): FormErrors {
     }
   }
 
-  if (validVariants === 0) {
+  if (!tiered && validVariants === 0) {
     const priceRaw = text(fd, "priceRon");
     const price = parseFloat(priceRaw);
     if (priceRaw === "") {
