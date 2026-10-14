@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import LoggedInGate from "@/components/account/LoggedInGate";
 
 export default function AccountLoginPage() {
   const t = useTranslations("Account");
@@ -37,58 +38,60 @@ export default function AccountLoginPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
       <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8">
-        <h1 className="font-display text-2xl text-taupe-800">
-          {t("loginTitle")}
-        </h1>
+        <LoggedInGate>
+          <h1 className="font-display text-2xl text-taupe-800">
+            {t("loginTitle")}
+          </h1>
 
-        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-          <Field label={t("email")}>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-          <Field label={t("password")}>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-            />
-          </Field>
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <Field label={t("email")}>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+            <Field label={t("password")}>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
-          >
-            {loading ? t("loggingIn") : t("login")}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
+            >
+              {loading ? t("loggingIn") : t("login")}
+            </button>
+          </form>
 
-        <div className="mt-5 flex flex-col gap-2 text-sm text-taupe-600">
-          <Link
-            href="/account/forgot-password"
-            className="text-salamander-600 hover:underline"
-          >
-            {t("forgotPassword")}
-          </Link>
-          <p>
-            {t("noAccount")}{" "}
+          <div className="mt-5 flex flex-col gap-2 text-sm text-taupe-600">
             <Link
-              href="/account/register"
+              href="/account/forgot-password"
               className="text-salamander-600 hover:underline"
             >
-              {t("registerLink")}
+              {t("forgotPassword")}
             </Link>
-          </p>
-        </div>
+            <p>
+              {t("noAccount")}{" "}
+              <Link
+                href="/account/register"
+                className="text-salamander-600 hover:underline"
+              >
+                {t("registerLink")}
+              </Link>
+            </p>
+          </div>
+        </LoggedInGate>
       </div>
     </div>
   );

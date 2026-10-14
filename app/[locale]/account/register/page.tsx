@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import LoggedInGate from "@/components/account/LoggedInGate";
 import Turnstile, { CAPTCHA_ENABLED } from "@/components/security/Turnstile";
 import PasswordRequirements from "@/components/account/PasswordRequirements";
 import { isValidPassword } from "@/lib/validation/password";
@@ -51,67 +52,69 @@ export default function AccountRegisterPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
       <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8">
-        <h1 className="font-display text-2xl text-taupe-800">
-          {t("registerTitle")}
-        </h1>
+        <LoggedInGate>
+          <h1 className="font-display text-2xl text-taupe-800">
+            {t("registerTitle")}
+          </h1>
 
-        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-          <Field label={t("name")}>
-            <input
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-          <Field label={t("email")}>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-          <Field label={t("password")}>
-            <input
-              type="password"
-              required
-              autoComplete="new-password"
-              ref={(el) =>
-                el?.setCustomValidity(
-                  isValidPassword(password) ? "" : t("weakPassword"),
-                )
-              }
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-            />
-            <PasswordRequirements password={password} />
-          </Field>
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <Field label={t("name")}>
+              <input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+            <Field label={t("email")}>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+            <Field label={t("password")}>
+              <input
+                type="password"
+                required
+                autoComplete="new-password"
+                ref={(el) =>
+                  el?.setCustomValidity(
+                    isValidPassword(password) ? "" : t("weakPassword"),
+                  )
+                }
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClass}
+              />
+              <PasswordRequirements password={password} />
+            </Field>
 
-          <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
+            <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading || (CAPTCHA_ENABLED && !captchaToken)}
-            className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
-          >
-            {loading ? t("registering") : t("register")}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading || (CAPTCHA_ENABLED && !captchaToken)}
+              className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
+            >
+              {loading ? t("registering") : t("register")}
+            </button>
+          </form>
 
-        <p className="mt-5 text-sm text-taupe-600">
-          {t("haveAccount")}{" "}
-          <Link
-            href="/account/login"
-            className="text-salamander-600 hover:underline"
-          >
-            {t("loginLink")}
-          </Link>
-        </p>
+          <p className="mt-5 text-sm text-taupe-600">
+            {t("haveAccount")}{" "}
+            <Link
+              href="/account/login"
+              className="text-salamander-600 hover:underline"
+            >
+              {t("loginLink")}
+            </Link>
+          </p>
+        </LoggedInGate>
       </div>
     </div>
   );

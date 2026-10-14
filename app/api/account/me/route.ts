@@ -13,6 +13,7 @@ export async function GET() {
     loggedIn: true,
     name: customer.name,
     email: customer.email,
+    emailVerified: Boolean(customer.emailVerifiedAt),
     phone: customer.phone ?? "",
     county: customer.county ?? "",
     city: customer.city ?? "",

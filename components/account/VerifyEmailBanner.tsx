@@ -1,11 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 
 // Shown on the account page until the e-mail address is confirmed.
 export default function VerifyEmailBanner() {
   const t = useTranslations("Account");
+  const router = useRouter();
+
+  // The confirmation link usually opens in another window or in the mail app.
+  // This window checks now and then (and when you come back to it) and updates
+  // itself as soon as the address is confirmed.
+  useEffect(() => {
+    let alive = true;
+    async function check() {
+      if (document.hidden) return;
+      try {
+        const res = await fetch("/api/account/me", { cache: "no-store" });
+        const data = await res.json();
+        if (alive && data.emailVerified) router.refresh();
+      } catch {
+        // try again at the next check
+      }
+    }
+    const timer = setInterval(check, 4000);
+    document.addEventListener("visibilitychange", check);
+    window.addEventListener("focus", check);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", check);
+      window.removeEventListener("focus", check);
+    };
+  }, [router]);
+
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState<{
     text: string;
@@ -45,6 +74,7 @@ export default function VerifyEmailBanner() {
         {t("verifyBannerTitle")}
       </h2>
       <p className="mt-1 text-sm text-taupe-700">{t("verifyBannerBody")}</p>
+      <p className="mt-1 text-xs text-taupe-500">{t("verifyBannerWaiting")}</p>
       <button
         type="button"
         onClick={resend}

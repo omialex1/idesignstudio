@@ -160,7 +160,13 @@
     "pwReqUpper": "An upper-case letter",
     "pwReqDigit": "A digit",
     "pwReqSpecial": "A special character (e.g. ! ? # @ %)",
-    "captchaFailed": "The anti-spam check did not pass. Please try again."
+    "captchaFailed": "The anti-spam check did not pass. Please try again.",
+    "alreadyLoggedInTitle": "You are already logged in",
+    "alreadyLoggedInBody": "You are logged in as {name} ({email}). To use another account, log out first.",
+    "goToAccount": "Go to my account",
+    "logoutAndContinue": "Log out and continue",
+    "verifyEmailCloseHint": "You can close this window. The window where you created the account updates by itself.",
+    "verifyBannerWaiting": "After you click the link in the e-mail, this page updates by itself."
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",

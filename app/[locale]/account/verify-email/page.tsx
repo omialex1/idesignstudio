@@ -56,6 +56,9 @@ function VerifyEmail() {
             <p className="mt-4 text-sm text-green-700">
               {t("verifyEmailDone")}
             </p>
+            <p className="mt-2 text-sm text-taupe-600">
+              {t("verifyEmailCloseHint")}
+            </p>
             {state.linked > 0 && (
               <p className="mt-2 text-sm text-taupe-600">
                 {t("verifyEmailLinked", { count: state.linked })}

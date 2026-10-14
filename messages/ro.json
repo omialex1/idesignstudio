@@ -160,7 +160,13 @@
     "pwReqUpper": "O literă mare",
     "pwReqDigit": "O cifră",
     "pwReqSpecial": "Un caracter special (ex: ! ? # @ %)",
-    "captchaFailed": "Verificarea anti-spam nu a reușit. Încearcă din nou."
+    "captchaFailed": "Verificarea anti-spam nu a reușit. Încearcă din nou.",
+    "alreadyLoggedInTitle": "Ești deja conectat",
+    "alreadyLoggedInBody": "Ești conectat ca {name} ({email}). Pentru alt cont, deconectează-te mai întâi.",
+    "goToAccount": "Mergi la contul meu",
+    "logoutAndContinue": "Deconectează-te și continuă",
+    "verifyEmailCloseHint": "Poți închide această fereastră. Fereastra în care ai creat contul se actualizează singură.",
+    "verifyBannerWaiting": "După ce apeși linkul din e-mail, această pagină se actualizează singură."
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",
