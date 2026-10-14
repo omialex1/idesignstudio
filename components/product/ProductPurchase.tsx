@@ -58,6 +58,7 @@ type Variant = {
   id: string;
   name: string;
   priceCents: number;
+  fullPriceCents: number;
   discountPercent: number;
   components: ColorComponent[];
 };
@@ -351,6 +352,11 @@ export default function ProductPurchase({
                 }`}
               >
                 {v.name}
+                {v.discountPercent > 0 && (
+                  <span className="ml-2 text-taupe-400 line-through">
+                    {formatPrice(v.fullPriceCents, currency, locale)}
+                  </span>
+                )}
                 <span className="ml-2 text-taupe-500">
                   {formatPrice(v.priceCents, currency, locale)}
                 </span>

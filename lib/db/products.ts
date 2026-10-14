@@ -1,6 +1,6 @@
 import { sortTiers, type PriceTier } from "@/lib/tiers";
 import { prisma } from "@/lib/db/client";
-import { finalPriceCents } from "@/lib/pricing";
+import { variantPricing } from "@/lib/pricing";
 
 export type ProductWithTranslation = {
   id: string;
@@ -146,12 +146,12 @@ export async function getProductDetail(productSlug: string, locale: string) {
     components: product.components
       .filter((c) => !c.variantId)
       .map((c) => toPiece(c, locale)),
-    variants: (product.tieredPricing ? [] : product.variants).map((v) => ({
+    variants: (product.tieredPricing ? [] : product.variants).map((v, i, all) => ({
       id: v.id,
       name: locale === "en" ? (v.nameEn ?? v.nameRo) : v.nameRo,
       // What the customer pays, after the variant's discount.
-      priceCents: finalPriceCents(v.priceCents, v.discountPercent),
-      fullPriceCents: v.priceCents,
+      priceCents: variantPricing(all)[i].finalCents,
+      fullPriceCents: variantPricing(all)[i].fullCents,
       discountPercent: v.discountPercent,
       components: product.components
         .filter((c) => c.variantId === v.id)

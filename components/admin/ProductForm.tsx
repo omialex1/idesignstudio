@@ -654,10 +654,13 @@ export default function ProductForm({
           </h2>
           <p className="mt-1 text-xs text-taupe-400">
             Opțional. Fiecare variantă este ce cumpără clientul (ex: Mare, Mic,
-            Set), cu prețul ei și cu piesele ei. Reducerea (%) se scade din
-            prețul variantei, deci o pui doar la seturi. Clientul alege culorile
-            doar pentru piesele variantei alese. O variantă lăsată goală nu se
-            folosește. Dacă ai variante, prețul de mai sus se ignoră.
+            Set), cu prețul ei și cu piesele ei. Reducerea (%) face din variantă
+            un set: prețul ei se calculează automat ca suma celorlalte variante,
+            minus reducerea (ex: Mare + Mic, −10%). Pentru un set, câmpul de
+            preț nu contează, se ignoră și se înlocuiește la salvare. Reducerea
+            se pune doar la seturi. Clientul alege culorile doar pentru piesele
+            variantei alese. O variantă lăsată goală nu se folosește. Dacă ai
+            variante, prețul de mai sus se ignoră.
           </p>
         </div>
         <Field

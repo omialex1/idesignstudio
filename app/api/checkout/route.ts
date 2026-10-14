@@ -4,7 +4,7 @@ import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { startNetopiaPayment } from "@/lib/netopia";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
-import { finalPriceCents } from "@/lib/pricing";
+import { finalPriceCents, variantPricing } from "@/lib/pricing";
 import {
   DEFAULT_MAX_QUANTITY,
   TIERED_MAX_QUANTITY,
@@ -369,7 +369,9 @@ export async function POST(request: NextRequest) {
       unitPriceCents: tiered
         ? tierFor(tiersOf(product), quantities.get(product.id)!)!.priceCents
         : variant
-          ? finalPriceCents(variant.priceCents, variant.discountPercent)
+          ? variantPricing(product.variants)[
+              product.variants.findIndex((v) => v.id === variant.id)
+            ].finalCents
           : product.priceCents,
       quantity: line.quantity,
     });

@@ -15,7 +15,7 @@ import {
   variantPieceSort,
   type FormErrors,
 } from "@/lib/admin/form-validation";
-import { finalPriceCents } from "@/lib/pricing";
+import { variantPricing } from "@/lib/pricing";
 import { rangeLabel, tierRanges } from "@/lib/tiers";
 
 async function assertAdmin() {
@@ -207,12 +207,14 @@ function readProductForm(formData: FormData) {
 
   // With variants, the product price is the cheapest price a customer pays
   // ("from X"), after any discount.
+  // Sets (variants with a discount) are priced from the other variants; the
+  // saved full price follows, so the admin always shows the real number.
+  const pricing = variantPricing(variants);
+  variants.forEach((v, i) => {
+    v.priceCents = pricing[i].fullCents;
+  });
   const priceCents = variants.length
-    ? Math.min(
-        ...variants.map((v) =>
-          finalPriceCents(v.priceCents, v.discountPercent),
-        ),
-      )
+    ? Math.min(...pricing.map((p) => p.finalCents))
     : Math.round(priceRon * 100);
   if (!Number.isFinite(priceCents) || priceCents < 0) {
     throw new Error("Prețul este obligatoriu când produsul nu are variante.");
