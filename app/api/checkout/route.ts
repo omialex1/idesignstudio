@@ -5,6 +5,8 @@ import { startNetopiaPayment } from "@/lib/netopia";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import { finalPriceCents, variantPricing } from "@/lib/pricing";
+import { POSTAL_CODE_PATTERN, normalizePhone } from "@/lib/validation/phone";
+import { canonicalCounty } from "@/lib/geo/ro-counties";
 import {
   DEFAULT_MAX_QUANTITY,
   TIERED_MAX_QUANTITY,
@@ -43,7 +45,9 @@ function parseColorChoices(value: unknown): ColorChoiceInput[] | null {
       !componentId ||
       !Array.isArray(colors) ||
       colors.length > MAX_COLORS ||
-      !colors.every((c) => typeof c === "string" && c.length > 0 && c.length <= 80) ||
+      !colors.every(
+        (c) => typeof c === "string" && c.length > 0 && c.length <= 80,
+      ) ||
       new Set(colors).size !== colors.length ||
       choices.some((c) => c.componentId === componentId)
     ) {
@@ -58,17 +62,11 @@ function clean(value: unknown, maxLength: number): string {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
-function normalizePhone(raw: string): string | null {
-  let phone = raw.replace(/[\s().-]/g, "");
-  if (phone.startsWith("0040")) phone = `+40${phone.slice(4)}`;
-  else if (phone.startsWith("07")) phone = `+40${phone.slice(1)}`;
-  return /^\+?\d{9,15}$/.test(phone) ? phone : null;
-}
-
 function siteUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  ).replace(/\/$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(
+    /\/$/,
+    "",
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -95,12 +93,26 @@ export async function POST(request: NextRequest) {
   if (body.customer?.isCompany === true) {
     company = {
       name: clean(body.customer?.companyName, 150),
-      cui: clean(body.customer?.companyCui, 20).replace(/\s/g, "").toUpperCase(),
+      cui: clean(body.customer?.companyCui, 20)
+        .replace(/\s/g, "")
+        .toUpperCase(),
     };
     if (!company.name || !CUI_PATTERN.test(company.cui)) {
       return NextResponse.json({ error: "invalid_company" }, { status: 400 });
     }
   }
+
+  if (clean(body.customer?.phone, 30) && !customer.phone) {
+    return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
+  }
+  const county = canonicalCounty(customer.county);
+  if (customer.county && !county) {
+    return NextResponse.json({ error: "invalid_county" }, { status: 400 });
+  }
+  if (customer.postalCode && !POSTAL_CODE_PATTERN.test(customer.postalCode)) {
+    return NextResponse.json({ error: "invalid_postal_code" }, { status: 400 });
+  }
+  if (county) customer.county = county;
 
   if (
     !customer.firstName ||
@@ -159,7 +171,14 @@ export async function POST(request: NextRequest) {
     ].join("|");
     const existing = requested.get(key);
     if (existing) existing.quantity += quantity;
-    else requested.set(key, { productId, variantId, colorChoices: colorChoices!, colorNote, quantity });
+    else
+      requested.set(key, {
+        productId,
+        variantId,
+        colorChoices: colorChoices!,
+        colorNote,
+        quantity,
+      });
     quantities.set(productId, (quantities.get(productId) ?? 0) + quantity);
   }
 
@@ -219,7 +238,9 @@ export async function POST(request: NextRequest) {
   for (const product of products) {
     const total = quantities.get(product.id)!;
     const tiers = tiersOf(product);
-    const cap = product.tieredPricing ? TIERED_MAX_QUANTITY : DEFAULT_MAX_QUANTITY;
+    const cap = product.tieredPricing
+      ? TIERED_MAX_QUANTITY
+      : DEFAULT_MAX_QUANTITY;
     if (total > cap || (product.tieredPricing && !tierFor(tiers, total))) {
       return NextResponse.json({ error: "invalid_items" }, { status: 400 });
     }
@@ -275,7 +296,8 @@ export async function POST(request: NextRequest) {
       variant ? c.variantId === variant.id : !c.variantId,
     );
     const palette = paletteByMain.get(product.category.mainCategoryId ?? "");
-    const colorsEnabled = product.hasColorOptions && !!palette && palette.size > 0;
+    const colorsEnabled =
+      product.hasColorOptions && !!palette && palette.size > 0;
     const expected = colorsEnabled
       ? pieces.length > 0
         ? pieces.map((c) => ({

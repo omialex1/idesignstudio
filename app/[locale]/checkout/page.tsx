@@ -10,6 +10,8 @@ import { formatPrice } from "@/lib/format";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import { maxQuantityFor, rangeLabel } from "@/lib/tiers";
 import QuantityControl from "@/components/cart/QuantityControl";
+import { POSTAL_CODE_PATTERN, normalizePhone } from "@/lib/validation/phone";
+import { RO_COUNTIES } from "@/lib/geo/ro-counties";
 
 const emptyForm = {
   firstName: "",
@@ -40,6 +42,8 @@ export default function CheckoutPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // error text appears once the customer has left the field
+  const [touched, setTouched] = useState({ phone: false, postalCode: false });
 
   // A logged-in customer gets name and e-mail filled in (only empty fields).
   useEffect(() => {
@@ -48,7 +52,9 @@ export default function CheckoutPage() {
       .then((res) => (res.ok ? res.json() : null))
       .then((me) => {
         if (!active || !me?.loggedIn) return;
-        const parts = String(me.name ?? "").trim().split(/\s+/);
+        const parts = String(me.name ?? "")
+          .trim()
+          .split(/\s+/);
         const firstName = parts[0] ?? "";
         const lastName = parts.slice(1).join(" ");
         setForm((prev) => ({
@@ -87,6 +93,9 @@ export default function CheckoutPage() {
     );
   }
 
+  const phoneInvalid = form.phone.trim() !== "" && !normalizePhone(form.phone);
+  const postalInvalid =
+    form.postalCode !== "" && !POSTAL_CODE_PATTERN.test(form.postalCode);
   const currency = items[0].currency;
   const subtotal = items.reduce(
     (sum, item) => sum + item.priceCents * item.quantity,
@@ -101,6 +110,9 @@ export default function CheckoutPage() {
     unavailable: t("errorUnavailable"),
     payment_unavailable: t("errorPayment"),
     invalid_company: t("errorCompany"),
+    invalid_phone: t("errorPhone"),
+    invalid_postal_code: t("errorPostalCode"),
+    invalid_county: t("errorCounty"),
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -196,12 +208,23 @@ export default function CheckoutPage() {
                   <input
                     required
                     type="tel"
+                    inputMode="tel"
                     maxLength={30}
                     autoComplete="tel"
                     value={form.phone}
+                    ref={(el) =>
+                      el?.setCustomValidity(phoneInvalid ? t("errorPhone") : "")
+                    }
                     onChange={(e) => update("phone", e.target.value)}
+                    onBlur={() => setTouched((v) => ({ ...v, phone: true }))}
+                    aria-invalid={touched.phone && phoneInvalid}
                     className={inputClass}
                   />
+                  {touched.phone && phoneInvalid && (
+                    <span className="text-xs text-red-600">
+                      {t("errorPhone")}
+                    </span>
+                  )}
                 </Field>
               </div>
 
@@ -270,24 +293,49 @@ export default function CheckoutPage() {
                   />
                 </Field>
                 <Field label={t("county")}>
-                  <input
+                  <select
                     required
-                    maxLength={100}
                     autoComplete="address-level1"
                     value={form.county}
                     onChange={(e) => update("county", e.target.value)}
                     className={inputClass}
-                  />
+                  >
+                    <option value="" disabled>
+                      {t("selectCounty")}
+                    </option>
+                    {RO_COUNTIES.map((county) => (
+                      <option key={county} value={county}>
+                        {county}
+                      </option>
+                    ))}
+                  </select>
                 </Field>
                 <Field label={t("postalCode")}>
                   <input
                     required
-                    maxLength={12}
+                    inputMode="numeric"
+                    maxLength={6}
                     autoComplete="postal-code"
                     value={form.postalCode}
-                    onChange={(e) => update("postalCode", e.target.value)}
+                    ref={(el) =>
+                      el?.setCustomValidity(
+                        postalInvalid ? t("errorPostalCode") : "",
+                      )
+                    }
+                    onChange={(e) =>
+                      update("postalCode", e.target.value.replace(/\D/g, ""))
+                    }
+                    onBlur={() =>
+                      setTouched((v) => ({ ...v, postalCode: true }))
+                    }
+                    aria-invalid={touched.postalCode && postalInvalid}
                     className={inputClass}
                   />
+                  {touched.postalCode && postalInvalid && (
+                    <span className="text-xs text-red-600">
+                      {t("errorPostalCode")}
+                    </span>
+                  )}
                 </Field>
               </div>
               <Field label={t("notes")}>
@@ -330,7 +378,8 @@ export default function CheckoutPage() {
                 />
                 <span>
                   <span className="font-medium">
-                    {t("payCod")} (+{formatPrice(COD_FEE_CENTS, currency, locale)})
+                    {t("payCod")} (+
+                    {formatPrice(COD_FEE_CENTS, currency, locale)})
                   </span>
                   <span className="block text-xs text-taupe-500">
                     {t("payCodNote")}

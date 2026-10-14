@@ -255,7 +255,11 @@
     "remove": "Remove",
     "decreaseQuantity": "Decrease quantity",
     "increaseQuantity": "Increase quantity",
-    "quantity": "Quantity"
+    "quantity": "Quantity",
+    "errorPhone": "The phone number is not valid. Use 10 digits, for example 0712 345 678 (or +40 712 345 678).",
+    "errorPostalCode": "The postal code must have exactly 6 digits.",
+    "errorCounty": "Choose a county from the list.",
+    "selectCounty": "Choose the county"
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",

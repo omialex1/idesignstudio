@@ -255,7 +255,11 @@
     "remove": "Elimină",
     "decreaseQuantity": "Scade cantitatea",
     "increaseQuantity": "Crește cantitatea",
-    "quantity": "Cantitate"
+    "quantity": "Cantitate",
+    "errorPhone": "Numărul de telefon nu este valid. Scrie 10 cifre, de exemplu 0712 345 678 (sau +40 712 345 678).",
+    "errorPostalCode": "Codul poștal trebuie să aibă exact 6 cifre.",
+    "errorCounty": "Alege un județ din listă.",
+    "selectCounty": "Alege județul"
   },
   "Withdrawal": {
     "title": "Retragere din contract",
