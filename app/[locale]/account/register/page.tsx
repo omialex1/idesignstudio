@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import PasswordRequirements from "@/components/account/PasswordRequirements";
+import { isValidPassword } from "@/lib/validation/password";
 
 export default function AccountRegisterPage() {
   const t = useTranslations("Account");
@@ -32,7 +34,8 @@ export default function AccountRegisterPage() {
     }
 
     const body = await res.json().catch(() => ({}));
-    if (body.error === "email_taken") setError(t("emailTaken"));
+    if (res.status === 429) setError(t("tooManyRequests"));
+    else if (body.error === "email_taken") setError(t("emailTaken"));
     else if (body.error === "weak_password") setError(t("weakPassword"));
     else setError(t("genericError"));
     setLoading(false);
@@ -67,11 +70,17 @@ export default function AccountRegisterPage() {
             <input
               type="password"
               required
-              minLength={8}
+              autoComplete="new-password"
+              ref={(el) =>
+                el?.setCustomValidity(
+                  isValidPassword(password) ? "" : t("weakPassword"),
+                )
+              }
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={inputClass}
             />
+            <PasswordRequirements password={password} />
           </Field>
 
           {error && <p className="text-sm text-red-600">{error}</p>}

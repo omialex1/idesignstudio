@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { getAdminResetEmail } from "@/lib/admin/password";
 import { sendEmail } from "@/lib/email/client";
+import {
+  HOUR,
+  checkRateLimits,
+  clientIp,
+  tooManyRequests,
+} from "@/lib/security/rate-limit";
 import { adminPasswordResetEmail } from "@/lib/email/templates/admin-password-reset";
 import {
   generateResetToken,
@@ -10,7 +16,17 @@ import {
 
 const MIN_INTERVAL_MS = 5 * 60 * 1000;
 
-export async function POST() {
+export async function POST(request: Request) {
+  const wait = await checkRateLimits([
+    {
+      action: "admin-forgot-ip",
+      id: clientIp(request),
+      limit: 5,
+      windowMs: HOUR,
+    },
+  ]);
+  if (wait) return tooManyRequests(wait);
+
   const recipient = getAdminResetEmail();
 
   // Always answer the same way, so this page never reveals anything.

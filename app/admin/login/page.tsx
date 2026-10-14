@@ -25,7 +25,11 @@ export default function AdminLoginPage() {
       router.push("/admin");
       router.refresh();
     } else {
-      setError("Parolă incorectă.");
+      setError(
+        res.status === 429
+          ? "Prea multe încercări. Încearcă din nou peste câteva minute."
+          : "Parolă incorectă.",
+      );
       setLoading(false);
     }
   }
@@ -40,7 +44,10 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-sm font-medium text-taupe-700">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-taupe-700"
+            >
               Parolă
             </label>
             <input

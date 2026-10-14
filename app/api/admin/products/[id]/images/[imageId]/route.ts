@@ -33,7 +33,10 @@ export async function PATCH(_request: Request, { params }: Params) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const ordered = [imageId, ...images.map((i) => i.id).filter((i) => i !== imageId)];
+  const ordered = [
+    imageId,
+    ...images.map((i) => i.id).filter((i) => i !== imageId),
+  ];
   await prisma.$transaction(
     ordered.map((id, index) =>
       prisma.productImage.update({ where: { id }, data: { sortOrder: index } }),

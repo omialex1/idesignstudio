@@ -3,8 +3,24 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/client";
 import { ADMIN_MIN_PASSWORD_LENGTH } from "@/lib/admin/password";
 import { hashResetToken } from "@/lib/customer/reset-token";
+import {
+  HOUR,
+  checkRateLimits,
+  clientIp,
+  tooManyRequests,
+} from "@/lib/security/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const wait = await checkRateLimits([
+    {
+      action: "admin-reset-ip",
+      id: clientIp(request),
+      limit: 10,
+      windowMs: HOUR,
+    },
+  ]);
+  if (wait) return tooManyRequests(wait);
+
   const { token, password } = await request.json().catch(() => ({}));
   if (typeof token !== "string" || typeof password !== "string") {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });

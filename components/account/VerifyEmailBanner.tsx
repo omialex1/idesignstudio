@@ -22,7 +22,14 @@ export default function VerifyEmailBanner() {
       if (res.ok) {
         setMessage({ text: t("verificationSent"), error: false });
       } else if (res.status === 429) {
-        setMessage({ text: t("verificationTooSoon"), error: true });
+        const body = await res.json().catch(() => ({}));
+        setMessage({
+          text:
+            body.error === "too_many_requests"
+              ? t("tooManyRequests")
+              : t("verificationTooSoon"),
+          error: true,
+        });
       } else {
         setMessage({ text: t("genericError"), error: true });
       }

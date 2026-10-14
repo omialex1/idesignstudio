@@ -7,6 +7,13 @@ import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import { finalPriceCents, variantPricing } from "@/lib/pricing";
 import { validateAddress } from "@/lib/address/validate";
 import {
+  DAY,
+  HOUR,
+  checkRateLimits,
+  clientIp,
+  tooManyRequests,
+} from "@/lib/security/rate-limit";
+import {
   DEFAULT_MAX_QUANTITY,
   TIERED_MAX_QUANTITY,
   tierFor,
@@ -74,6 +81,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
+  // against bots placing fake orders (cash on delivery especially)
+  const ipWait = await checkRateLimits([
+    { action: "checkout-ip", id: clientIp(request), limit: 10, windowMs: HOUR },
+  ]);
+  if (ipWait) return tooManyRequests(ipWait);
+
   const locale = body.locale === "en" ? "en" : "ro";
 
   const customer = {
@@ -112,6 +125,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: checked.error }, { status: 400 });
   }
   customer.phone = checked.phone;
+  if (checked.phone) {
+    const phoneWait = await checkRateLimits([
+      { action: "checkout-phone", id: checked.phone, limit: 6, windowMs: DAY },
+    ]);
+    if (phoneWait) return tooManyRequests(phoneWait);
+  }
   customer.county = checked.county;
   customer.city = checked.city;
   const addressUnverified = checked.unverified;

@@ -9,17 +9,20 @@ export default function ForgotPasswordPage() {
   const locale = useLocale();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    await fetch("/api/account/forgot-password", {
+    setError(null);
+    const res = await fetch("/api/account/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, locale }),
     });
-    setSent(true);
+    if (res.status === 429) setError(t("tooManyRequests"));
+    else setSent(true);
     setLoading(false);
   }
 
@@ -44,6 +47,7 @@ export default function ForgotPasswordPage() {
                 className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400"
               />
             </label>
+            {error && <p className="text-sm text-red-600">{error}</p>}
             <button
               type="submit"
               disabled={loading}

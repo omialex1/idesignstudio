@@ -5,6 +5,11 @@ import {
   destroyCustomerSession,
   getCurrentCustomerId,
 } from "@/lib/customer/auth";
+import {
+  HOUR,
+  checkRateLimits,
+  tooManyRequests,
+} from "@/lib/security/rate-limit";
 
 // Deletes the account for good. The password is asked again so a stolen
 // session alone cannot do it. Orders are kept (accounting records) but are
@@ -15,6 +20,11 @@ export async function POST(request: NextRequest) {
   if (!customerId) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const wait = await checkRateLimits([
+    { action: "delete-customer", id: customerId, limit: 10, windowMs: HOUR },
+  ]);
+  if (wait) return tooManyRequests(wait);
 
   const { password } = await request.json().catch(() => ({}));
   if (!password) {

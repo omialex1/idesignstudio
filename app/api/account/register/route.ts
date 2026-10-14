@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/client";
 import { createCustomerSession } from "@/lib/customer/auth";
+import { isValidPassword } from "@/lib/validation/password";
+import {
+  HOUR,
+  checkRateLimits,
+  clientIp,
+  tooManyRequests,
+} from "@/lib/security/rate-limit";
 import { sendEmail } from "@/lib/email/client";
 import { welcomeEmail } from "@/lib/email/templates/welcome";
 import { createVerificationLink } from "@/lib/customer/verify";
@@ -12,7 +19,11 @@ export async function POST(request: NextRequest) {
   if (!email || !password || !name) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
-  if (String(password).length < 8) {
+  const wait = await checkRateLimits([
+    { action: "register-ip", id: clientIp(request), limit: 5, windowMs: HOUR },
+  ]);
+  if (wait) return tooManyRequests(wait);
+  if (!isValidPassword(String(password))) {
     return NextResponse.json({ error: "weak_password" }, { status: 400 });
   }
 

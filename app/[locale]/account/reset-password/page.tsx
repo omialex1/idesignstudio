@@ -4,6 +4,8 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import PasswordRequirements from "@/components/account/PasswordRequirements";
+import { isValidPassword } from "@/lib/validation/password";
 
 export default function ResetPasswordPage() {
   return (
@@ -40,7 +42,8 @@ function ResetPasswordForm() {
       setTimeout(() => router.push("/account/login"), 2000);
     } else {
       const body = await res.json().catch(() => ({}));
-      if (body.error === "weak_password") setError(t("weakPassword"));
+      if (res.status === 429) setError(t("tooManyRequests"));
+      else if (body.error === "weak_password") setError(t("weakPassword"));
       else setError(t("invalidOrExpiredToken"));
       setLoading(false);
     }
@@ -70,11 +73,17 @@ function ResetPasswordForm() {
               <input
                 type="password"
                 required
-                minLength={8}
+                autoComplete="new-password"
+                ref={(el) =>
+                  el?.setCustomValidity(
+                    isValidPassword(password) ? "" : t("weakPassword"),
+                  )
+                }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400"
               />
+              <PasswordRequirements password={password} />
             </label>
 
             {error && <p className="text-sm text-red-600">{error}</p>}

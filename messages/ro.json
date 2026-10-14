@@ -85,7 +85,7 @@
     "loginLink": "Conecteaza-te",
     "invalidCredentials": "Email sau parola incorecta.",
     "emailTaken": "Exista deja un cont cu acest email.",
-    "weakPassword": "Parola trebuie sa aiba cel putin 8 caractere.",
+    "weakPassword": "Parola trebuie să aibă cel puțin 8 caractere, o literă mică, o literă mare, o cifră și un caracter special.",
     "genericError": "A aparut o eroare. Te rugam sa incerci din nou.",
     "logout": "Deconectare",
     "welcomeBack": "Salut",
@@ -152,7 +152,14 @@
     "errorPostalCode": "Codul poștal trebuie să aibă exact 6 cifre.",
     "errorAmbiguousLocality": "Alege localitatea din listă: mai multe localități din județ au același nume.",
     "errorIncompleteAddress": "Alege județul și localitatea împreună, sau lasă-le goale pe amândouă.",
-    "errorMissingName": "Numele nu poate fi gol."
+    "errorMissingName": "Numele nu poate fi gol.",
+    "tooManyRequests": "Prea multe încercări. Încearcă din nou peste câteva minute.",
+    "pwRequirementsTitle": "Cerințele parolei",
+    "pwReqLength": "Cel puțin 8 caractere",
+    "pwReqLower": "O literă mică",
+    "pwReqUpper": "O literă mare",
+    "pwReqDigit": "O cifră",
+    "pwReqSpecial": "Un caracter special (ex: ! ? # @ %)"
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",
@@ -289,7 +296,8 @@
     "errorPostalCode": "Codul poștal trebuie să aibă exact 6 cifre.",
     "errorCounty": "Alege un județ din listă.",
     "selectCounty": "Alege județul",
-    "errorLocality": "Alege localitatea din listă: mai multe localități din județ au același nume."
+    "errorLocality": "Alege localitatea din listă: mai multe localități din județ au același nume.",
+    "errorTooMany": "Ai trimis prea multe comenzi într-un timp scurt. Încearcă din nou peste puțin timp sau scrie-ne la contact@idesignstudio.ro."
   },
   "Withdrawal": {
     "title": "Retragere din contract",

@@ -125,6 +125,7 @@ export default function CheckoutPage() {
     invalid_postal_code: t("errorPostalCode"),
     invalid_county: t("errorCounty"),
     ambiguous_locality: t("errorLocality"),
+    too_many_requests: t("errorTooMany"),
   };
 
   async function handleSubmit(e: React.FormEvent) {

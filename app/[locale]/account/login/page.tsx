@@ -27,7 +27,9 @@ export default function AccountLoginPage() {
       router.push("/account");
       router.refresh();
     } else {
-      setError(t("invalidCredentials"));
+      setError(
+        res.status === 429 ? t("tooManyRequests") : t("invalidCredentials"),
+      );
       setLoading(false);
     }
   }

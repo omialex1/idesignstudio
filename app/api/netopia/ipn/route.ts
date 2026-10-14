@@ -11,11 +11,7 @@ import {
 const ERROR_TEMPORARY = 1;
 const ERROR_PERMANENT = 2;
 
-function reply(
-  errorType: number,
-  errorMessage: string | null,
-  status: number,
-) {
+function reply(errorType: number, errorMessage: string | null, status: number) {
   return NextResponse.json(
     { errorType, errorCode: null, errorMessage },
     { status },

@@ -242,6 +242,8 @@ model Customer {
   postalCode      String?
   // Set when the customer clicks the link sent to their e-mail
   emailVerifiedAt DateTime?
+  // Raised when the password changes, so older logins stop working
+  sessionVersion  Int                      @default(0)
   createdAt       DateTime                 @default(now())
   updatedAt       DateTime                 @updatedAt
   orders          Order[]
@@ -296,4 +298,13 @@ model AdminPasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+}
+
+// Counters for the limits on login, sign-up, checkout and similar. The key is a
+// hash (action + IP / e-mail / phone), never the raw value; rows older than a
+// day are removed.
+model RateLimit {
+  key         String   @id
+  count       Int
+  windowStart DateTime
 }

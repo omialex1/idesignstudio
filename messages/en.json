@@ -85,7 +85,7 @@
     "loginLink": "Log in",
     "invalidCredentials": "Invalid email or password.",
     "emailTaken": "An account with this email already exists.",
-    "weakPassword": "Password must be at least 8 characters.",
+    "weakPassword": "The password needs at least 8 characters, a lower-case letter, an upper-case letter, a digit and a special character.",
     "genericError": "Something went wrong. Please try again.",
     "logout": "Log out",
     "welcomeBack": "Hi",
@@ -152,7 +152,14 @@
     "errorPostalCode": "The postal code must have exactly 6 digits.",
     "errorAmbiguousLocality": "Pick the locality from the list: several places in the county have the same name.",
     "errorIncompleteAddress": "Choose the county and the locality together, or leave both empty.",
-    "errorMissingName": "The name cannot be empty."
+    "errorMissingName": "The name cannot be empty.",
+    "tooManyRequests": "Too many attempts. Please try again in a few minutes.",
+    "pwRequirementsTitle": "Password requirements",
+    "pwReqLength": "At least 8 characters",
+    "pwReqLower": "A lower-case letter",
+    "pwReqUpper": "An upper-case letter",
+    "pwReqDigit": "A digit",
+    "pwReqSpecial": "A special character (e.g. ! ? # @ %)"
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",
@@ -289,7 +296,8 @@
     "errorPostalCode": "The postal code must have exactly 6 digits.",
     "errorCounty": "Choose a county from the list.",
     "selectCounty": "Choose the county",
-    "errorLocality": "Pick the locality from the list: several places in the county have the same name."
+    "errorLocality": "Pick the locality from the list: several places in the county have the same name.",
+    "errorTooMany": "You sent too many orders in a short time. Please try again in a little while or write to us at contact@idesignstudio.ro."
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",

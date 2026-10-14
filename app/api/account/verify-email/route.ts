@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { hashResetToken } from "@/lib/customer/reset-token";
+import {
+  HOUR,
+  checkRateLimits,
+  clientIp,
+  tooManyRequests,
+} from "@/lib/security/rate-limit";
 
 // Confirms the e-mail address from the link in the message. Once the address is
 // confirmed, orders placed as a guest with the same address are connected to
 // the account (only the owner of the mailbox can reach this point).
 export async function POST(request: NextRequest) {
+  const wait = await checkRateLimits([
+    { action: "verify-ip", id: clientIp(request), limit: 20, windowMs: HOUR },
+  ]);
+  if (wait) return tooManyRequests(wait);
   const { token } = await request.json().catch(() => ({}));
   if (!token) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });

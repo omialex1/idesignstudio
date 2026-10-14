@@ -29,9 +29,11 @@ export default function DeleteAccountForm() {
         return;
       }
       setError(
-        body.error === "wrong_password"
-          ? t("wrongPassword")
-          : t("genericError"),
+        res.status === 429
+          ? t("tooManyRequests")
+          : body.error === "wrong_password"
+            ? t("wrongPassword")
+            : t("genericError"),
       );
     } catch {
       setError(t("genericError"));

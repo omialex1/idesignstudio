@@ -5,6 +5,12 @@ import {
   RESET_TOKEN_TTL_MS,
 } from "@/lib/customer/reset-token";
 import { sendEmail } from "@/lib/email/client";
+import {
+  HOUR,
+  checkRateLimits,
+  clientIp,
+  tooManyRequests,
+} from "@/lib/security/rate-limit";
 import { passwordResetEmail } from "@/lib/email/templates/password-reset";
 
 export async function POST(request: NextRequest) {
@@ -14,6 +20,13 @@ export async function POST(request: NextRequest) {
   }
 
   const normalizedEmail = String(email).trim().toLowerCase();
+
+  // also stops someone from flooding a person's mailbox with reset e-mails
+  const wait = await checkRateLimits([
+    { action: "forgot-ip", id: clientIp(request), limit: 5, windowMs: HOUR },
+    { action: "forgot-email", id: normalizedEmail, limit: 3, windowMs: HOUR },
+  ]);
+  if (wait) return tooManyRequests(wait);
   const customer = await prisma.customer.findUnique({
     where: { email: normalizedEmail },
   });

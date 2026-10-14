@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import PasswordRequirements from "@/components/account/PasswordRequirements";
+import { isValidPassword } from "@/lib/validation/password";
 
 export default function ChangePasswordForm() {
   const t = useTranslations("Account");
@@ -28,6 +30,8 @@ export default function ChangePasswordForm() {
         setCurrentPassword("");
         setNewPassword("");
         setMessage({ text: t("passwordChanged"), error: false });
+      } else if (res.status === 429) {
+        setMessage({ text: t("tooManyRequests"), error: true });
       } else if (body.error === "wrong_password") {
         setMessage({ text: t("wrongPassword"), error: true });
       } else if (body.error === "weak_password") {
@@ -61,12 +65,17 @@ export default function ChangePasswordForm() {
         <input
           type="password"
           required
-          minLength={8}
           autoComplete="new-password"
+          ref={(el) =>
+            el?.setCustomValidity(
+              isValidPassword(newPassword) ? "" : t("weakPassword"),
+            )
+          }
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400"
         />
+        <PasswordRequirements password={newPassword} />
       </label>
       {message && (
         <p
