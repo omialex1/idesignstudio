@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { PENDING_ORDER_KEY } from "@/lib/cart/pending-order";
@@ -40,6 +40,29 @@ export default function CheckoutPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // A logged-in customer gets name and e-mail filled in (only empty fields).
+  useEffect(() => {
+    let active = true;
+    fetch("/api/account/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((me) => {
+        if (!active || !me?.loggedIn) return;
+        const parts = String(me.name ?? "").trim().split(/\s+/);
+        const firstName = parts[0] ?? "";
+        const lastName = parts.slice(1).join(" ");
+        setForm((prev) => ({
+          ...prev,
+          firstName: prev.firstName || firstName,
+          lastName: prev.lastName || lastName,
+          email: prev.email || String(me.email ?? ""),
+        }));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function update(field: keyof typeof emptyForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));

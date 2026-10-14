@@ -26,6 +26,9 @@ export async function sendOrderEmails(order: OrderWithItems) {
       totalCents: order.totalCents,
       currency: order.currency,
       paymentMethod: order.paymentMethod,
+      orderUrl: order.customerId
+        ? `${(process.env.NEXT_PUBLIC_SITE_URL || "https://www.idesignstudio.ro").replace(/\/$/, "")}/${order.locale === "en" ? "en" : "ro"}/account/orders/${order.id}`
+        : undefined,
     });
     await sendEmail({ to: order.customerEmail, ...confirmation });
   } catch (err) {

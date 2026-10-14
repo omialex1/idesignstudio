@@ -40,9 +40,10 @@ export default async function AccountOrdersPage({
         ) : (
           <div className="mt-6 flex flex-col gap-3">
             {orders.map((order) => (
-              <div
+              <Link
                 key={order.id}
-                className="flex items-center justify-between rounded-xl border border-cream-200 bg-white px-4 py-3"
+                href={`/account/orders/${order.id}`}
+                className="flex items-center justify-between rounded-xl border border-cream-200 bg-white px-4 py-3 transition-colors hover:border-salamander-400"
               >
                 <div>
                   <p className="font-mono text-xs text-taupe-500">
@@ -58,7 +59,7 @@ export default async function AccountOrdersPage({
                   {formatPrice(order.totalCents, order.currency, locale)}
                 </span>
                 <OrderStatusBadge status={order.status} />
-              </div>
+              </Link>
             ))}
           </div>
         )}
