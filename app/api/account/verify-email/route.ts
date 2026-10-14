@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { hashResetToken } from "@/lib/customer/reset-token";
+import { createCustomerSession } from "@/lib/customer/auth";
+import {
+  clearPendingVerification,
+  getPendingCustomerId,
+} from "@/lib/customer/pending";
 import {
   HOUR,
   checkRateLimits,
@@ -45,5 +50,20 @@ export async function POST(request: NextRequest) {
     }),
   ]);
 
-  return NextResponse.json({ ok: true, linkedOrders: linked.count });
+  // Same browser that created the account: log it in right away. Otherwise
+  // (link opened in the mail app) the person logs in with the password; the
+  // browser that is waiting is logged in by the status check.
+  let loggedIn = false;
+  if ((await getPendingCustomerId()) === customer.id) {
+    await createCustomerSession(customer.id);
+    await clearPendingVerification();
+    loggedIn = true;
+  }
+
+  return NextResponse.json({
+    ok: true,
+    linkedOrders: linked.count,
+    loggedIn,
+    email: customer.email,
+  });
 }

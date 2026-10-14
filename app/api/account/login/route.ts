@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/client";
 import { createCustomerSession } from "@/lib/customer/auth";
+import { setPendingVerification } from "@/lib/customer/pending";
+import { resendVerificationEmail } from "@/lib/customer/verify";
 import {
   MINUTE,
   checkRateLimits,
@@ -43,6 +45,20 @@ export async function POST(request: NextRequest) {
   const valid = await bcrypt.compare(String(password), customer.passwordHash);
   if (!valid) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+  }
+
+  // the password is right, but the address was never confirmed
+  if (!customer.emailVerifiedAt) {
+    try {
+      await resendVerificationEmail(customer); // skipped if one was sent a minute ago
+    } catch (err) {
+      console.error("Failed to send verification email", err);
+    }
+    await setPendingVerification(customer.id);
+    return NextResponse.json(
+      { error: "email_not_verified", email: customer.email },
+      { status: 403 },
+    );
   }
 
   await createCustomerSession(customer.id);

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentCustomerId } from "@/lib/customer/auth";
+import { getPendingCustomerId } from "@/lib/customer/pending";
 import { getCustomerById } from "@/lib/customer/queries";
 import { resendVerificationEmail } from "@/lib/customer/verify";
 import {
@@ -9,7 +10,8 @@ import {
 } from "@/lib/security/rate-limit";
 
 export async function POST() {
-  const customerId = await getCurrentCustomerId();
+  const customerId =
+    (await getCurrentCustomerId()) ?? (await getPendingCustomerId());
   const customer = customerId ? await getCustomerById(customerId) : null;
   if (!customer) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });

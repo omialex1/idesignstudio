@@ -3,15 +3,17 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 
 type State =
   | { status: "working" }
-  | { status: "done"; linked: number }
+  // loggedIn: this browser created the account and is now logged in
+  | { status: "done"; linked: number; loggedIn: boolean; email: string }
   | { status: "invalid" };
 
 function VerifyEmail() {
   const t = useTranslations("Account");
+  const router = useRouter();
   const token = useSearchParams().get("token");
   const [state, setState] = useState<State>(
     token ? { status: "working" } : { status: "invalid" },
@@ -28,9 +30,21 @@ function VerifyEmail() {
       .then(async (res) => {
         const body = await res.json().catch(() => ({}));
         if (!active) return;
+        if (res.ok && body.loggedIn) {
+          // same browser that created the account: straight into the account
+          setTimeout(() => {
+            router.push("/account");
+            router.refresh();
+          }, 1500);
+        }
         setState(
           res.ok
-            ? { status: "done", linked: Number(body.linkedOrders) || 0 }
+            ? {
+                status: "done",
+                linked: Number(body.linkedOrders) || 0,
+                loggedIn: Boolean(body.loggedIn),
+                email: String(body.email ?? ""),
+              }
             : { status: "invalid" },
         );
       })
@@ -40,7 +54,7 @@ function VerifyEmail() {
     return () => {
       active = false;
     };
-  }, [token]);
+  }, [token, router]);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
@@ -54,22 +68,38 @@ function VerifyEmail() {
         {state.status === "done" && (
           <>
             <p className="mt-4 text-sm text-green-700">
-              {t("verifyEmailDone")}
-            </p>
-            <p className="mt-2 text-sm text-taupe-600">
-              {t("verifyEmailCloseHint")}
+              {state.loggedIn
+                ? t("verifyEmailLoggingIn")
+                : t("verifyEmailDone")}
             </p>
             {state.linked > 0 && (
               <p className="mt-2 text-sm text-taupe-600">
                 {t("verifyEmailLinked", { count: state.linked })}
               </p>
             )}
-            <Link
-              href="/account"
-              className="mt-6 inline-block rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
-            >
-              {t("dashboardTitle")}
-            </Link>
+            {state.loggedIn ? (
+              <Link
+                href="/account"
+                className="mt-6 inline-block rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
+              >
+                {t("goToAccount")}
+              </Link>
+            ) : (
+              <>
+                <p className="mt-2 text-sm text-taupe-600">
+                  {t("verifyEmailLoginHint")}
+                </p>
+                <Link
+                  href={`/account/login?confirmed=1&email=${encodeURIComponent(state.email)}`}
+                  className="mt-6 inline-block rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
+                >
+                  {t("login")}
+                </Link>
+                <p className="mt-4 text-xs text-taupe-500">
+                  {t("verifyEmailCloseHint")}
+                </p>
+              </>
+            )}
           </>
         )}
         {state.status === "invalid" && (

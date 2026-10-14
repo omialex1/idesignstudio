@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import LoggedInGate from "@/components/account/LoggedInGate";
+import VerifyPending from "@/components/account/VerifyPending";
 import Turnstile, { CAPTCHA_ENABLED } from "@/components/security/Turnstile";
 import PasswordRequirements from "@/components/account/PasswordRequirements";
 import { isValidPassword } from "@/lib/validation/password";
@@ -11,12 +12,13 @@ import { isValidPassword } from "@/lib/validation/password";
 export default function AccountRegisterPage() {
   const t = useTranslations("Account");
   const locale = useLocale();
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // set once the account exists: the e-mail still has to be confirmed
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaNonce, setCaptchaNonce] = useState(0);
 
@@ -31,13 +33,13 @@ export default function AccountRegisterPage() {
       body: JSON.stringify({ name, email, password, locale, captchaToken }),
     });
 
+    const body = await res.json().catch(() => ({}));
     if (res.ok) {
-      router.push("/account");
-      router.refresh();
+      setPendingEmail(body.email ?? email);
+      setLoading(false);
       return;
     }
 
-    const body = await res.json().catch(() => ({}));
     if (res.status === 429) setError(t("tooManyRequests"));
     else if (body.error === "email_taken") setError(t("emailTaken"));
     else if (body.error === "weak_password") setError(t("weakPassword"));
@@ -53,67 +55,76 @@ export default function AccountRegisterPage() {
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
       <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white p-8">
         <LoggedInGate>
-          <h1 className="font-display text-2xl text-taupe-800">
-            {t("registerTitle")}
-          </h1>
+          {pendingEmail ? (
+            <VerifyPending email={pendingEmail} />
+          ) : (
+            <>
+              <h1 className="font-display text-2xl text-taupe-800">
+                {t("registerTitle")}
+              </h1>
 
-          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-            <Field label={t("name")}>
-              <input
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputClass}
-              />
-            </Field>
-            <Field label={t("email")}>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
-              />
-            </Field>
-            <Field label={t("password")}>
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
-                ref={(el) =>
-                  el?.setCustomValidity(
-                    isValidPassword(password) ? "" : t("weakPassword"),
-                  )
-                }
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
-              />
-              <PasswordRequirements password={password} />
-            </Field>
+              <form
+                onSubmit={handleSubmit}
+                className="mt-6 flex flex-col gap-4"
+              >
+                <Field label={t("name")}>
+                  <input
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label={t("email")}>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label={t("password")}>
+                  <input
+                    type="password"
+                    required
+                    autoComplete="new-password"
+                    ref={(el) =>
+                      el?.setCustomValidity(
+                        isValidPassword(password) ? "" : t("weakPassword"),
+                      )
+                    }
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={inputClass}
+                  />
+                  <PasswordRequirements password={password} />
+                </Field>
 
-            <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
+                <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+                {error && <p className="text-sm text-red-600">{error}</p>}
 
-            <button
-              type="submit"
-              disabled={loading || (CAPTCHA_ENABLED && !captchaToken)}
-              className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
-            >
-              {loading ? t("registering") : t("register")}
-            </button>
-          </form>
+                <button
+                  type="submit"
+                  disabled={loading || (CAPTCHA_ENABLED && !captchaToken)}
+                  className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
+                >
+                  {loading ? t("registering") : t("register")}
+                </button>
+              </form>
 
-          <p className="mt-5 text-sm text-taupe-600">
-            {t("haveAccount")}{" "}
-            <Link
-              href="/account/login"
-              className="text-salamander-600 hover:underline"
-            >
-              {t("loginLink")}
-            </Link>
-          </p>
+              <p className="mt-5 text-sm text-taupe-600">
+                {t("haveAccount")}{" "}
+                <Link
+                  href="/account/login"
+                  className="text-salamander-600 hover:underline"
+                >
+                  {t("loginLink")}
+                </Link>
+              </p>
+            </>
+          )}
         </LoggedInGate>
       </div>
     </div>

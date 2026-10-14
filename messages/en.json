@@ -165,8 +165,15 @@
     "alreadyLoggedInBody": "You are logged in as {name} ({email}). To use another account, log out first.",
     "goToAccount": "Go to my account",
     "logoutAndContinue": "Log out and continue",
-    "verifyEmailCloseHint": "You can close this window. The window where you created the account updates by itself.",
-    "verifyBannerWaiting": "After you click the link in the e-mail, this page updates by itself."
+    "verifyEmailCloseHint": "If you left the window where you created the account open, it logs you in by itself.",
+    "verifyBannerWaiting": "After you click the link in the e-mail, this page updates by itself.",
+    "verifyPendingTitle": "Check your e-mail",
+    "verifyPendingReminder": "Your account is not confirmed yet, so we cannot log you in. We sent the confirmation link again.",
+    "verifyPendingBody": "We sent a confirmation link to {email}. Click it to activate your account. Check your Spam folder too.",
+    "verifyPendingAuto": "This page logs you in by itself once you confirm, you don't need to do anything else.",
+    "verifyEmailLoggingIn": "Your account is confirmed. Logging you in…",
+    "verifyEmailLoginHint": "Log in with the e-mail and password you chose when you created the account.",
+    "loginConfirmedNote": "Your account is confirmed. Log in with the password you chose."
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",

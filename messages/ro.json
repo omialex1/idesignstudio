@@ -165,8 +165,15 @@
     "alreadyLoggedInBody": "Ești conectat ca {name} ({email}). Pentru alt cont, deconectează-te mai întâi.",
     "goToAccount": "Mergi la contul meu",
     "logoutAndContinue": "Deconectează-te și continuă",
-    "verifyEmailCloseHint": "Poți închide această fereastră. Fereastra în care ai creat contul se actualizează singură.",
-    "verifyBannerWaiting": "După ce apeși linkul din e-mail, această pagină se actualizează singură."
+    "verifyEmailCloseHint": "Dacă ai lăsat deschisă fereastra în care ai creat contul, ea te conectează singură.",
+    "verifyBannerWaiting": "După ce apeși linkul din e-mail, această pagină se actualizează singură.",
+    "verifyPendingTitle": "Verifică-ți e-mailul",
+    "verifyPendingReminder": "Contul tău nu este confirmat încă, deci nu te putem conecta. Ți-am retrimis linkul de confirmare.",
+    "verifyPendingBody": "Ți-am trimis un link de confirmare la {email}. Apasă-l ca să-ți activezi contul. Verifică și folderul Spam.",
+    "verifyPendingAuto": "Această pagină te conectează singură după ce confirmi, nu trebuie să faci nimic altceva.",
+    "verifyEmailLoggingIn": "Contul tău este confirmat. Te conectăm…",
+    "verifyEmailLoginHint": "Conectează-te cu e-mailul și parola pe care le-ai ales la crearea contului.",
+    "loginConfirmedNote": "Contul este confirmat. Conectează-te cu parola aleasă."
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",

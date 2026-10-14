@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/client";
-import { createCustomerSession } from "@/lib/customer/auth";
+import { setPendingVerification } from "@/lib/customer/pending";
 import { isValidPassword } from "@/lib/validation/password";
 import { verifyCaptcha } from "@/lib/security/turnstile";
 import {
@@ -50,7 +50,9 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  await createCustomerSession(customer.id);
+  // not logged in yet: the e-mail has to be confirmed first. This browser is
+  // remembered, so it is logged in automatically once that happens.
+  await setPendingVerification(customer.id);
 
   try {
     const verifyUrl = await createVerificationLink(customer);
@@ -64,5 +66,5 @@ export async function POST(request: NextRequest) {
     console.error("Failed to send welcome email", err);
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, email: customer.email });
 }
