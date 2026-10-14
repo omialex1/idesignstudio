@@ -1,8 +1,10 @@
 import crypto from "node:crypto";
 
+// From NETOPIA's official API spec (https://secure.sandbox.netopia-payments.com/spec).
+// Sandbox keys do not work on live and the other way round.
 const BASE_URLS = {
   sandbox: "https://secure.sandbox.netopia-payments.com",
-  live: "https://secure.netopia-payments.com",
+  live: "https://secure.mobilpay.ro/pay",
 };
 
 const PRODUCT_VAT_PERCENT = 0;
