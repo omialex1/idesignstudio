@@ -12,6 +12,7 @@ import {
   HOUR,
   checkRateLimits,
   clientIp,
+  refundRateLimit,
   tooManyRequests,
 } from "@/lib/security/rate-limit";
 import {
@@ -129,7 +130,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: checked.error }, { status: 400 });
   }
   customer.phone = checked.phone;
-  if (checked.phone) {
+  // Per phone number: only for cash on delivery, where fake orders cost a bot
+  // nothing. Card orders are already limited per IP address and a failed or
+  // abandoned card payment must not use up a customer's daily orders.
+  if (checked.phone && body.paymentMethod === "cod") {
     const phoneWait = await checkRateLimits([
       { action: "checkout-phone", id: checked.phone, limit: 6, windowMs: DAY },
     ]);
@@ -534,6 +538,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ paymentUrl, orderId: order.id });
   } catch (err) {
     console.error("Could not start Netopia payment", err);
+    // not the customer's fault: give the attempt back
+    await refundRateLimit("checkout-ip", clientIp(request));
     await prisma.order.update({
       where: { id: order.id },
       data: { status: "FAILED" },

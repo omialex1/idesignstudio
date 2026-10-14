@@ -87,6 +87,19 @@ export async function checkRateLimits(rules: RateRule[]): Promise<number> {
   }
 }
 
+// Gives back an attempt that was not the customer's fault (for example the
+// payment could not be started), so honest retries are not used up.
+export async function refundRateLimit(action: string, id: string) {
+  try {
+    await prisma.rateLimit.updateMany({
+      where: { key: keyOf(action, id), count: { gt: 0 } },
+      data: { count: { decrement: 1 } },
+    });
+  } catch (err) {
+    console.error("Could not refund a rate limit attempt", err);
+  }
+}
+
 export function tooManyRequests(retryAfterSec: number) {
   return NextResponse.json(
     { error: "too_many_requests", retryAfterSec },
