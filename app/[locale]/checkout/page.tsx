@@ -301,14 +301,7 @@ export default function CheckoutPage() {
                   className={inputClass}
                 />
               </Field>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <LocalityField
-                  county={form.county}
-                  value={form.city}
-                  onChange={(v) => update("city", v)}
-                  label={t("city")}
-                  inputClassName={inputClass}
-                />
+              <div className="grid gap-4 sm:grid-cols-[1fr_1.6fr]">
                 <Field label={t("county")}>
                   <select
                     required
@@ -330,6 +323,13 @@ export default function CheckoutPage() {
                     ))}
                   </select>
                 </Field>
+                <LocalityField
+                  county={form.county}
+                  value={form.city}
+                  onChange={(v) => update("city", v)}
+                  label={t("city")}
+                  inputClassName={inputClass}
+                />
                 <Field label={t("postalCode")}>
                   <input
                     inputMode="numeric"

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLocalities } from "@/lib/geo/localities";
+import { getLocalities, getUrban } from "@/lib/geo/localities";
 
 // The localities of one county, for the checkout and account address fields.
 export async function GET(request: NextRequest) {
   const county = request.nextUrl.searchParams.get("county") ?? "";
   const localities = getLocalities(county);
   return NextResponse.json(
-    { localities },
+    { localities, urban: getUrban(county) },
     {
       headers: {
         // the list only changes when the site is rebuilt with newer data

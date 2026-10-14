@@ -54,6 +54,8 @@ const stripUatPrefix = (name) => name.replace(/^(MUNICIPIUL|ORA[ȘŞS]UL|ORA[Ș�
 const fold = (s) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[\s-]+/g, " ").trim();
 
+// Kind of every town/city, so the address field can list them first and label them.
+const URBAN_KIND = { 1: "seat", 5: "seat", 4: "municipality", 2: "town" };
 const UAT_LABEL = { 1: "municipiul", 4: "municipiul", 2: "orașul", 5: "orașul", 3: "comuna" };
 const PLACE_TYPES = new Set(["9", "10", "11", "17", "18", "19", "22", "23"]);
 
@@ -66,7 +68,11 @@ for (const r of rows.filter((x) => x.TIP === "40")) {
 const bucharestId = [...counties].find(([, n]) => n === "București")?.[0];
 
 const result = {};
-for (const name of counties.values()) result[name] = new Set();
+const urban = {};
+for (const name of counties.values()) {
+  result[name] = new Set();
+  urban[name] = {};
+}
 
 for (const r of rows) {
   const county = counties.get(r.JUD);
@@ -76,7 +82,10 @@ for (const r of rows) {
   if (r.JUD === bucharestId) {
     if (r.TIP === "6") {
       const sector = r.DENLOC.match(/(\d+)\s*$/)?.[1];
-      if (sector) result[county].add(`București, Sector ${sector}`);
+      if (sector) {
+        result[county].add(`București, Sector ${sector}`);
+        urban[county][`București, Sector ${sector}`] = "sector";
+      }
     }
     continue;
   }
@@ -84,7 +93,9 @@ for (const r of rows) {
   // Some towns have no separate row for their seat locality (e.g. Băile
   // Govora), so every town and municipality is added under its own name too.
   if (["1", "2", "4", "5"].includes(r.TIP)) {
-    result[county].add(title(stripUatPrefix(r.DENLOC)));
+    const name = title(stripUatPrefix(r.DENLOC));
+    result[county].add(name);
+    urban[county][name] = URBAN_KIND[r.TIP];
     continue;
   }
 
@@ -109,7 +120,7 @@ for (const [county, set] of Object.entries(result).sort(([a], [b]) => collator.c
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "lib", "geo");
 fs.writeFileSync(
   path.join(dir, "localities.json"),
-  JSON.stringify({ source: "SIRUTA s1 2026, data.gov.ro", counties: out }),
+  JSON.stringify({ source: "SIRUTA s1 2026, data.gov.ro", counties: out, urban }),
 );
 console.log(`counties: ${Object.keys(out).length}, localities: ${total}`);
 console.log("Valcea sample:", out["Vâlcea"].slice(0, 6));
