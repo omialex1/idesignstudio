@@ -2,6 +2,7 @@ import { getOrdersForAdmin } from "@/lib/admin/queries";
 import { formatPrice } from "@/lib/format";
 import { itemDetails } from "@/lib/orders/item-details";
 import OrderStatusBadge from "@/components/admin/OrderStatusBadge";
+import CancelOrderButton from "@/components/admin/CancelOrderButton";
 
 export default async function AdminOrdersPage() {
   const orders = await getOrdersForAdmin();
@@ -20,11 +21,15 @@ export default async function AdminOrdersPage() {
               <th className="px-4 py-3 font-medium">Data</th>
               <th className="px-4 py-3 font-medium">Total</th>
               <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Acțiuni</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((o) => (
-              <tr key={o.id} className="border-b border-cream-100 last:border-0">
+              <tr
+                key={o.id}
+                className={`border-b border-cream-100 last:border-0 ${o.status === "CANCELED" ? "opacity-60" : ""}`}
+              >
                 <td className="px-4 py-3 font-mono text-xs text-taupe-600">
                   {o.id.slice(0, 8)}
                 </td>
@@ -70,11 +75,21 @@ export default async function AdminOrdersPage() {
                 <td className="px-4 py-3">
                   <OrderStatusBadge status={o.status} />
                 </td>
+                <td className="px-4 py-3">
+                  {(o.status === "PENDING" ||
+                    o.status === "COD" ||
+                    o.status === "PAID") && (
+                    <CancelOrderButton orderId={o.id} status={o.status} />
+                  )}
+                </td>
               </tr>
             ))}
             {orders.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-taupe-400">
+                <td
+                  colSpan={7}
+                  className="px-4 py-6 text-center text-taupe-400"
+                >
                   Nicio comandă încă.
                 </td>
               </tr>

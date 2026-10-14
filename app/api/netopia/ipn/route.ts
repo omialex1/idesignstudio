@@ -63,7 +63,9 @@ export async function POST(request: NextRequest) {
 
   if (NETOPIA_PAID_STATUSES.includes(paymentStatus)) {
     const claimed = await prisma.order.updateMany({
-      where: { id: order.id, status: { not: "PAID" } },
+      // paidAt is kept when the admin cancels a paid order, so a repeated
+      // notification cannot mark it paid (and take stock) a second time
+      where: { id: order.id, status: { not: "PAID" }, paidAt: null },
       data: {
         status: "PAID",
         paidAt: new Date(),

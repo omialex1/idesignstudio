@@ -2,7 +2,9 @@ import { prisma } from "@/lib/db/client";
 
 export async function getDashboardStats() {
   const products = await prisma.product.findMany({ include: { inventory: true } });
-  const totalOrders = await prisma.order.count();
+  const totalOrders = await prisma.order.count({
+    where: { status: { notIn: ["CANCELED", "FAILED"] } },
+  });
 
   let lowStock = 0;
   let outOfStock = 0;
