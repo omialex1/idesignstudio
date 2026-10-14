@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import Turnstile, { CAPTCHA_ENABLED } from "@/components/security/Turnstile";
 import PasswordRequirements from "@/components/account/PasswordRequirements";
 import { isValidPassword } from "@/lib/validation/password";
 
@@ -15,6 +16,8 @@ export default function AccountRegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaNonce, setCaptchaNonce] = useState(0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,7 +27,7 @@ export default function AccountRegisterPage() {
     const res = await fetch("/api/account/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, locale }),
+      body: JSON.stringify({ name, email, password, locale, captchaToken }),
     });
 
     if (res.ok) {
@@ -37,7 +40,11 @@ export default function AccountRegisterPage() {
     if (res.status === 429) setError(t("tooManyRequests"));
     else if (body.error === "email_taken") setError(t("emailTaken"));
     else if (body.error === "weak_password") setError(t("weakPassword"));
+    else if (body.error === "captcha_failed") setError(t("captchaFailed"));
     else setError(t("genericError"));
+    // a proof can be used once: ask for a fresh one
+    setCaptchaToken("");
+    setCaptchaNonce((n) => n + 1);
     setLoading(false);
   }
 
@@ -83,11 +90,13 @@ export default function AccountRegisterPage() {
             <PasswordRequirements password={password} />
           </Field>
 
+          <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
+
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (CAPTCHA_ENABLED && !captchaToken)}
             className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
           >
             {loading ? t("registering") : t("register")}

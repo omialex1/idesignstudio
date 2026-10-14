@@ -13,6 +13,7 @@ import QuantityControl from "@/components/cart/QuantityControl";
 import { POSTAL_CODE_PATTERN, normalizePhone } from "@/lib/validation/phone";
 import { RO_COUNTIES } from "@/lib/geo/ro-counties";
 import LocalityField from "@/components/address/LocalityField";
+import Turnstile, { CAPTCHA_ENABLED } from "@/components/security/Turnstile";
 
 const emptyForm = {
   firstName: "",
@@ -43,6 +44,8 @@ export default function CheckoutPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaNonce, setCaptchaNonce] = useState(0);
   // error text appears once the customer has left the field
   const [touched, setTouched] = useState({ phone: false, postalCode: false });
 
@@ -125,6 +128,7 @@ export default function CheckoutPage() {
     invalid_postal_code: t("errorPostalCode"),
     invalid_county: t("errorCounty"),
     ambiguous_locality: t("errorLocality"),
+    captcha_failed: t("errorCaptcha"),
     too_many_requests: t("errorTooMany"),
   };
 
@@ -140,6 +144,7 @@ export default function CheckoutPage() {
           locale,
           termsAccepted,
           paymentMethod,
+          captchaToken,
           customer: { ...form, isCompany },
           items: items.map((item) => ({
             productId: item.productId,
@@ -165,6 +170,8 @@ export default function CheckoutPage() {
         return;
       }
       setError(errorMessages[data?.error] ?? t("errorGeneric"));
+      setCaptchaToken("");
+      setCaptchaNonce((n) => n + 1);
     } catch {
       setError(t("errorGeneric"));
     }
@@ -510,9 +517,11 @@ export default function CheckoutPage() {
 
             {error && <p className="text-sm text-salamander-600">{error}</p>}
 
+            <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
+
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || (CAPTCHA_ENABLED && !captchaToken)}
               className="rounded-full bg-salamander-500 px-6 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-tangerine-400 disabled:opacity-60"
             >
               {submitting

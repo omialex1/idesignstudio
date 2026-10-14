@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import Turnstile, { CAPTCHA_ENABLED } from "@/components/security/Turnstile";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("Account");
@@ -11,6 +12,8 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaNonce, setCaptchaNonce] = useState(0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,10 +22,14 @@ export default function ForgotPasswordPage() {
     const res = await fetch("/api/account/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, locale }),
+      body: JSON.stringify({ email, locale, captchaToken }),
     });
     if (res.status === 429) setError(t("tooManyRequests"));
-    else setSent(true);
+    else if (res.status === 400) {
+      setError(t("captchaFailed"));
+      setCaptchaToken("");
+      setCaptchaNonce((n) => n + 1);
+    } else setSent(true);
     setLoading(false);
   }
 
@@ -47,10 +54,11 @@ export default function ForgotPasswordPage() {
                 className="rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400"
               />
             </label>
+            <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
             {error && <p className="text-sm text-red-600">{error}</p>}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (CAPTCHA_ENABLED && !captchaToken)}
               className="rounded-full bg-salamander-500 px-6 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
             >
               {t("sendResetLink")}

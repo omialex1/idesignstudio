@@ -12,9 +12,10 @@ import {
   tooManyRequests,
 } from "@/lib/security/rate-limit";
 import { passwordResetEmail } from "@/lib/email/templates/password-reset";
+import { verifyCaptcha } from "@/lib/security/turnstile";
 
 export async function POST(request: NextRequest) {
-  const { email, locale } = await request.json();
+  const { email, locale, captchaToken } = await request.json();
   if (!email) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
@@ -27,6 +28,9 @@ export async function POST(request: NextRequest) {
     { action: "forgot-email", id: normalizedEmail, limit: 3, windowMs: HOUR },
   ]);
   if (wait) return tooManyRequests(wait);
+  if (!(await verifyCaptcha(captchaToken, clientIp(request)))) {
+    return NextResponse.json({ error: "captcha_failed" }, { status: 400 });
+  }
   const customer = await prisma.customer.findUnique({
     where: { email: normalizedEmail },
   });

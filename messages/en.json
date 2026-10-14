@@ -159,7 +159,8 @@
     "pwReqLower": "A lower-case letter",
     "pwReqUpper": "An upper-case letter",
     "pwReqDigit": "A digit",
-    "pwReqSpecial": "A special character (e.g. ! ? # @ %)"
+    "pwReqSpecial": "A special character (e.g. ! ? # @ %)",
+    "captchaFailed": "The anti-spam check did not pass. Please try again."
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",
@@ -185,7 +186,7 @@
     "termsPaymentHeading": "Payment methods",
     "termsPaymentBody": "You can pay online by card (Visa, Mastercard), securely processed by NETOPIA Payments, an authorized payment processor; your card details are never stored on our servers. Alternatively, you can pay by cash on delivery, in cash to the courier when the parcel arrives, for an additional cash-on-delivery fee of 3.99 RON.",
     "termsDeliveryHeading": "Delivery policy",
-    "termsDeliveryBody": "Our products (event decor, handmade items, stationery and home & lifestyle accessories) are made to order. The estimated delivery time is made up of processing/production time of 1-2 business days, plus courier transit time. We currently ship within Romania only, via courier (Sameday), with an estimated delivery time of 1-2 business days after dispatch. Shipping is a flat fee of 19.99 RON, which includes protective packaging for fragile items, and is free for orders of 200 RON or more. You'll receive a tracking number (AWB) as soon as your order ships.",
+    "termsDeliveryBody": "Our products (event decor, handmade items, stationery and home & lifestyle accessories) are made to order. The estimated delivery time is made up of processing/production time of 1-2 business days, plus courier transit time. We currently ship within Romania only, via a courier company, with an estimated delivery time of 1-2 business days after dispatch. Shipping is a flat fee of 19.99 RON, which includes protective packaging for fragile items, and is free for orders of 200 RON or more. You'll receive a tracking number (AWB) as soon as your order ships.",
     "termsReturnsHeading": "Returns & cancellation policy",
     "termsReturnsBody": "Personalized products (invitations, decor, or stationery made to your specifications — names, text, dates) cannot be returned or exchanged for reasons of personal preference once production has begun, per art. 16(c) of OUG no. 34/2014. You can cancel or modify a personalized order free of charge within 24 hours of placing it, or before production begins, whichever comes first — please contact us as soon as possible. Non-personalized products can be returned within 14 days of delivery, per the \"Right of withdrawal\" section below. If you receive a product that is damaged, defective, or different from what you ordered, see the \"Legal guarantee of conformity\" section. You can cancel a non-personalized order before it ships by writing to contact@idesignstudio.ro; we refund the amount using the same payment method within 14 days at most.",
     "termsWithdrawalHeading": "Right of withdrawal",
@@ -199,7 +200,7 @@
     "privacyControllerHeading": "Data controller",
     "privacyControllerBody": "The controller of your personal data is:",
     "privacyDataHeading": "What data we collect",
-    "privacyDataBody": "We collect the data you give us directly: name, email address, phone number and delivery address when you place an order; the company name and tax ID if you order as a company; the contents of your order and your notes; and, when you create an account, your password (stored encrypted). Your card details do not pass through our site: card payments are processed by NETOPIA Payments.",
+    "privacyDataBody": "We collect the data you give us directly: first and last name, email address, phone number and delivery address when you place an order; the company name and tax ID if you order as a company; the content of your order and your notes. If you create an account, we keep your email address, name and password (which we store only as a cryptographic fingerprint, a \"hash\", that we cannot read or recover), plus your phone number and delivery address if you choose to save them so that orders can be filled in automatically. Card details never pass through our site: card payments are processed by NETOPIA Payments.",
     "privacyUseHeading": "How we use it",
     "privacyUseBody": "We use this data solely to manage your account, process orders, communicate with you about your orders (confirmations, notifications), and to respond to your requests when applicable.",
     "privacyRightsHeading": "Your rights",
@@ -214,7 +215,7 @@
     "termsConformityBody2": "If you receive a product that is damaged, different from your order or defective, write to us at contact@idesignstudio.ro with your order number and a few photos. You can choose repair or replacement. We do it free of charge, within a reasonable time of at most 15 calendar days from your notice. If repair or replacement is not possible, you can choose a price reduction or a refund.",
     "termsConformityBody3": "The guarantee does not cover damage caused by improper use of the product or normal wear and tear. Your legal rights are not limited in any way.",
     "termsAccountHeading": "Customer account",
-    "termsAccountBody": "An account is optional: you can order without one. You are responsible for keeping your password safe. We delete your account on request, within 30 days. We may suspend accounts that are used abusively.",
+    "termsAccountBody": "An account is optional: you can also order without one. To have an account you need a valid email address that you can confirm and a password of at least 8 characters containing a lower-case letter, an upper-case letter, a digit and a special character. You are responsible for keeping your password safe and for the activity in your account; if you suspect someone else knows it, change it immediately. To protect accounts, we limit the number of login attempts, account creations and orders within a period of time. You can delete your account at any time from the account, or on request within 30 days at most; orders already placed stay with us only for accounting records. We may suspend accounts that are used abusively.",
     "termsIpHeading": "Intellectual property",
     "termsIpBody": "The texts, images, logo and design of the site belong to IDESIGN STUDIO S.R.L. and may not be copied without our consent. If you send us texts or images for personalized products, you confirm that you have the right to use them.",
     "termsLiabilityHeading": "Liability",
@@ -225,16 +226,19 @@
     "privacyCookiesHeading": "Cookies and data stored in your browser",
     "privacyCookiesIntro": "We only use what is needed for the site to work:",
     "privacyCookiesItem1": "a cookie with your chosen language (NEXT_LOCALE);",
-    "privacyCookiesItem2": "a session cookie, if you log in to your account;",
+    "privacyCookiesItem2": "a session cookie, if you log in to your account (valid for up to 30 days or until you log out; it also ends when you change your password);",
     "privacyCookiesItem3": "in your browser, we keep your shopping cart and, during a payment, the last order you started.",
     "privacyCookiesOutro": "We do not use analytics, advertising or third-party trackers. The NETOPIA payment page has its own cookie policy.",
     "privacyLegalHeading": "Legal basis",
     "privacyLegalBody": "We use your data to perform the contract (processing and delivering your order), to comply with legal obligations (invoicing and accounting records), for our legitimate interest (site security and fraud prevention) and, where we ask for it, with your consent.",
     "privacyRecipientsHeading": "Who we share data with",
-    "privacyRecipientsBody": "We share only the data that is strictly needed with the payment processor NETOPIA Payments, the courier company for delivery (currently Sameday), the providers that help us run the site (hosting, database, sending emails) and those who handle invoicing and accounting. They use the data only for that service. If a provider processes data outside the European Union, it does so with the safeguards required by law.",
+    "privacyRecipientsBody": "We share only the data that is strictly needed with the payment processor NETOPIA Payments, the courier company for delivery, the providers that help us run the site (hosting, database, sending emails) and those who handle invoicing and accounting. They use the data only for that service. If a provider processes data outside the European Union, it does so with the safeguards required by law.",
     "privacyRetentionHeading": "How long we keep data",
-    "privacyRetentionBody": "Order and invoice data, for the period required by tax and accounting law. Your customer account, until you delete it. Messages you send us, for as long as needed to resolve them.",
-    "privacyRightsComplaint": "You can also contact the National Supervisory Authority for Personal Data Processing (ANSPDCP):"
+    "privacyRetentionBody": "Order and invoice data, for the period required by tax and accounting law. The customer account, until you delete it, which you can do yourself from the account; orders already placed stay with us only for accounting records, with no link to an account. Messages sent to us, for as long as needed to resolve them. Email confirmation and password reset links expire (after 24 hours and 1 hour respectively), and the technical security counters are deleted within 24 hours at most.",
+    "privacyRightsComplaint": "You can also contact the National Supervisory Authority for Personal Data Processing (ANSPDCP):",
+    "privacySecurityHeading": "Security of your data and account",
+    "privacySecurityBody": "We protect the site and accounts with an encrypted connection (HTTPS), passwords stored only as a hash, password requirements (at least 8 characters, a lower-case letter, an upper-case letter, a digit and a special character), confirmation of your email address when you create an account, limits on the number of login, account-creation and order attempts (to prevent unauthorized access and automated abuse), and a warning email when the password is changed, which also closes your other open sessions. To limit attempts we use technical counters in which the IP address, email or phone number are kept only as a fingerprint (hash), for at most 24 hours. Our hosting provider may also keep technical connection logs (including the IP address), under its own policy.",
+    "privacyCaptchaBody": "To protect our forms from bots (account creation, password reset, orders) we use the Cloudflare Turnstile service, provided by Cloudflare, Inc. It receives your IP address and technical data from your browser to check that you are a person. The basis is our legitimate interest in security. Cloudflare may also process the data outside the European Union, with the safeguards required by law."
   },
   "Checkout": {
     "title": "Checkout",
@@ -297,7 +301,8 @@
     "errorCounty": "Choose a county from the list.",
     "selectCounty": "Choose the county",
     "errorLocality": "Pick the locality from the list: several places in the county have the same name.",
-    "errorTooMany": "You sent too many orders in a short time. Please try again in a little while or write to us at contact@idesignstudio.ro."
+    "errorTooMany": "You sent too many orders in a short time. Please try again in a little while or write to us at contact@idesignstudio.ro.",
+    "errorCaptcha": "The anti-spam check did not pass. Please try again or reload the page."
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",

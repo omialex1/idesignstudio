@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/client";
 import { createCustomerSession } from "@/lib/customer/auth";
 import { isValidPassword } from "@/lib/validation/password";
+import { verifyCaptcha } from "@/lib/security/turnstile";
 import {
   HOUR,
   checkRateLimits,
@@ -14,7 +15,7 @@ import { welcomeEmail } from "@/lib/email/templates/welcome";
 import { createVerificationLink } from "@/lib/customer/verify";
 
 export async function POST(request: NextRequest) {
-  const { email, password, name, locale } = await request.json();
+  const { email, password, name, locale, captchaToken } = await request.json();
 
   if (!email || !password || !name) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
@@ -23,6 +24,9 @@ export async function POST(request: NextRequest) {
     { action: "register-ip", id: clientIp(request), limit: 5, windowMs: HOUR },
   ]);
   if (wait) return tooManyRequests(wait);
+  if (!(await verifyCaptcha(captchaToken, clientIp(request)))) {
+    return NextResponse.json({ error: "captcha_failed" }, { status: 400 });
+  }
   if (!isValidPassword(String(password))) {
     return NextResponse.json({ error: "weak_password" }, { status: 400 });
   }

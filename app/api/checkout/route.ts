@@ -6,6 +6,7 @@ import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import { finalPriceCents, variantPricing } from "@/lib/pricing";
 import { validateAddress } from "@/lib/address/validate";
+import { verifyCaptcha } from "@/lib/security/turnstile";
 import {
   DAY,
   HOUR,
@@ -86,6 +87,9 @@ export async function POST(request: NextRequest) {
     { action: "checkout-ip", id: clientIp(request), limit: 10, windowMs: HOUR },
   ]);
   if (ipWait) return tooManyRequests(ipWait);
+  if (!(await verifyCaptcha(body.captchaToken, clientIp(request)))) {
+    return NextResponse.json({ error: "captcha_failed" }, { status: 400 });
+  }
 
   const locale = body.locale === "en" ? "en" : "ro";
 

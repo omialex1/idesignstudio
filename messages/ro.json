@@ -159,7 +159,8 @@
     "pwReqLower": "O literă mică",
     "pwReqUpper": "O literă mare",
     "pwReqDigit": "O cifră",
-    "pwReqSpecial": "Un caracter special (ex: ! ? # @ %)"
+    "pwReqSpecial": "Un caracter special (ex: ! ? # @ %)",
+    "captchaFailed": "Verificarea anti-spam nu a reușit. Încearcă din nou."
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",
@@ -185,7 +186,7 @@
     "termsPaymentHeading": "Metode de plată",
     "termsPaymentBody": "Poți plăti online cu cardul (Visa, Mastercard), procesat în siguranță prin NETOPIA Payments, un procesator autorizat de plăți; datele cardului tău nu sunt niciodată stocate pe serverele noastre. Alternativ, poți plăti ramburs, în numerar, curierului, la primirea coletului, cu o taxă suplimentară de ramburs de 3,99 lei.",
     "termsDeliveryHeading": "Politica de livrare",
-    "termsDeliveryBody": "Produsele noastre (decor pentru evenimente, obiecte handmade, papetărie și accesorii pentru casă și stil de viață) sunt confecționate la comandă. Timpul de livrare estimat este format din timpul de procesare/producție, de 1–2 zile lucrătoare, la care se adaugă timpul de transport prin curier. Livrăm în prezent doar pe teritoriul României, prin curier (Sameday), cu livrare estimată în 1–2 zile lucrătoare de la expediere. Costul de livrare este o taxă fixă de 19,99 lei, care include ambalarea de protecție pentru produsele fragile, și este gratuit pentru comenzile de 200 lei sau mai mult. Vei primi un cod de urmărire (AWB) de îndată ce comanda ta este expediată.",
+    "termsDeliveryBody": "Produsele noastre (decor pentru evenimente, obiecte handmade, papetărie și accesorii pentru casă și stil de viață) sunt confecționate la comandă. Timpul de livrare estimat este format din timpul de procesare/producție, de 1–2 zile lucrătoare, la care se adaugă timpul de transport prin curier. Livrăm în prezent doar pe teritoriul României, prin firma de curierat, cu livrare estimată în 1–2 zile lucrătoare de la expediere. Costul de livrare este o taxă fixă de 19,99 lei, care include ambalarea de protecție pentru produsele fragile, și este gratuit pentru comenzile de 200 lei sau mai mult. Vei primi un cod de urmărire (AWB) de îndată ce comanda ta este expediată.",
     "termsReturnsHeading": "Politica de retur și anulare",
     "termsReturnsBody": "Produsele personalizate (invitații, decoruri sau papetărie realizate conform specificațiilor tale — nume, text, date) nu pot fi returnate sau schimbate din motive care țin de preferința personală, odată ce producția a început, conform art. 16 lit. c) din OUG nr. 34/2014. Poți anula sau modifica gratuit o comandă personalizată în termen de 24 de ore de la plasare sau înainte de începerea producției, oricare survine mai întâi — te rugăm să ne contactezi cât mai curând posibil. Produsele nepersonalizate pot fi returnate în termen de 14 zile de la livrare, conform secțiunii „Dreptul de retragere” de mai jos. Dacă primești un produs deteriorat, defect sau diferit de ceea ce ai comandat, vezi secțiunea „Garanția de conformitate”. Poți anula o comandă nepersonalizată înainte de expediere, scriindu-ne la contact@idesignstudio.ro; îți rambursăm suma prin aceeași metodă de plată, în maximum 14 zile.",
     "termsWithdrawalHeading": "Dreptul de retragere",
@@ -199,7 +200,7 @@
     "privacyControllerHeading": "Operatorul de date",
     "privacyControllerBody": "Operatorul datelor tale cu caracter personal este:",
     "privacyDataHeading": "Ce date colectăm",
-    "privacyDataBody": "Colectăm datele pe care ni le oferi direct: nume, prenume, adresă de email, telefon și adresă de livrare, când plasezi o comandă; denumirea și CUI-ul firmei, dacă comanzi pe firmă; conținutul comenzii și observațiile tale; iar la crearea unui cont, parola (stocată criptat). Datele cardului nu trec prin site-ul nostru: plata cu cardul este procesată de NETOPIA Payments.",
+    "privacyDataBody": "Colectăm datele pe care ni le oferi direct: nume, prenume, adresă de email, telefon și adresă de livrare, când plasezi o comandă; denumirea și CUI-ul firmei, dacă comanzi pe firmă; conținutul comenzii și observațiile tale. Dacă îți creezi un cont, păstrăm adresa de email, numele și parola (pe care o stocăm doar sub formă de amprentă cifrată, „hash”, care nu poate fi citită sau recuperată de noi), plus telefonul și adresa de livrare, dacă alegi să le salvezi pentru completarea automată a comenzilor. Datele cardului nu trec prin site-ul nostru: plata cu cardul este procesată de NETOPIA Payments.",
     "privacyUseHeading": "Cum folosim datele",
     "privacyUseBody": "Folosim aceste date exclusiv pentru gestionarea contului tău, procesarea comenzilor, comunicarea legată de comenzile tale (confirmări, notificări) și, dacă este cazul, pentru a răspunde solicitărilor tale.",
     "privacyRightsHeading": "Drepturile tale",
@@ -214,7 +215,7 @@
     "termsConformityBody2": "Dacă primești un produs deteriorat, diferit de comandă sau cu un defect, scrie-ne la contact@idesignstudio.ro cu numărul comenzii și câteva fotografii. Poți alege repararea sau înlocuirea produsului. Le facem gratuit, într-un termen rezonabil, de maximum 15 zile calendaristice de la anunțul tău. Dacă repararea sau înlocuirea nu sunt posibile, poți alege reducerea prețului sau returnarea banilor.",
     "termsConformityBody3": "Garanția nu acoperă deteriorările provocate de utilizarea necorespunzătoare a produsului sau de uzura normală. Drepturile tale legale nu sunt limitate în niciun fel.",
     "termsAccountHeading": "Contul de client",
-    "termsAccountBody": "Contul este opțional: poți comanda și fără cont. Ești responsabil pentru păstrarea parolei. Îți ștergem contul la cerere, în maximum 30 de zile. Putem suspenda conturile folosite abuziv.",
+    "termsAccountBody": "Contul este opțional: poți comanda și fără cont. Pentru cont ai nevoie de o adresă de email validă, pe care o poți confirma, și de o parolă cu minimum 8 caractere, care să conțină literă mică, literă mare, cifră și caracter special. Ești responsabil pentru păstrarea parolei și pentru activitatea din cont; dacă bănuiești că altcineva o știe, schimb-o imediat. Pentru a proteja conturile, limităm numărul de încercări de autentificare, de creare de conturi și de comenzi într-un interval de timp. Îți poți șterge contul oricând din cont sau la cerere, în maximum 30 de zile; comenzile deja plasate rămân la noi doar pentru evidența contabilă. Putem suspenda conturile folosite abuziv.",
     "termsIpHeading": "Proprietate intelectuală",
     "termsIpBody": "Textele, imaginile, logo-ul și designul site-ului aparțin IDESIGN STUDIO S.R.L. și nu pot fi copiate fără acordul nostru. Dacă ne trimiți texte sau imagini pentru produse personalizate, ne confirmi că ai dreptul să le folosești.",
     "termsLiabilityHeading": "Răspundere",
@@ -225,16 +226,19 @@
     "privacyCookiesHeading": "Cookie-uri și date stocate în browser",
     "privacyCookiesIntro": "Folosim doar ce este necesar pentru funcționarea site-ului:",
     "privacyCookiesItem1": "un cookie cu limba aleasă (NEXT_LOCALE);",
-    "privacyCookiesItem2": "un cookie de sesiune, dacă te conectezi la contul tău;",
+    "privacyCookiesItem2": "un cookie de sesiune, dacă te conectezi la contul tău (valabil până la 30 de zile sau până te deconectezi; se închide și când îți schimbi parola);",
     "privacyCookiesItem3": "în browserul tău, păstrăm coșul de cumpărături și, pe durata unei plăți, ultima comandă începută.",
     "privacyCookiesOutro": "Nu folosim analiză, reclame sau trackere ale terților. Pagina de plată NETOPIA are propria politică de cookie-uri.",
     "privacyLegalHeading": "Temeiul legal",
     "privacyLegalBody": "Folosim datele tale pentru: executarea contractului (procesarea și livrarea comenzii), respectarea obligațiilor legale (facturare și evidență contabilă), interesul nostru legitim (securitatea site-ului și prevenirea fraudei) și, acolo unde îl cerem, consimțământul tău.",
     "privacyRecipientsHeading": "Cui transmitem datele",
-    "privacyRecipientsBody": "Transmitem datele strict necesare procesatorului de plăți NETOPIA Payments, firmei de curierat pentru livrare (în prezent Sameday), furnizorilor care ne ajută să rulăm site-ul (găzduire, bază de date, trimiterea emailurilor) și celor care se ocupă de facturare și contabilitate. Ei folosesc datele doar pentru serviciul respectiv. Dacă un furnizor prelucrează date în afara Uniunii Europene, o face cu garanțiile prevăzute de lege.",
+    "privacyRecipientsBody": "Transmitem datele strict necesare procesatorului de plăți NETOPIA Payments, firmei de curierat pentru livrare, furnizorilor care ne ajută să rulăm site-ul (găzduire, bază de date, trimiterea emailurilor) și celor care se ocupă de facturare și contabilitate. Ei folosesc datele doar pentru serviciul respectiv. Dacă un furnizor prelucrează date în afara Uniunii Europene, o face cu garanțiile prevăzute de lege.",
     "privacyRetentionHeading": "Cât păstrăm datele",
-    "privacyRetentionBody": "Datele comenzilor și ale facturilor, pe perioada cerută de legislația fiscală și contabilă. Contul de client, până îl ștergi. Mesajele trimise către noi, cât este necesar ca să le rezolvăm.",
-    "privacyRightsComplaint": "Te poți adresa și Autorității Naționale de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP):"
+    "privacyRetentionBody": "Datele comenzilor și ale facturilor, pe perioada cerută de legislația fiscală și contabilă. Contul de client, până îl ștergi, ceea ce poți face singur din cont; comenzile deja plasate rămân la noi doar pentru evidența contabilă, fără legătură cu un cont. Mesajele trimise către noi, cât este necesar ca să le rezolvăm. Linkurile de confirmare a emailului și de resetare a parolei expiră (în 24 de ore, respectiv 1 oră), iar contoarele tehnice de securitate se șterg în cel mult 24 de ore.",
+    "privacyRightsComplaint": "Te poți adresa și Autorității Naționale de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP):",
+    "privacySecurityHeading": "Securitatea datelor și a contului",
+    "privacySecurityBody": "Protejăm site-ul și conturile prin conexiune criptată (HTTPS), parole stocate doar sub formă de hash, cerințe pentru parolă (minimum 8 caractere, literă mică, literă mare, cifră și caracter special), confirmarea adresei de email la crearea contului, limitarea numărului de încercări de autentificare, de creare de conturi și de plasare de comenzi (pentru a preveni accesul neautorizat și abuzul automat) și un email de avertizare când parola este schimbată, care închide și celelalte sesiuni deschise. Pentru limitarea încercărilor folosim contoare tehnice în care adresa IP, emailul sau telefonul sunt păstrate doar sub formă de amprentă (hash), cel mult 24 de ore. Furnizorul de găzduire poate păstra, la rândul lui, jurnale tehnice ale conexiunilor (inclusiv adresa IP), conform politicii sale.",
+    "privacyCaptchaBody": "Pentru a proteja formularele de roboți (creare cont, resetare parolă, comenzi) folosim serviciul Cloudflare Turnstile, furnizat de Cloudflare, Inc. El primește adresa ta IP și date tehnice ale browserului, ca să verifice că ești o persoană. Temeiul este interesul nostru legitim de securitate. Cloudflare poate prelucra datele și în afara Uniunii Europene, cu garanțiile prevăzute de lege."
   },
   "Checkout": {
     "title": "Finalizează comanda",
@@ -297,7 +301,8 @@
     "errorCounty": "Alege un județ din listă.",
     "selectCounty": "Alege județul",
     "errorLocality": "Alege localitatea din listă: mai multe localități din județ au același nume.",
-    "errorTooMany": "Ai trimis prea multe comenzi într-un timp scurt. Încearcă din nou peste puțin timp sau scrie-ne la contact@idesignstudio.ro."
+    "errorTooMany": "Ai trimis prea multe comenzi într-un timp scurt. Încearcă din nou peste puțin timp sau scrie-ne la contact@idesignstudio.ro.",
+    "errorCaptcha": "Verificarea anti-spam nu a reușit. Încearcă din nou sau reîncarcă pagina."
   },
   "Withdrawal": {
     "title": "Retragere din contract",
