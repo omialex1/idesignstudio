@@ -315,7 +315,8 @@
     "selectCounty": "Alege județul",
     "errorLocality": "Alege localitatea din listă: mai multe localități din județ au același nume.",
     "errorTooMany": "Ai trimis prea multe comenzi într-un timp scurt. Încearcă din nou peste puțin timp sau scrie-ne la contact@idesignstudio.ro.",
-    "errorCaptcha": "Verificarea anti-spam nu a reușit. Încearcă din nou sau reîncarcă pagina."
+    "errorCaptcha": "Verificarea anti-spam nu a reușit. Încearcă din nou sau reîncarcă pagina.",
+    "errorDetail": "Detaliu tehnic (comunică-l nouă)"
   },
   "Withdrawal": {
     "title": "Retragere din contract",

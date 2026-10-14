@@ -44,6 +44,7 @@ export default function CheckoutPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaNonce, setCaptchaNonce] = useState(0);
   // error text appears once the customer has left the field
@@ -170,6 +171,9 @@ export default function CheckoutPage() {
         return;
       }
       setError(errorMessages[data?.error] ?? t("errorGeneric"));
+      setErrorDetail(
+        typeof data?.detail === "string" && data.detail ? data.detail : null,
+      );
       setCaptchaToken("");
       setCaptchaNonce((n) => n + 1);
     } catch {
@@ -516,6 +520,11 @@ export default function CheckoutPage() {
             </label>
 
             {error && <p className="text-sm text-salamander-600">{error}</p>}
+            {error && errorDetail && (
+              <p className="text-xs break-words text-taupe-400">
+                {t("errorDetail")}: {errorDetail}
+              </p>
+            )}
 
             <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
 

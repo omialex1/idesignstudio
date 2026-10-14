@@ -21,13 +21,16 @@ export const NETOPIA_CANCELED_STATUSES = [4];
 export const NETOPIA_FAILED_STATUSES = [11, 12, 13, 23];
 
 function getConfig() {
-  const apiKey = process.env.NETOPIA_API_KEY;
-  const posSignature = process.env.NETOPIA_POS_SIGNATURE;
+  // trimmed: a space or line break pasted with the value must not break the payment
+  const apiKey = process.env.NETOPIA_API_KEY?.trim();
+  const posSignature = process.env.NETOPIA_POS_SIGNATURE?.trim();
   if (!apiKey || !posSignature) {
     throw new Error("NETOPIA_API_KEY or NETOPIA_POS_SIGNATURE is not set");
   }
   const baseUrl =
-    process.env.NETOPIA_ENV === "live" ? BASE_URLS.live : BASE_URLS.sandbox;
+    process.env.NETOPIA_ENV?.trim() === "live"
+      ? BASE_URLS.live
+      : BASE_URLS.sandbox;
   return { apiKey, posSignature, baseUrl };
 }
 
@@ -123,8 +126,7 @@ export async function startNetopiaPayment(input: NetopiaOrderInput) {
 }
 
 export type IpnVerification =
-  | { ok: true }
-  | { ok: false; reason: "not_configured" | "invalid" };
+  { ok: true } | { ok: false; reason: "not_configured" | "invalid" };
 
 function decodeBase64Url(value: string): Buffer {
   return Buffer.from(value, "base64url");

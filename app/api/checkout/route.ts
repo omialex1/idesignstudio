@@ -538,6 +538,12 @@ export async function POST(request: NextRequest) {
       where: { id: order.id },
       data: { status: "FAILED" },
     });
-    return NextResponse.json({ error: "payment_unavailable" }, { status: 502 });
+    // a short technical reason (no secrets are ever part of these messages), so a
+    // failed payment can be diagnosed from what the customer sees
+    const detail = err instanceof Error ? err.message.slice(0, 180) : "";
+    return NextResponse.json(
+      { error: "payment_unavailable", detail },
+      { status: 502 },
+    );
   }
 }

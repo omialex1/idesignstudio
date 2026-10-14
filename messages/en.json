@@ -315,7 +315,8 @@
     "selectCounty": "Choose the county",
     "errorLocality": "Pick the locality from the list: several places in the county have the same name.",
     "errorTooMany": "You sent too many orders in a short time. Please try again in a little while or write to us at contact@idesignstudio.ro.",
-    "errorCaptcha": "The anti-spam check did not pass. Please try again or reload the page."
+    "errorCaptcha": "The anti-spam check did not pass. Please try again or reload the page.",
+    "errorDetail": "Technical detail (please share it with us)"
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",
