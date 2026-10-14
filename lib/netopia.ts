@@ -111,17 +111,32 @@ export async function startNetopiaPayment(input: NetopiaOrderInput) {
     body: JSON.stringify(body),
   });
 
-  const data = await res.json().catch(() => null);
+  const raw = await res.text();
+  let data: {
+    payment?: { paymentURL?: unknown; ntpID?: unknown };
+    error?: unknown;
+  } | null = null;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    data = null;
+  }
   const paymentUrl: unknown = data?.payment?.paymentURL;
   if (!res.ok || typeof paymentUrl !== "string") {
+    const where = res.redirected
+      ? `, redirected to ${new URL(res.url).host}`
+      : "";
+    const answer = data
+      ? JSON.stringify(data.error ?? data)
+      : `not JSON: ${raw.slice(0, 80).replace(/\s+/g, " ")}`;
     throw new Error(
-      `Netopia payment start failed (${res.status}): ${JSON.stringify(data?.error ?? data)}`,
+      `Netopia payment start failed (${res.status}${where}): ${answer}`,
     );
   }
 
   return {
     paymentUrl,
-    ntpId: data.payment.ntpID ? String(data.payment.ntpID) : null,
+    ntpId: data?.payment?.ntpID ? String(data.payment.ntpID) : null,
   };
 }
 

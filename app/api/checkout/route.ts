@@ -540,9 +540,19 @@ export async function POST(request: NextRequest) {
     console.error("Could not start Netopia payment", err);
     // not the customer's fault: give the attempt back
     await refundRateLimit("checkout-ip", clientIp(request));
+    // a short technical reason (no secrets are ever part of these messages), so a
+    // failed payment can be diagnosed from what the customer sees
+    const reason = err instanceof Error ? err.message.slice(0, 180) : "";
     await prisma.order.update({
       where: { id: order.id },
-      data: { status: "FAILED" },
+      data: {
+        status: "FAILED",
+        // also kept on the order, visible in the admin next to the customer's notes
+        notes: [order.notes, reason && `[Plata nu a putut porni: ${reason}]`]
+          .filter(Boolean)
+          .join(" | ")
+          .slice(0, 500),
+      },
     });
     // a short technical reason (no secrets are ever part of these messages), so a
     // failed payment can be diagnosed from what the customer sees
