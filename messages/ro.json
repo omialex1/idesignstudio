@@ -123,7 +123,36 @@
     "deleteAccount": "Șterge contul",
     "deletingAccount": "Se șterge...",
     "deleteAccountConfirm": "Sigur vrei să ștergi contul? Nu se poate anula.",
-    "confirmWithPassword": "Scrie parola pentru confirmare"
+    "confirmWithPassword": "Scrie parola pentru confirmare",
+    "verifiedLabel": "E-mail confirmat",
+    "verifyBannerTitle": "Confirmă adresa de e-mail",
+    "verifyBannerBody": "Ți-am trimis un link de confirmare. După confirmare, comenzile făcute fără cont cu această adresă apar și în contul tău.",
+    "resendVerification": "Trimite din nou linkul",
+    "resendingVerification": "Se trimite...",
+    "verificationSent": "Am trimis linkul. Verifică și folderul Spam.",
+    "verificationTooSoon": "Ai cerut deja un link acum câteva secunde. Mai așteaptă un minut.",
+    "verifyEmailTitle": "Confirmare e-mail",
+    "verifyingEmail": "Se confirmă adresa...",
+    "verifyEmailDone": "Adresa de e-mail a fost confirmată.",
+    "verifyEmailLinked": "Am legat de cont și {count, plural, one {o comandă} other {# comenzi}} făcute fără cont cu această adresă.",
+    "verifyEmailInvalid": "Linkul de confirmare este invalid sau a expirat. Intră în cont și cere un link nou.",
+    "profileHeading": "Datele mele",
+    "profileNote": "Le folosim ca să-ți completăm automat comanda. Poți lăsa goale câmpurile pe care nu vrei să le salvezi.",
+    "phone": "Telefon",
+    "county": "Județ",
+    "selectCounty": "Alege județul",
+    "locality": "Localitate",
+    "addressLine": "Stradă, număr, bloc, apartament",
+    "postalCode": "Cod poștal (opțional)",
+    "saveProfile": "Salvează",
+    "savingProfile": "Se salvează...",
+    "profileSaved": "Datele au fost salvate.",
+    "profileSavedUnverified": "Datele au fost salvate. Localitatea nu e în lista noastră, așa că vom verifica adresa la comenzi.",
+    "errorPhone": "Numărul de telefon nu este valid. Scrie 10 cifre, de exemplu 0712 345 678 (sau +40 712 345 678).",
+    "errorPostalCode": "Codul poștal trebuie să aibă exact 6 cifre.",
+    "errorAmbiguousLocality": "Alege localitatea din listă: mai multe localități din județ au același nume.",
+    "errorIncompleteAddress": "Alege județul și localitatea împreună, sau lasă-le goale pe amândouă.",
+    "errorMissingName": "Numele nu poate fi gol."
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",
@@ -209,9 +238,9 @@
     "email": "Email",
     "phone": "Telefon",
     "addressLine": "Adresă (stradă, număr, bloc, apartament)",
-    "city": "Oraș / localitate",
+    "city": "Localitate",
     "county": "Județ",
-    "postalCode": "Cod poștal",
+    "postalCode": "Cod poștal (opțional)",
     "notes": "Observații pentru comandă (opțional)",
     "summaryHeading": "Sumar comandă",
     "subtotal": "Subtotal",
@@ -259,7 +288,8 @@
     "errorPhone": "Numărul de telefon nu este valid. Scrie 10 cifre, de exemplu 0712 345 678 (sau +40 712 345 678).",
     "errorPostalCode": "Codul poștal trebuie să aibă exact 6 cifre.",
     "errorCounty": "Alege un județ din listă.",
-    "selectCounty": "Alege județul"
+    "selectCounty": "Alege județul",
+    "errorLocality": "Alege localitatea din listă: mai multe localități din județ au același nume."
   },
   "Withdrawal": {
     "title": "Retragere din contract",
@@ -278,5 +308,11 @@
   },
   "Footer": {
     "rights": "Toate drepturile rezervate."
+  },
+  "Address": {
+    "localityPlaceholder": "Scrie și alege din listă",
+    "pickCountyFirst": "Alege mai întâi județul",
+    "localityAmbiguous": "Mai multe localități din acest județ se numesc „{value}”. Alege din listă varianta cu comuna ta.",
+    "localityUnknown": "Nu găsim „{value}” în lista noastră pentru județul {county}. Poți continua: scrie localitatea completă (sat și comună), iar noi verificăm adresa înainte să trimitem coletul."
   }
 }

@@ -13,6 +13,8 @@ type NewOrderEmailInput = {
   county: string;
   postalCode: string;
   notes: string | null;
+  // true when the customer wrote a locality that is not in the official list
+  addressUnverified?: boolean;
   companyName: string | null;
   companyCui: string | null;
   items: {
@@ -54,6 +56,11 @@ export function newOrderBusinessEmail(order: NewOrderEmailInput) {
     <h2 style="font-size:15px;color:#3D332E;margin:16px 0 6px;">Produse</h2>
     <ul style="margin:0;padding-left:18px;">${itemRows}</ul>
     <p style="margin:8px 0 0;">Livrare: ${order.shippingCents === 0 ? "gratuită" : formatPrice(order.shippingCents, order.currency, "ro")}${order.codFeeCents > 0 ? `<br>Taxă ramburs: ${formatPrice(order.codFeeCents, order.currency, "ro")}` : ""}<br><strong>Total: ${formatPrice(order.totalCents, order.currency, "ro")}</strong></p>
+    ${
+      order.addressUnverified
+        ? `<p style="margin:16px 0 0;padding:10px 12px;background:#FFF4DB;border:1px solid #F0D58A;border-radius:8px;color:#7A5200;font-size:14px;"><strong>Verifică adresa înainte să trimiți coletul:</strong> localitatea „${escapeHtml(order.city)}” nu e în lista oficială (poate fi scrisă greșit sau e o localitate nouă). Sună clientul dacă ai dubii.</p>`
+        : ""
+    }
     <h2 style="font-size:15px;color:#3D332E;margin:20px 0 6px;">Client și livrare</h2>
     <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;">
       ${row("Nume", `${order.firstName} ${order.lastName}`)}
@@ -62,7 +69,7 @@ export function newOrderBusinessEmail(order: NewOrderEmailInput) {
       ${row("Adresă", order.addressLine)}
       ${row("Oraș", order.city)}
       ${row("Județ", order.county)}
-      ${row("Cod poștal", order.postalCode)}
+      ${order.postalCode ? row("Cod poștal", order.postalCode) : ""}
       ${order.notes ? row("Observații", order.notes) : ""}
     </table>
     ${

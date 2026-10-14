@@ -43,6 +43,11 @@ export default async function AdminOrdersPage() {
                   <div className="text-xs text-taupe-600">
                     {o.addressLine}, {o.city}, {o.county} {o.postalCode}
                   </div>
+                  {o.addressUnverified && (
+                    <div className="mt-1 w-fit rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                      Adresă de verificat: localitatea nu e în lista oficială
+                    </div>
+                  )}
                   {o.companyName && (
                     <div className="mt-1 text-xs font-medium text-taupe-700">
                       Firmă: {o.companyName}, CUI {o.companyCui}

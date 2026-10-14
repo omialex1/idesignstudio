@@ -17,6 +17,7 @@ const PUBLIC_ACCOUNT_PATHS = [
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/verify-email",
 ];
 
 async function isValidSession(token: string | undefined, secretEnvVar: string) {

@@ -5,8 +5,7 @@ import { startNetopiaPayment } from "@/lib/netopia";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import { finalPriceCents, variantPricing } from "@/lib/pricing";
-import { POSTAL_CODE_PATTERN, normalizePhone } from "@/lib/validation/phone";
-import { canonicalCounty } from "@/lib/geo/ro-counties";
+import { validateAddress } from "@/lib/address/validate";
 import {
   DEFAULT_MAX_QUANTITY,
   TIERED_MAX_QUANTITY,
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest) {
     firstName: clean(body.customer?.firstName, 80),
     lastName: clean(body.customer?.lastName, 80),
     email: clean(body.customer?.email, 200).toLowerCase(),
-    phone: normalizePhone(clean(body.customer?.phone, 30)),
+    phone: clean(body.customer?.phone, 30),
     addressLine: clean(body.customer?.addressLine, 200),
     city: clean(body.customer?.city, 100),
     county: clean(body.customer?.county, 100),
@@ -102,17 +101,20 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (clean(body.customer?.phone, 30) && !customer.phone) {
-    return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
+  // phone, county, locality and postal code: one shared check
+  const checked = validateAddress({
+    phone: customer.phone,
+    county: customer.county,
+    city: customer.city,
+    postalCode: customer.postalCode,
+  });
+  if (!checked.ok) {
+    return NextResponse.json({ error: checked.error }, { status: 400 });
   }
-  const county = canonicalCounty(customer.county);
-  if (customer.county && !county) {
-    return NextResponse.json({ error: "invalid_county" }, { status: 400 });
-  }
-  if (customer.postalCode && !POSTAL_CODE_PATTERN.test(customer.postalCode)) {
-    return NextResponse.json({ error: "invalid_postal_code" }, { status: 400 });
-  }
-  if (county) customer.county = county;
+  customer.phone = checked.phone;
+  customer.county = checked.county;
+  customer.city = checked.city;
+  const addressUnverified = checked.unverified;
 
   if (
     !customer.firstName ||
@@ -121,7 +123,6 @@ export async function POST(request: NextRequest) {
     !customer.addressLine ||
     !customer.city ||
     !customer.county ||
-    !customer.postalCode ||
     !EMAIL_PATTERN.test(customer.email) ||
     body.termsAccepted !== true
   ) {
@@ -421,6 +422,7 @@ export async function POST(request: NextRequest) {
     county: customer.county,
     postalCode: customer.postalCode,
     notes,
+    addressUnverified,
     companyName: company?.name ?? null,
     companyCui: company?.cui ?? null,
     paymentMethod: isCod ? ("COD" as const) : ("CARD" as const),

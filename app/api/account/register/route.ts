@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db/client";
 import { createCustomerSession } from "@/lib/customer/auth";
 import { sendEmail } from "@/lib/email/client";
 import { welcomeEmail } from "@/lib/email/templates/welcome";
+import { createVerificationLink } from "@/lib/customer/verify";
 
 export async function POST(request: NextRequest) {
   const { email, password, name, locale } = await request.json();
@@ -37,7 +38,12 @@ export async function POST(request: NextRequest) {
   await createCustomerSession(customer.id);
 
   try {
-    const { subject, html } = welcomeEmail(customer.locale, customer.name);
+    const verifyUrl = await createVerificationLink(customer);
+    const { subject, html } = welcomeEmail(
+      customer.locale,
+      customer.name,
+      verifyUrl,
+    );
     await sendEmail({ to: customer.email, subject, html });
   } catch (err) {
     console.error("Failed to send welcome email", err);

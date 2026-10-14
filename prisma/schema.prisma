@@ -74,16 +74,16 @@ model MainCategoryTranslation {
 
 // A subcategory: belongs to one main category and holds products.
 model Category {
-  id           String                @id @default(cuid())
+  id             String                @id @default(cuid())
   mainCategoryId String?
-  mainCategory MainCategory? @relation(fields: [mainCategoryId], references: [id])
-  slug         String                @unique
-  sortOrder    Int                   @default(0)
-  heroImageUrl String?
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
-  translations CategoryTranslation[]
-  products     Product[]
+  mainCategory   MainCategory?         @relation(fields: [mainCategoryId], references: [id])
+  slug           String                @unique
+  sortOrder      Int                   @default(0)
+  heroImageUrl   String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  translations   CategoryTranslation[]
+  products       Product[]
 }
 
 model CategoryTranslation {
@@ -99,68 +99,68 @@ model CategoryTranslation {
 }
 
 model Product {
-  id           String               @id @default(cuid())
-  categoryId   String
-  category     Category             @relation(fields: [categoryId], references: [id])
-  slug         String               @unique
-  priceCents   Int
-  currency     String               @default("RON")
-  isActive     Boolean              @default(true)
-  hasColorOptions Boolean           @default(true)
+  id              String               @id @default(cuid())
+  categoryId      String
+  category        Category             @relation(fields: [categoryId], references: [id])
+  slug            String               @unique
+  priceCents      Int
+  currency        String               @default("RON")
+  isActive        Boolean              @default(true)
+  hasColorOptions Boolean              @default(true)
   // Price depends on how many pieces are bought: the variants are then price
   // tiers (minQuantity + unit price) that the customer cannot pick, only read.
-  tieredPricing Boolean             @default(false)
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  variants     ProductVariant[]
-  components   ProductComponent[]
-  translations ProductTranslation[]
-  images       ProductImage[]
-  inventory    Inventory?
-  orderItems   OrderItem[]
+  tieredPricing   Boolean              @default(false)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  variants        ProductVariant[]
+  components      ProductComponent[]
+  translations    ProductTranslation[]
+  images          ProductImage[]
+  inventory       Inventory?
+  orderItems      OrderItem[]
 }
 
 model ProductVariant {
-  id         String  @id @default(cuid())
-  productId  String
-  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  sortOrder  Int     @default(0)
-  nameRo     String
-  nameEn     String?
-  priceCents Int
+  id              String             @id @default(cuid())
+  productId       String
+  product         Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sortOrder       Int                @default(0)
+  nameRo          String
+  nameEn          String?
+  priceCents      Int
   // Optional % taken off priceCents (used for sets).
-  discountPercent Int @default(0)
+  discountPercent Int                @default(0)
   // For tiered products: smallest quantity that gets this unit price.
-  minQuantity Int?
+  minQuantity     Int?
   // Pieces of this variant, each with its own colour choice.
-  components ProductComponent[]
+  components      ProductComponent[]
 
   @@unique([productId, sortOrder])
 }
 
 model ProductComponent {
-  id        String  @id @default(cuid())
+  id        String          @id @default(cuid())
   productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   // Set for pieces that belong to one variant; null = piece of a product
   // that has no variants.
   variantId String?
   variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  sortOrder Int     @default(0)
+  sortOrder Int             @default(0)
   nameRo    String
   nameEn    String?
-  maxColors Int     @default(1)
+  maxColors Int             @default(1)
 
   @@unique([productId, sortOrder])
 }
 
 model ProductTranslation {
-  id          String  @id @default(cuid())
-  productId   String
-  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  locale      String
-  name        String
-  description String?
+  id              String  @id @default(cuid())
+  productId       String
+  product         Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale          String
+  name            String
+  description     String?
   longDescription String?
 
   @@unique([productId, locale])
@@ -168,12 +168,12 @@ model ProductTranslation {
 }
 
 model ProductImage {
-  id        String  @id @default(cuid())
+  id        String            @id @default(cuid())
   productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
   altText   String?
-  sortOrder Int     @default(0)
+  sortOrder Int               @default(0)
   data      ProductImageData?
 }
 
@@ -195,47 +195,68 @@ model Inventory {
 }
 
 model Order {
-  id              String        @id @default(cuid())
-  ntpId           String?       @unique
-  customerEmail   String
-  customerId      String?
-  customer        Customer?     @relation(fields: [customerId], references: [id])
-  firstName       String
-  lastName        String
-  phone           String
-  addressLine     String
-  city            String
-  county          String
-  postalCode      String
-  country         String        @default("RO")
-  notes           String?
-  companyName     String?
-  companyCui      String?
-  paymentMethod   PaymentMethod @default(CARD)
-  status          OrderStatus   @default(PENDING)
-  subtotalCents   Int
-  shippingCents   Int
-  codFeeCents     Int           @default(0)
-  totalCents      Int
-  currency        String        @default("RON")
-  locale          String
-  termsAcceptedAt DateTime
-  paidAt          DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  items           OrderItem[]
+  id                String        @id @default(cuid())
+  ntpId             String?       @unique
+  customerEmail     String
+  customerId        String?
+  customer          Customer?     @relation(fields: [customerId], references: [id])
+  firstName         String
+  lastName          String
+  phone             String
+  addressLine       String
+  city              String
+  county            String
+  postalCode        String
+  country           String        @default("RO")
+  notes             String?
+  companyName       String?
+  companyCui        String?
+  paymentMethod     PaymentMethod @default(CARD)
+  status            OrderStatus   @default(PENDING)
+  subtotalCents     Int
+  shippingCents     Int
+  codFeeCents       Int           @default(0)
+  totalCents        Int
+  currency          String        @default("RON")
+  locale            String
+  termsAcceptedAt   DateTime
+  paidAt            DateTime?
+  // True when the customer wrote a locality that is not in our list; Bea checks it before shipping
+  addressUnverified Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  items             OrderItem[]
 }
 
 model Customer {
-  id           String               @id @default(cuid())
-  email        String               @unique
-  passwordHash String
-  name         String
-  locale       String               @default("ro")
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  orders       Order[]
-  resetTokens  PasswordResetToken[]
+  id              String                   @id @default(cuid())
+  email           String                   @unique
+  passwordHash    String
+  name            String
+  locale          String                   @default("ro")
+  // Saved contact and delivery details, used to prefill the checkout
+  phone           String?
+  addressLine     String?
+  city            String?
+  county          String?
+  postalCode      String?
+  // Set when the customer clicks the link sent to their e-mail
+  emailVerifiedAt DateTime?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  orders          Order[]
+  resetTokens     PasswordResetToken[]
+  verifyTokens    EmailVerificationToken[]
+}
+
+model EmailVerificationToken {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model PasswordResetToken {
@@ -249,11 +270,11 @@ model PasswordResetToken {
 }
 
 model OrderItem {
-  id                  String  @id @default(cuid())
+  id                  String   @id @default(cuid())
   orderId             String
-  order               Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId           String
-  product             Product @relation(fields: [productId], references: [id])
+  product             Product  @relation(fields: [productId], references: [id])
   productNameSnapshot String
   variantName         String?
   colors              String[]

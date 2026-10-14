@@ -6,6 +6,8 @@ import { getCustomerById } from "@/lib/customer/queries";
 import LogoutButton from "@/components/account/LogoutButton";
 import ChangePasswordForm from "@/components/account/ChangePasswordForm";
 import DeleteAccountForm from "@/components/account/DeleteAccountForm";
+import ProfileForm from "@/components/account/ProfileForm";
+import VerifyEmailBanner from "@/components/account/VerifyEmailBanner";
 
 export default async function AccountDashboardPage() {
   const customerId = await getCurrentCustomerId();
@@ -27,7 +29,14 @@ export default async function AccountDashboardPage() {
             <LogoutButton />
           </div>
 
-          <p className="mt-2 text-sm text-taupe-600">{customer.email}</p>
+          <p className="mt-2 text-sm text-taupe-600">
+            {customer.email}
+            {customer.emailVerifiedAt && (
+              <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
+                {t("verifiedLabel")}
+              </span>
+            )}
+          </p>
 
           <Link
             href="/account/orders"
@@ -36,6 +45,25 @@ export default async function AccountDashboardPage() {
             {t("viewOrders")}
           </Link>
         </div>
+
+        {!customer.emailVerifiedAt && <VerifyEmailBanner />}
+
+        <section className="rounded-2xl border border-cream-200 bg-white p-8">
+          <h2 className="font-display text-lg text-taupe-800">
+            {t("profileHeading")}
+          </h2>
+          <p className="mt-1 mb-4 text-sm text-taupe-600">{t("profileNote")}</p>
+          <ProfileForm
+            defaults={{
+              name: customer.name,
+              phone: customer.phone ?? "",
+              county: customer.county ?? "",
+              city: customer.city ?? "",
+              addressLine: customer.addressLine ?? "",
+              postalCode: customer.postalCode ?? "",
+            }}
+          />
+        </section>
 
         <section className="rounded-2xl border border-cream-200 bg-white p-8">
           <h2 className="font-display text-lg text-taupe-800">

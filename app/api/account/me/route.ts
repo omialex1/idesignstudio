@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { getCustomerById } from "@/lib/customer/queries";
 
-// Name and e-mail of the logged-in customer, used to prefill the checkout.
+// Name, e-mail and saved delivery details of the logged-in customer, used to prefill the checkout.
 export async function GET() {
   const customerId = await getCurrentCustomerId();
   const customer = customerId ? await getCustomerById(customerId) : null;
@@ -13,5 +13,10 @@ export async function GET() {
     loggedIn: true,
     name: customer.name,
     email: customer.email,
+    phone: customer.phone ?? "",
+    county: customer.county ?? "",
+    city: customer.city ?? "",
+    addressLine: customer.addressLine ?? "",
+    postalCode: customer.postalCode ?? "",
   });
 }

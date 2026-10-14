@@ -123,7 +123,36 @@
     "deleteAccount": "Delete account",
     "deletingAccount": "Deleting...",
     "deleteAccountConfirm": "Are you sure you want to delete your account? This cannot be undone.",
-    "confirmWithPassword": "Type your password to confirm"
+    "confirmWithPassword": "Type your password to confirm",
+    "verifiedLabel": "E-mail confirmed",
+    "verifyBannerTitle": "Confirm your e-mail address",
+    "verifyBannerBody": "We sent you a confirmation link. Once confirmed, orders you placed without an account using this address also show up in your account.",
+    "resendVerification": "Send the link again",
+    "resendingVerification": "Sending...",
+    "verificationSent": "We sent the link. Check your Spam folder too.",
+    "verificationTooSoon": "You asked for a link a few seconds ago. Please wait a minute.",
+    "verifyEmailTitle": "E-mail confirmation",
+    "verifyingEmail": "Confirming your address...",
+    "verifyEmailDone": "Your e-mail address is confirmed.",
+    "verifyEmailLinked": "We also connected {count, plural, one {one order} other {# orders}} placed without an account with this address.",
+    "verifyEmailInvalid": "The confirmation link is invalid or has expired. Log in and ask for a new one.",
+    "profileHeading": "My details",
+    "profileNote": "We use them to fill in your order automatically. You can leave empty the fields you don't want to save.",
+    "phone": "Phone",
+    "county": "County",
+    "selectCounty": "Choose the county",
+    "locality": "Locality",
+    "addressLine": "Street, number, building, apartment",
+    "postalCode": "Postal code (optional)",
+    "saveProfile": "Save",
+    "savingProfile": "Saving...",
+    "profileSaved": "Your details were saved.",
+    "profileSavedUnverified": "Your details were saved. The locality is not in our list, so we will check the address on orders.",
+    "errorPhone": "The phone number is not valid. Use 10 digits, for example 0712 345 678 (or +40 712 345 678).",
+    "errorPostalCode": "The postal code must have exactly 6 digits.",
+    "errorAmbiguousLocality": "Pick the locality from the list: several places in the county have the same name.",
+    "errorIncompleteAddress": "Choose the county and the locality together, or leave both empty.",
+    "errorMissingName": "The name cannot be empty."
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",
@@ -209,9 +238,9 @@
     "email": "Email",
     "phone": "Phone",
     "addressLine": "Address (street, number, building, apartment)",
-    "city": "City / town",
+    "city": "Locality",
     "county": "County",
-    "postalCode": "Postal code",
+    "postalCode": "Postal code (optional)",
     "notes": "Order notes (optional)",
     "summaryHeading": "Order summary",
     "subtotal": "Subtotal",
@@ -259,7 +288,8 @@
     "errorPhone": "The phone number is not valid. Use 10 digits, for example 0712 345 678 (or +40 712 345 678).",
     "errorPostalCode": "The postal code must have exactly 6 digits.",
     "errorCounty": "Choose a county from the list.",
-    "selectCounty": "Choose the county"
+    "selectCounty": "Choose the county",
+    "errorLocality": "Pick the locality from the list: several places in the county have the same name."
   },
   "Withdrawal": {
     "title": "Withdraw from a contract",
@@ -278,5 +308,11 @@
   },
   "Footer": {
     "rights": "All rights reserved."
+  },
+  "Address": {
+    "localityPlaceholder": "Type and pick from the list",
+    "pickCountyFirst": "Choose the county first",
+    "localityAmbiguous": "Several places in this county are called “{value}”. Pick yours from the list, with its commune.",
+    "localityUnknown": "We can't find “{value}” in our list for {county} county. You can continue: write the full place name (village and commune) and we will check the address before shipping."
   }
 }

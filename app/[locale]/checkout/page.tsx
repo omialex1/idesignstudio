@@ -12,6 +12,7 @@ import { maxQuantityFor, rangeLabel } from "@/lib/tiers";
 import QuantityControl from "@/components/cart/QuantityControl";
 import { POSTAL_CODE_PATTERN, normalizePhone } from "@/lib/validation/phone";
 import { RO_COUNTIES } from "@/lib/geo/ro-counties";
+import LocalityField from "@/components/address/LocalityField";
 
 const emptyForm = {
   firstName: "",
@@ -62,6 +63,16 @@ export default function CheckoutPage() {
           firstName: prev.firstName || firstName,
           lastName: prev.lastName || lastName,
           email: prev.email || String(me.email ?? ""),
+          phone: prev.phone || String(me.phone ?? ""),
+          addressLine: prev.addressLine || String(me.addressLine ?? ""),
+          postalCode: prev.postalCode || String(me.postalCode ?? ""),
+          // county and locality go together: only fill them when both are empty
+          ...(!prev.county && !prev.city
+            ? {
+                county: String(me.county ?? ""),
+                city: String(me.city ?? ""),
+              }
+            : {}),
         }));
       })
       .catch(() => {});
@@ -113,6 +124,7 @@ export default function CheckoutPage() {
     invalid_phone: t("errorPhone"),
     invalid_postal_code: t("errorPostalCode"),
     invalid_county: t("errorCounty"),
+    ambiguous_locality: t("errorLocality"),
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -282,22 +294,22 @@ export default function CheckoutPage() {
                 />
               </Field>
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field label={t("city")}>
-                  <input
-                    required
-                    maxLength={100}
-                    autoComplete="address-level2"
-                    value={form.city}
-                    onChange={(e) => update("city", e.target.value)}
-                    className={inputClass}
-                  />
-                </Field>
+                <LocalityField
+                  county={form.county}
+                  value={form.city}
+                  onChange={(v) => update("city", v)}
+                  label={t("city")}
+                  inputClassName={inputClass}
+                />
                 <Field label={t("county")}>
                   <select
                     required
                     autoComplete="address-level1"
                     value={form.county}
-                    onChange={(e) => update("county", e.target.value)}
+                    onChange={(e) => {
+                      update("county", e.target.value);
+                      update("city", "");
+                    }}
                     className={inputClass}
                   >
                     <option value="" disabled>
@@ -312,7 +324,6 @@ export default function CheckoutPage() {
                 </Field>
                 <Field label={t("postalCode")}>
                   <input
-                    required
                     inputMode="numeric"
                     maxLength={6}
                     autoComplete="postal-code"

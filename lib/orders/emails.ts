@@ -53,6 +53,7 @@ export async function sendOrderEmails(order: OrderWithItems) {
       notes: order.notes,
       companyName: order.companyName,
       companyCui: order.companyCui,
+      addressUnverified: order.addressUnverified,
       items: toEmailItems("ro"),
       shippingCents: order.shippingCents,
       codFeeCents: order.codFeeCents,
