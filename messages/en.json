@@ -327,5 +327,8 @@
     "pickCountyFirst": "Choose the county first",
     "localityAmbiguous": "Several places in this county are called “{value}”. Pick yours from the list, with its commune.",
     "localityUnknown": "We can't find “{value}” in our list for {county} county. You can continue: write the full place name (village and commune) and we will check the address before shipping."
+  },
+  "Security": {
+    "captchaUnavailable": "The anti-spam check could not load. Turn off any ad blocker for this site or try another browser. You can also write to us at contact@idesignstudio.ro."
   }
 }

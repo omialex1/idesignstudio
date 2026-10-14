@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useLocale } from "next-intl";
+import { useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 type TurnstileApi = {
   render: (
@@ -60,6 +60,9 @@ export default function Turnstile({
 }) {
   const container = useRef<HTMLDivElement>(null);
   const locale = useLocale();
+  const t = useTranslations("Security");
+  // set when the check cannot load (blocked script, network), so the customer is told
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!SITE_KEY) return;
@@ -72,12 +75,21 @@ export default function Turnstile({
         widgetId = window.turnstile.render(container.current, {
           sitekey: SITE_KEY,
           language: locale === "en" ? "en" : "ro",
-          callback: (token) => onToken(token),
+          callback: (token) => {
+            setFailed(false);
+            onToken(token);
+          },
           "expired-callback": () => onToken(""),
-          "error-callback": () => onToken(""),
+          "error-callback": () => {
+            setFailed(true);
+            onToken("");
+          },
         });
       })
-      .catch(() => onToken(""));
+      .catch(() => {
+        setFailed(true);
+        onToken("");
+      });
 
     return () => {
       cancelled = true;
@@ -86,5 +98,14 @@ export default function Turnstile({
   }, [locale, onToken]);
 
   if (!SITE_KEY) return null;
-  return <div ref={container} />;
+  return (
+    <div>
+      <div ref={container} />
+      {failed && (
+        <p role="alert" className="mt-2 text-xs text-red-600">
+          {t("captchaUnavailable")}
+        </p>
+      )}
+    </div>
+  );
 }

@@ -327,5 +327,8 @@
     "pickCountyFirst": "Alege mai întâi județul",
     "localityAmbiguous": "Mai multe localități din acest județ se numesc „{value}”. Alege din listă varianta cu comuna ta.",
     "localityUnknown": "Nu găsim „{value}” în lista noastră pentru județul {county}. Poți continua: scrie localitatea completă (sat și comună), iar noi verificăm adresa înainte să trimitem coletul."
+  },
+  "Security": {
+    "captchaUnavailable": "Verificarea anti-spam nu s-a putut încărca. Dezactivează un eventual blocant de reclame pentru acest site sau încearcă alt browser. Ne poți scrie și la contact@idesignstudio.ro."
   }
 }
