@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { getCustomerOrders } from "@/lib/customer/queries";
 import { formatPrice } from "@/lib/format";
+import { formatDateTime } from "@/lib/format-date";
 import OrderStatusBadge from "@/components/admin/OrderStatusBadge";
 
 export default async function AccountOrdersPage({
@@ -50,9 +51,7 @@ export default async function AccountOrdersPage({
                     #{order.id.slice(0, 8)}
                   </p>
                   <p className="text-sm text-taupe-600">
-                    {order.createdAt.toLocaleDateString(
-                      locale === "en" ? "en-US" : "ro-RO",
-                    )}
+                    {formatDateTime(order.createdAt, locale)}
                   </p>
                 </div>
                 <span className="font-semibold text-taupe-800">

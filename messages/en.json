@@ -109,7 +109,7 @@
     "orderPayCard": "Online by card",
     "orderPayCod": "Cash on delivery",
     "orderDeliveryTo": "Delivery to",
-    "orderDate": "Date",
+    "orderDate": "Placed on",
     "orderCanceledNote": "This order was canceled. If you paid by card, the amount is returned to the same card.",
     "orderNotFound": "Order not found.",
     "securityHeading": "Password",
@@ -173,7 +173,8 @@
     "verifyPendingAuto": "This page logs you in by itself once you confirm, you don't need to do anything else.",
     "verifyEmailLoggingIn": "Your account is confirmed. Logging you in…",
     "verifyEmailLoginHint": "Log in with the e-mail and password you chose when you created the account.",
-    "loginConfirmedNote": "Your account is confirmed. Log in with the password you chose."
+    "loginConfirmedNote": "Your account is confirmed. Log in with the password you chose.",
+    "orderPaidAt": "Paid on"
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",

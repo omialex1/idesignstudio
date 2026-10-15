@@ -25,7 +25,7 @@ export default function Header({
 
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // On every page except the homepage the bar slides away and comes back when
+  // On every page except the homepage and the account pages the bar slides away and comes back when
   // the mouse reaches the top edge. It is shown for a moment after each page
   // load so people can see it exists, and it always stays on touch screens,
   // where there is no mouse to bring it back.
@@ -33,7 +33,8 @@ export default function Header({
   const visible = hiddenOn !== pathname;
   const bar = useRef<HTMLDivElement>(null);
   const headerEl = useRef<HTMLElement>(null);
-  const autoHide = pathname !== "/";
+  // (the account pages keep it visible all the time)
+  const autoHide = pathname !== "/" && !pathname.startsWith("/account");
 
   useEffect(() => {
     const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)");

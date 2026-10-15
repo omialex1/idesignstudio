@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { getCustomerOrder } from "@/lib/customer/queries";
 import { formatPrice } from "@/lib/format";
+import { formatDateTime } from "@/lib/format-date";
 import { itemDetails } from "@/lib/orders/item-details";
 import OrderStatusBadge from "@/components/admin/OrderStatusBadge";
 
@@ -42,9 +43,12 @@ export default async function AccountOrderDetailPage({
           <OrderStatusBadge status={order.status} />
         </div>
         <p className="mt-1 text-sm text-taupe-500">
-          {t("orderDate")}:{" "}
-          {order.createdAt.toLocaleDateString(
-            locale === "en" ? "en-US" : "ro-RO",
+          {t("orderDate")}: {formatDateTime(order.createdAt, locale)}
+          {order.paidAt && (
+            <>
+              {" · "}
+              {t("orderPaidAt")}: {formatDateTime(order.paidAt, locale)}
+            </>
           )}
         </p>
 

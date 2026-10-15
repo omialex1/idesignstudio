@@ -109,7 +109,7 @@
     "orderPayCard": "Card online",
     "orderPayCod": "Ramburs, la curier",
     "orderDeliveryTo": "Livrare la",
-    "orderDate": "Data",
+    "orderDate": "Plasată la",
     "orderCanceledNote": "Această comandă a fost anulată. Dacă ai plătit cu cardul, suma se returnează pe același card.",
     "orderNotFound": "Comanda nu a fost găsită.",
     "securityHeading": "Parola",
@@ -173,7 +173,8 @@
     "verifyPendingAuto": "Această pagină te conectează singură după ce confirmi, nu trebuie să faci nimic altceva.",
     "verifyEmailLoggingIn": "Contul tău este confirmat. Te conectăm…",
     "verifyEmailLoginHint": "Conectează-te cu e-mailul și parola pe care le-ai ales la crearea contului.",
-    "loginConfirmedNote": "Contul este confirmat. Conectează-te cu parola aleasă."
+    "loginConfirmedNote": "Contul este confirmat. Conectează-te cu parola aleasă.",
+    "orderPaidAt": "Plătită la"
   },
   "Legal": {
     "companyName": "IDESIGN STUDIO S.R.L.",
