@@ -16,12 +16,21 @@ const LABELS: Record<OrderStatus, string> = {
   CANCELED: "Anulată",
 };
 
-export default function OrderStatusBadge({ status }: { status: OrderStatus }) {
+export default function OrderStatusBadge({
+  status,
+  unfinished = false,
+}: {
+  status: OrderStatus;
+  // a card order that was never paid and is no longer waiting
+  unfinished?: boolean;
+}) {
   return (
     <span
       className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-semibold ${STYLES[status]}`}
     >
-      {LABELS[status]}
+      {unfinished && status === "PENDING"
+        ? "Neplătită (neterminată)"
+        : LABELS[status]}
     </span>
   );
 }

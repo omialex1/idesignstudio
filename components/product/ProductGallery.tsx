@@ -255,11 +255,17 @@ export default function ProductGallery({
               aria-label={`${alt} ${index + 1}`}
               aria-current={index === active}
               className={`overflow-hidden rounded-lg border-2 ${
-                index === active ? "border-salamander-500" : "border-transparent"
+                index === active
+                  ? "border-salamander-500"
+                  : "border-transparent"
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" className="aspect-square w-full object-cover" />
+              <img
+                src={url}
+                alt=""
+                className="aspect-square w-full object-cover"
+              />
             </button>
           ))}
         </div>

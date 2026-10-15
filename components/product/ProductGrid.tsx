@@ -15,7 +15,7 @@ export default function ProductGrid({
   locale: string;
 }) {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
       {products.map((product, i) => (
         <Reveal key={product.id} index={i % 3}>
           <ProductCard

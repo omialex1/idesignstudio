@@ -62,17 +62,17 @@ export default function ProductTile({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center px-1 pt-5 pb-5">
+      <div className="flex flex-1 flex-col items-center justify-center px-0.5 pt-3 pb-3.5 sm:px-1 sm:pt-5 sm:pb-5">
         {eyebrow && (
           <span className="mb-1 text-[11px] font-semibold tracking-[0.18em] text-salamander-600 uppercase">
             {eyebrow}
           </span>
         )}
-        <h3 className="font-display text-xl leading-tight text-taupe-800">
+        <h3 className="font-display text-base leading-tight text-taupe-800 sm:text-xl">
           {name}
         </h3>
         {description && (
-          <p className="mt-2 line-clamp-2 text-sm text-taupe-600">
+          <p className="mt-1.5 line-clamp-2 text-xs text-taupe-600 sm:mt-2 sm:text-sm">
             {description}
           </p>
         )}
@@ -83,12 +83,12 @@ export default function ProductTile({
           />
         )}
         {priceLabel && (
-          <span className="text-sm font-semibold text-salamander-600">
+          <span className="text-xs font-semibold text-salamander-600 sm:text-sm">
             {priceLabel}
           </span>
         )}
         {cta && (
-          <span className="text-sm font-medium text-salamander-600 group-hover:underline">
+          <span className="text-xs font-medium text-salamander-600 group-hover:underline sm:text-sm">
             {cta}
           </span>
         )}
@@ -101,7 +101,7 @@ export default function ProductTile({
     return (
       <Link
         href={href}
-        className="group flex h-full flex-col rounded border border-cream-300/70 bg-[url(/images/card-bg.jpg)] bg-cover bg-center px-4 pt-5 text-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)]"
+        className="group flex h-full flex-col rounded border border-cream-300/70 bg-[url(/images/card-bg.jpg)] bg-cover bg-center px-2.5 pt-3.5 text-center sm:px-4 sm:pt-5 shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)]"
       >
         {content}
       </Link>
@@ -111,7 +111,7 @@ export default function ProductTile({
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col rounded border border-cream-200 bg-paper px-4 pt-5 text-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)]"
+      className="group flex h-full flex-col rounded border border-cream-200 bg-paper px-2.5 pt-3.5 text-center sm:px-4 sm:pt-5 shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)]"
     >
       {content}
     </Link>
