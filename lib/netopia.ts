@@ -140,8 +140,45 @@ export async function startNetopiaPayment(input: NetopiaOrderInput) {
   };
 }
 
+// Asks NETOPIA what it knows about a payment (POST /operation/status). Returns
+// null when the answer cannot be read, so callers simply keep the order as is.
+export async function fetchNetopiaPaymentStatus(input: {
+  orderId: string;
+  ntpId: string;
+}): Promise<{ status: number; amountCents: number | null } | null> {
+  try {
+    const { apiKey, posSignature, baseUrl } = getConfig();
+    const res = await fetch(`${baseUrl}/operation/status`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: apiKey,
+      },
+      body: JSON.stringify({
+        ntpID: input.ntpId,
+        orderID: input.orderId,
+        posID: posSignature,
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+    const data = await res.json().catch(() => null);
+    const status = data?.payment?.status;
+    if (!res.ok || typeof status !== "number") return null;
+    const amount = Number(data?.payment?.amount);
+    return {
+      status,
+      amountCents: Number.isFinite(amount) ? Math.round(amount * 100) : null,
+    };
+  } catch (err) {
+    console.error("Could not read the payment status from Netopia", err);
+    return null;
+  }
+}
+
 export type IpnVerification =
-  { ok: true } | { ok: false; reason: "not_configured" | "invalid" };
+  | { ok: true }
+  | { ok: false; reason: "not_configured" | "invalid"; detail: string };
 
 function decodeBase64Url(value: string): Buffer {
   return Buffer.from(value, "base64url");
@@ -156,19 +193,25 @@ export function verifyNetopiaIpn(
   const publicKeyPem = process.env.NETOPIA_PUBLIC_KEY?.replace(/\\n/g, "\n");
   const posSignature = process.env.NETOPIA_POS_SIGNATURE;
   if (!publicKeyPem || !posSignature) {
-    return { ok: false, reason: "not_configured" };
+    return { ok: false, reason: "not_configured", detail: "setari lipsa" };
   }
-  if (!token) return { ok: false, reason: "invalid" };
+  if (!token) return { ok: false, reason: "invalid", detail: "fara jeton" };
 
   try {
     const [headerPart, payloadPart, signaturePart] = token.split(".");
     if (!headerPart || !payloadPart || !signaturePart) {
-      return { ok: false, reason: "invalid" };
+      return { ok: false, reason: "invalid", detail: "jeton prost format" };
     }
 
     const header = JSON.parse(decodeBase64Url(headerPart).toString("utf8"));
     const algorithm = JWT_ALGORITHMS[header.alg];
-    if (!algorithm) return { ok: false, reason: "invalid" };
+    if (!algorithm) {
+      return {
+        ok: false,
+        reason: "invalid",
+        detail: `algoritm ${String(header.alg).slice(0, 12)}`,
+      };
+    }
 
     const signatureValid = crypto.verify(
       algorithm,
@@ -176,31 +219,51 @@ export function verifyNetopiaIpn(
       crypto.createPublicKey(publicKeyPem),
       decodeBase64Url(signaturePart),
     );
-    if (!signatureValid) return { ok: false, reason: "invalid" };
+    if (!signatureValid) {
+      return {
+        ok: false,
+        reason: "invalid",
+        detail: "semnatura nu se potriveste cu cheia publica",
+      };
+    }
 
     const payload = JSON.parse(decodeBase64Url(payloadPart).toString("utf8"));
     if (payload.iss !== "NETOPIA Payments") {
-      return { ok: false, reason: "invalid" };
+      return { ok: false, reason: "invalid", detail: "emitent neasteptat" };
     }
     if (typeof payload.exp === "number" && payload.exp * 1000 < Date.now()) {
-      return { ok: false, reason: "invalid" };
+      return { ok: false, reason: "invalid", detail: "jeton expirat" };
     }
 
     const audiences: unknown[] = Array.isArray(payload.aud)
       ? payload.aud
       : [payload.aud];
     if (!audiences.includes(posSignature)) {
-      return { ok: false, reason: "invalid" };
+      return {
+        ok: false,
+        reason: "invalid",
+        detail: "destinatar (semnatura POS) diferit",
+      };
     }
 
     const bodyHash = crypto
       .createHash("sha512")
       .update(rawBody)
       .digest("base64");
-    if (bodyHash !== payload.sub) return { ok: false, reason: "invalid" };
+    if (bodyHash !== payload.sub) {
+      return {
+        ok: false,
+        reason: "invalid",
+        detail: "continutul nu se potriveste cu jetonul",
+      };
+    }
 
     return { ok: true };
   } catch {
-    return { ok: false, reason: "invalid" };
+    return {
+      ok: false,
+      reason: "invalid",
+      detail: "cheia publica nu poate fi citita",
+    };
   }
 }

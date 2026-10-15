@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
-import { sendOrderEmails } from "@/lib/orders/emails";
+import { markOrderPaid } from "@/lib/orders/payment";
 import {
   NETOPIA_CANCELED_STATUSES,
   NETOPIA_FAILED_STATUSES,
@@ -30,6 +30,37 @@ export async function POST(request: NextRequest) {
       console.error("Netopia IPN received but NETOPIA_PUBLIC_KEY is not set");
       return reply(ERROR_TEMPORARY, "not_configured", 503);
     }
+    // Leave a short, fixed reason on the order (never anything from the request),
+    // so a rejected notification can be understood from the admin.
+    try {
+      const claimedId = JSON.parse(rawBody)?.order?.orderID;
+      if (typeof claimedId === "string") {
+        const known = await prisma.order.findUnique({
+          where: { id: claimedId },
+          select: { notes: true, status: true },
+        });
+        if (
+          known &&
+          known.status === "PENDING" &&
+          !(known.notes ?? "").includes("[Netopia a trimis")
+        ) {
+          await prisma.order.update({
+            where: { id: claimedId },
+            data: {
+              notes: [
+                known.notes,
+                `[Netopia a trimis confirmarea, dar a fost respinsa: ${verification.detail}]`,
+              ]
+                .filter(Boolean)
+                .join(" | ")
+                .slice(0, 500),
+            },
+          });
+        }
+      }
+    } catch {
+      // the note is only a help
+    }
     return reply(ERROR_PERMANENT, "verification_failed", 400);
   }
 
@@ -58,30 +89,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (NETOPIA_PAID_STATUSES.includes(paymentStatus)) {
-    const claimed = await prisma.order.updateMany({
-      // paidAt is kept when the admin cancels a paid order, so a repeated
-      // notification cannot mark it paid (and take stock) a second time
-      where: { id: order.id, status: { not: "PAID" }, paidAt: null },
-      data: {
-        status: "PAID",
-        paidAt: new Date(),
-        ntpId: notification.payment?.ntpID
-          ? String(notification.payment.ntpID)
-          : order.ntpId,
-      },
-    });
-
-    if (claimed.count === 1) {
-      await prisma.$transaction(
-        order.items.map((item) =>
-          prisma.inventory.updateMany({
-            where: { productId: item.productId },
-            data: { quantityOnHand: { decrement: item.quantity } },
-          }),
-        ),
-      );
-      await sendOrderEmails(order);
-    }
+    await markOrderPaid(
+      order.id,
+      notification.payment?.ntpID ? String(notification.payment.ntpID) : null,
+    );
   } else if (
     order.status === "PENDING" &&
     (NETOPIA_CANCELED_STATUSES.includes(paymentStatus) ||

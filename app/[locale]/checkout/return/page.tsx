@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/db/client";
+import { reconcileCardOrder } from "@/lib/orders/payment";
 import { formatPrice } from "@/lib/format";
 import {
   AutoRefresh,
@@ -23,18 +24,29 @@ export default async function CheckoutReturnPage({
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    select: { id: true, status: true, totalCents: true, currency: true },
+    select: {
+      id: true,
+      status: true,
+      totalCents: true,
+      currency: true,
+      paymentMethod: true,
+      ntpId: true,
+    },
   });
   if (!order) notFound();
+
+  // The customer is back from the payment page: if Netopia's notification has
+  // not arrived yet, ask Netopia directly so the thank-you page is right.
+  const status = await reconcileCardOrder(order);
 
   const t = await getTranslations("Checkout");
 
   const state =
-    order.status === "PAID"
+    status === "PAID"
       ? "Paid"
-      : order.status === "COD"
+      : status === "COD"
         ? "Cod"
-        : order.status === "PENDING"
+        : status === "PENDING"
           ? "Pending"
           : "Failed";
 
@@ -47,9 +59,7 @@ export default async function CheckoutReturnPage({
         <h1 className="font-display text-2xl text-taupe-800">
           {t(`return${state}Title`)}
         </h1>
-        <p className="mt-3 text-sm text-taupe-600">
-          {t(`return${state}Body`)}
-        </p>
+        <p className="mt-3 text-sm text-taupe-600">{t(`return${state}Body`)}</p>
 
         <p className="mt-6 text-sm text-taupe-500">
           {t("orderNumber")}:{" "}
