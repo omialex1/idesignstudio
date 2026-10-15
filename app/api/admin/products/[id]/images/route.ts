@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/db/client";
-import { isAdminAuthenticated } from "@/lib/admin/auth";
+import { getCurrentAdmin } from "@/lib/admin/auth";
+import { logAdminAction } from "@/lib/admin/log";
 import {
   MAX_IMAGES_PER_PRODUCT,
   MAX_IMAGE_BYTES,
@@ -14,14 +15,15 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAdminAuthenticated())) {
+  const admin = await getCurrentAdmin();
+  if (!admin) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const { id: productId } = await params;
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    select: { id: true },
+    select: { id: true, slug: true },
   });
   if (!product) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -65,6 +67,7 @@ export async function POST(
     },
   });
 
+  await logAdminAction(admin, "Poză adăugată la produs", product.slug);
   revalidatePath("/", "layout");
   return NextResponse.json({ id: imageId, url: productImageUrl(imageId) });
 }

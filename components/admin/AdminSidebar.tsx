@@ -10,9 +10,11 @@ const navLinks = [
   { href: "/admin/subcategories", label: "Subcategorii", exact: false },
   { href: "/admin/colors", label: "Culori", exact: false },
   { href: "/admin/orders", label: "Comenzi", exact: false },
+  { href: "/admin/log", label: "Jurnal", exact: false },
+  { href: "/admin/users", label: "Conturi admin", exact: false },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ username }: { username: string }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -53,6 +55,9 @@ export default function AdminSidebar() {
       </nav>
 
       <div className="border-t border-cream-200 p-3">
+        <p className="px-3 pb-2 text-xs text-taupe-400">
+          Conectat ca <span className="font-semibold text-taupe-600">{username}</span>
+        </p>
         <button
           type="button"
           onClick={handleLogout}

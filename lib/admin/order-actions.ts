@@ -1,13 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isAdminAuthenticated } from "@/lib/admin/auth";
+import { requireAdmin } from "@/lib/admin/auth";
+import { logAdminAction } from "@/lib/admin/log";
 import { cancelOrder } from "@/lib/orders/cancel";
 
 export async function cancelOrderAction(
   orderId: string,
 ): Promise<{ message: string; error?: boolean }> {
-  if (!(await isAdminAuthenticated())) throw new Error("unauthorized");
+  const admin = await requireAdmin();
 
   const result = await cancelOrder(orderId);
   revalidatePath("/admin/orders");
@@ -22,6 +23,8 @@ export async function cancelOrderAction(
           : "Comanda nu mai poate fi anulată (a fost deja anulată sau a eșuat).",
     };
   }
+
+  await logAdminAction(admin, "Comandă anulată", `#${orderId.slice(0, 8)}`);
 
   const parts = ["Comanda a fost anulată."];
   if (result.stockRestored) parts.push("Stocul a fost refăcut.");

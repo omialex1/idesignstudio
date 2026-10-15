@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/client";
 import { slugify } from "@/lib/admin/slug";
-import { isAdminAuthenticated } from "@/lib/admin/auth";
+import { requireAdmin } from "@/lib/admin/auth";
+import { logAdminAction } from "@/lib/admin/log";
 import {
   PIECE_SLOTS,
   TIER_SLOTS,
@@ -17,10 +18,6 @@ import {
 } from "@/lib/admin/form-validation";
 import { variantPricing } from "@/lib/pricing";
 import { rangeLabel, tierRanges } from "@/lib/tiers";
-
-async function assertAdmin() {
-  if (!(await isAdminAuthenticated())) throw new Error("unauthorized");
-}
 
 // Slug problems that only the database can tell (already used by another product).
 async function checkSlug(
@@ -301,10 +298,86 @@ async function savePieces(
   ]);
 }
 
+const money = (cents: number) => `${(cents / 100).toFixed(2)} RON`;
+
+type ProductSnapshot = {
+  name: string;
+  priceCents: number;
+  isActive: boolean;
+  tieredPricing: boolean;
+  quantityOnHand: number | null;
+  lowStockThreshold: number | null;
+  variants: string;
+};
+
+// What the activity log needs to tell a change apart: price, stock, visibility.
+async function productSnapshot(
+  productId: string,
+): Promise<ProductSnapshot | null> {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: {
+      inventory: true,
+      variants: { orderBy: { sortOrder: "asc" } },
+      translations: { where: { locale: "ro" } },
+    },
+  });
+  if (!product) return null;
+  return {
+    name: product.translations[0]?.name ?? product.slug,
+    priceCents: product.priceCents,
+    isActive: product.isActive,
+    tieredPricing: product.tieredPricing,
+    quantityOnHand: product.inventory?.quantityOnHand ?? null,
+    lowStockThreshold: product.inventory?.lowStockThreshold ?? null,
+    variants: product.variants
+      .map(
+        (v) =>
+          `${v.sortOrder}:${v.priceCents}:${v.discountPercent ?? ""}:${v.minQuantity ?? ""}`,
+      )
+      .join("|"),
+  };
+}
+
+function describeProductChanges(
+  before: ProductSnapshot,
+  after: ProductSnapshot,
+): string {
+  const changes: string[] = [];
+  if (before.name !== after.name) {
+    changes.push(`nume "${before.name}" → "${after.name}"`);
+  }
+  if (before.priceCents !== after.priceCents) {
+    changes.push(
+      `preț ${money(before.priceCents)} → ${money(after.priceCents)}`,
+    );
+  }
+  if (before.variants !== after.variants) changes.push("variante/prețuri pe cantitate modificate");
+  if (before.tieredPricing !== after.tieredPricing) {
+    changes.push(
+      after.tieredPricing
+        ? "preț pe cantitate activat"
+        : "preț pe cantitate dezactivat",
+    );
+  }
+  if (before.quantityOnHand !== after.quantityOnHand) {
+    changes.push(`stoc ${before.quantityOnHand ?? "-"} → ${after.quantityOnHand ?? "-"}`);
+  }
+  if (before.lowStockThreshold !== after.lowStockThreshold) {
+    changes.push(
+      `prag stoc redus ${before.lowStockThreshold ?? "-"} → ${after.lowStockThreshold ?? "-"}`,
+    );
+  }
+  if (before.isActive !== after.isActive) {
+    changes.push(after.isActive ? "produs activat (vizibil)" : "produs dezactivat (ascuns)");
+  }
+  return changes.length ? changes.join("; ") : "alte detalii (descrieri, poze, culori)";
+}
+
 export async function createProduct(
   formData: FormData,
 ): Promise<{ id: string } | { errors: FormErrors }> {
-  await assertAdmin();
+  const admin = await requireAdmin();
   const errors = {
     ...validateProductForm(formData),
     ...(await checkSlug(formData)),
@@ -366,6 +439,11 @@ export async function createProduct(
 
   await savePieces(created.id, data, created.variants);
 
+  await logAdminAction(
+    admin,
+    "Produs creat",
+    `${data.roName}; preț ${money(data.priceCents)}; stoc ${data.quantityOnHand}${data.isActive ? "" : "; ascuns"}`,
+  );
   revalidatePath("/", "layout");
   return { id: created.id };
 }
@@ -374,7 +452,7 @@ export async function updateProduct(
   productId: string,
   formData: FormData,
 ): Promise<{ errors: FormErrors } | void> {
-  await assertAdmin();
+  const admin = await requireAdmin();
   const errors = {
     ...validateProductForm(formData),
     ...(await checkSlug(formData, productId)),
@@ -384,6 +462,7 @@ export async function updateProduct(
 
   const data = readProductForm(formData);
   await applyColorRules(data);
+  const before = await productSnapshot(productId);
 
   const updated = await prisma.product.update({
     where: { id: productId },
@@ -471,16 +550,26 @@ export async function updateProduct(
 
   await savePieces(productId, data, updated.variants);
 
+  const after = await productSnapshot(productId);
+  if (before && after) {
+    await logAdminAction(
+      admin,
+      "Produs modificat",
+      `${after.name}: ${describeProductChanges(before, after)}`,
+    );
+  }
   revalidatePath("/", "layout");
   redirect("/admin/products");
 }
 
 export async function deleteProduct(formData: FormData) {
-  await assertAdmin();
+  const admin = await requireAdmin();
   const productId = String(formData.get("productId") || "");
   if (!productId) return;
 
+  const before = await productSnapshot(productId);
   await prisma.product.delete({ where: { id: productId } });
+  await logAdminAction(admin, "Produs șters", before?.name ?? productId);
 
   revalidatePath("/", "layout");
   redirect("/admin/products");

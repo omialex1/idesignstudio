@@ -14,11 +14,3 @@ export async function getAdminPasswordHash(): Promise<string | null> {
   if (!hashB64) return null;
   return Buffer.from(hashB64, "base64").toString("utf-8");
 }
-
-export function getAdminResetEmail(): string | null {
-  return (
-    process.env.ADMIN_RESET_EMAIL ??
-    process.env.WITHDRAWAL_NOTIFY_EMAIL ??
-    null
-  );
-}

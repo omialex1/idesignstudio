@@ -11,6 +11,7 @@ const PUBLIC_ADMIN_PATHS = [
   "/admin/login",
   "/admin/forgot-password",
   "/admin/reset-password",
+  "/admin/invite",
 ];
 const PUBLIC_ACCOUNT_PATHS = [
   "/login",

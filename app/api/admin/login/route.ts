@@ -1,41 +1,118 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { createAdminSession } from "@/lib/admin/auth";
+import { cookies } from "next/headers";
+import { prisma } from "@/lib/db/client";
+import { createAdminSession, legacyLoginAllowed } from "@/lib/admin/auth";
 import { getAdminPasswordHash } from "@/lib/admin/password";
+import { logAdminAction } from "@/lib/admin/log";
+import { DEVICE_COOKIE, registerLoginDevice } from "@/lib/admin/users";
 import {
   MINUTE,
   checkRateLimits,
   clientIp,
+  refundRateLimit,
   tooManyRequests,
 } from "@/lib/security/rate-limit";
 
+// Compared against when the account does not exist, so a wrong name and a
+// wrong password take the same time to answer.
+let dummyHash: string | null = null;
+function getDummyHash() {
+  dummyHash ??= bcrypt.hashSync("not-a-real-password", 12);
+  return dummyHash;
+}
+
+const DEVICE_COOKIE_SECONDS = 60 * 60 * 24 * 400;
+
 export async function POST(request: NextRequest) {
-  const wait = await checkRateLimits([
-    {
-      action: "admin-login-ip",
-      id: clientIp(request),
-      limit: 10,
-      windowMs: 15 * MINUTE,
-    },
-  ]);
-  if (wait) return tooManyRequests(wait);
+  const body = await request.json().catch(() => ({}));
+  const identifier =
+    typeof body.identifier === "string" ? body.identifier.trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  const remember = body.remember === true;
 
-  const { password } = await request.json();
-
-  if (typeof password !== "string" || password.length === 0) {
+  if (password.length === 0) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
 
-  const hash = await getAdminPasswordHash();
-  if (!hash) {
-    return NextResponse.json({ error: "not_configured" }, { status: 500 });
+  const ip = clientIp(request);
+  // 10 tries / 15 min from one address, and 5 / 15 min on one account whatever
+  // the address (counted by the typed name, even if no such account exists).
+  const rules = [
+    { action: "admin-login-ip", id: ip, limit: 10, windowMs: 15 * MINUTE },
+    ...(identifier
+      ? [
+          {
+            action: "admin-login-account",
+            id: identifier,
+            limit: 5,
+            windowMs: 15 * MINUTE,
+          },
+        ]
+      : []),
+  ];
+  const wait = await checkRateLimits(rules);
+  if (wait) return tooManyRequests(wait);
+
+  async function giveBackAttempts() {
+    await Promise.all(
+      rules.map((r) => refundRateLimit(r.action, r.id)),
+    );
   }
 
-  const valid = await bcrypt.compare(password, hash);
-  if (!valid) {
+  // No name typed: only the old shared password, and only until the first
+  // account has chosen its own password.
+  if (!identifier) {
+    if (!(await legacyLoginAllowed())) {
+      await bcrypt.compare(password, getDummyHash());
+      return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+    }
+    const hash = await getAdminPasswordHash();
+    if (!hash) {
+      return NextResponse.json({ error: "not_configured" }, { status: 500 });
+    }
+    if (!(await bcrypt.compare(password, hash))) {
+      return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+    }
+    await createAdminSession(null, false);
+    await giveBackAttempts();
+    return NextResponse.json({ ok: true });
+  }
+
+  const key = identifier.toLowerCase();
+  const user = await prisma.adminUser.findFirst({
+    where: { OR: [{ usernameKey: key }, { email: key }] },
+  });
+
+  const valid = await bcrypt.compare(
+    password,
+    user?.passwordHash ?? getDummyHash(),
+  );
+  if (!user || !user.passwordHash || !user.isActive || !valid) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }
 
-  await createAdminSession();
+  const cookieStore = await cookies();
+  const deviceId = await registerLoginDevice(
+    user,
+    cookieStore.get(DEVICE_COOKIE)?.value,
+    request.headers.get("user-agent"),
+    ip,
+  );
+  cookieStore.set(DEVICE_COOKIE, deviceId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: DEVICE_COOKIE_SECONDS,
+  });
+
+  await prisma.adminUser.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  });
+  await createAdminSession(user, remember);
+  await logAdminAction(user, "Conectare");
+  await giveBackAttempts();
   return NextResponse.json({ ok: true });
 }

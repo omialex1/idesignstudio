@@ -1,22 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
-import { getAdminResetEmail } from "@/lib/admin/password";
-import { sendEmail } from "@/lib/email/client";
+import { sendAdminReset } from "@/lib/admin/users";
 import {
   HOUR,
   checkRateLimits,
   clientIp,
   tooManyRequests,
 } from "@/lib/security/rate-limit";
-import { adminPasswordResetEmail } from "@/lib/email/templates/admin-password-reset";
-import {
-  generateResetToken,
-  RESET_TOKEN_TTL_MS,
-} from "@/lib/customer/reset-token";
 
 const MIN_INTERVAL_MS = 5 * 60 * 1000;
 
 export async function POST(request: Request) {
+  const body = await request.json().catch(() => ({}));
+  const identifier =
+    typeof body.identifier === "string" ? body.identifier.trim() : "";
+
   const wait = await checkRateLimits([
     {
       action: "admin-forgot-ip",
@@ -24,39 +22,45 @@ export async function POST(request: Request) {
       limit: 5,
       windowMs: HOUR,
     },
+    ...(identifier
+      ? [
+          {
+            action: "admin-forgot-account",
+            id: identifier,
+            limit: 3,
+            windowMs: HOUR,
+          },
+        ]
+      : []),
   ]);
   if (wait) return tooManyRequests(wait);
 
-  const recipient = getAdminResetEmail();
+  // Always the same answer, so this page never reveals which accounts exist.
+  if (!identifier) return NextResponse.json({ ok: true });
 
-  // Always answer the same way, so this page never reveals anything.
-  if (!recipient) {
-    console.error("No admin reset email is configured");
-    return NextResponse.json({ ok: true });
-  }
+  const key = identifier.toLowerCase();
+  const user = await prisma.adminUser.findFirst({
+    where: {
+      OR: [{ usernameKey: key }, { email: key }],
+      isActive: true,
+      passwordHash: { not: null },
+    },
+  });
+  if (!user) return NextResponse.json({ ok: true });
 
-  const recent = await prisma.adminPasswordResetToken.findFirst({
-    where: { createdAt: { gt: new Date(Date.now() - MIN_INTERVAL_MS) } },
+  const recent = await prisma.adminUserToken.findFirst({
+    where: {
+      adminUserId: user.id,
+      kind: "reset",
+      createdAt: { gt: new Date(Date.now() - MIN_INTERVAL_MS) },
+    },
   });
   if (recent) return NextResponse.json({ ok: true });
 
-  const { token, tokenHash } = generateResetToken();
-  await prisma.adminPasswordResetToken.create({
-    data: { tokenHash, expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS) },
-  });
-
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  ).replace(/\/$/, "");
-
   try {
-    const { subject, html } = adminPasswordResetEmail(
-      `${siteUrl}/admin/reset-password?token=${token}`,
-    );
-    await sendEmail({ to: recipient, subject, html });
+    await sendAdminReset(user);
   } catch (err) {
     console.error("Failed to send admin password reset email", err);
   }
-
   return NextResponse.json({ ok: true });
 }
