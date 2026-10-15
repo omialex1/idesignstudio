@@ -2,8 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import LoggedInGate from "@/components/account/LoggedInGate";
 import VerifyPending from "@/components/account/VerifyPending";
 
@@ -17,7 +17,7 @@ export default function AccountLoginPage() {
 
 function LoginForm() {
   const t = useTranslations("Account");
-  const router = useRouter();
+  const locale = useLocale();
   const params = useSearchParams();
   // the confirmation page sends people here with their address filled in
   const [email, setEmail] = useState(params.get("email") ?? "");
@@ -40,8 +40,10 @@ function LoginForm() {
     });
 
     if (res.ok) {
-      router.push("/account");
-      router.refresh();
+      // a full page load: the router must not reuse the redirect-to-login answer
+      // it may have kept from before the login
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full page load on purpose (see above)
+      window.location.assign(`/${locale}/account`);
       return;
     }
 

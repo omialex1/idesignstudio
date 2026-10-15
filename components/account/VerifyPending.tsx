@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
 // "Check your e-mail" screen shown after creating an account (or after trying
 // to log in to an unconfirmed one). It watches for the confirmation: when the
@@ -17,7 +16,7 @@ export default function VerifyPending({
   reminder?: boolean;
 }) {
   const t = useTranslations("Account");
-  const router = useRouter();
+  const locale = useLocale();
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState<{
     text: string;
@@ -33,10 +32,16 @@ export default function VerifyPending({
           cache: "no-store",
         });
         const data = await res.json();
-        if (alive && data.status === "verified") {
-          router.push("/account");
-          router.refresh();
+        let loggedIn = data.status === "verified";
+        if (!loggedIn && data.status === "none") {
+          // the link may have been opened in this same browser, which then
+          // logged in and cleared the waiting mark: look at the login itself
+          const me = await fetch("/api/account/me", { cache: "no-store" });
+          loggedIn = Boolean((await me.json()).loggedIn);
         }
+        // a full page load, so no earlier answer kept by the router is reused
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full page load on purpose (see above)
+        if (alive && loggedIn) window.location.assign(`/${locale}/account`);
       } catch {
         // try again at the next check
       }
@@ -50,7 +55,7 @@ export default function VerifyPending({
       document.removeEventListener("visibilitychange", check);
       window.removeEventListener("focus", check);
     };
-  }, [router]);
+  }, [locale]);
 
   async function resend() {
     setSending(true);

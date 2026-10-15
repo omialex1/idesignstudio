@@ -190,6 +190,9 @@ export default function Header({
 
           <Link
             href="/account"
+            // not prefetched: while logged out that answer is a redirect to the
+            // login page, and the router would reuse it right after logging in
+            prefetch={false}
             aria-label={tAccount("accountLabel")}
             className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
           >

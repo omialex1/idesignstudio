@@ -2,8 +2,8 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 type State =
   | { status: "working" }
@@ -13,7 +13,7 @@ type State =
 
 function VerifyEmail() {
   const t = useTranslations("Account");
-  const router = useRouter();
+  const locale = useLocale();
   const token = useSearchParams().get("token");
   const [state, setState] = useState<State>(
     token ? { status: "working" } : { status: "invalid" },
@@ -33,8 +33,9 @@ function VerifyEmail() {
         if (res.ok && body.loggedIn) {
           // same browser that created the account: straight into the account
           setTimeout(() => {
-            router.push("/account");
-            router.refresh();
+            // a full page load, so no earlier answer kept by the router is reused
+            // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full page load on purpose (see above)
+            window.location.assign(`/${locale}/account`);
           }, 900);
         }
         setState(
@@ -54,7 +55,7 @@ function VerifyEmail() {
     return () => {
       active = false;
     };
-  }, [token, router]);
+  }, [token, locale]);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
