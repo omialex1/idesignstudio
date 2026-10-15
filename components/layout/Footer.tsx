@@ -8,10 +8,10 @@ export default async function Footer() {
   const tLegal = await getTranslations("Legal");
 
   return (
-    <footer className="relative isolate overflow-hidden bg-[#91564c] bg-[url(/images/footer-fabric.jpg)] bg-cover bg-center text-cream-50">
-      {/* slight shade so the small text stays easy to read on the lighter folds */}
+    <footer className="relative isolate overflow-hidden bg-[#784239] bg-[url(/images/footer-satin.jpg)] bg-cover bg-center text-cream-50">
+      {/* shade so the small text stays easy to read on the lighter folds of the satin */}
       <div
-        className="absolute inset-0 -z-10 bg-[rgba(60,25,20,0.2)]"
+        className="absolute inset-0 -z-10 bg-[rgba(60,25,20,0.35)]"
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10">
@@ -46,22 +46,13 @@ export default async function Footer() {
           <CompanyInfoBlock tone="dark" />
 
           <div className="flex flex-col gap-2 text-sm">
-            <Link
-              href="/terms"
-              className="text-cream-50 hover:underline"
-            >
+            <Link href="/terms" className="text-cream-50 hover:underline">
               {tLegal("termsLink")}
             </Link>
-            <Link
-              href="/privacy"
-              className="text-cream-50 hover:underline"
-            >
+            <Link href="/privacy" className="text-cream-50 hover:underline">
               {tLegal("privacyLink")}
             </Link>
-            <Link
-              href="/withdrawal"
-              className="text-cream-50 hover:underline"
-            >
+            <Link href="/withdrawal" className="text-cream-50 hover:underline">
               {tLegal("withdrawalLink")}
             </Link>
           </div>
