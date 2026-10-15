@@ -184,13 +184,31 @@ function decodeBase64Url(value: string): Buffer {
   return Buffer.from(value, "base64url");
 }
 
+// A key pasted into a settings field often loses its line breaks (one long
+// line, spaces instead of breaks, or the two characters "\n"). Rebuild a clean
+// PEM from the header, the base64 body and the footer, so the key still reads.
+export function normalizePem(raw: string): string {
+  const text = raw
+    .replace(/\\n/g, "\n")
+    .trim()
+    .replace(/^["']|["']$/g, "");
+  const found = text.match(
+    /-----BEGIN ([A-Z ]+)-----([\s\S]*?)-----END \1-----/,
+  );
+  if (!found) return text;
+  const body = found[2].replace(/[^A-Za-z0-9+/=]/g, "");
+  const lines = body.match(/.{1,64}/g)?.join("\n") ?? body;
+  return `-----BEGIN ${found[1]}-----\n${lines}\n-----END ${found[1]}-----\n`;
+}
+
 // Netopia signs each notification as a JWT: `sub` is the base64 SHA-512 of the
 // exact request body and `aud` the POS signature it is meant for.
 export function verifyNetopiaIpn(
   token: string | null,
   rawBody: string,
 ): IpnVerification {
-  const publicKeyPem = process.env.NETOPIA_PUBLIC_KEY?.replace(/\\n/g, "\n");
+  const configuredKey = process.env.NETOPIA_PUBLIC_KEY;
+  const publicKeyPem = configuredKey ? normalizePem(configuredKey) : undefined;
   const posSignature = process.env.NETOPIA_POS_SIGNATURE;
   if (!publicKeyPem || !posSignature) {
     return { ok: false, reason: "not_configured", detail: "setari lipsa" };
