@@ -135,7 +135,7 @@
     "verifyingEmail": "Confirming your address...",
     "verifyEmailDone": "Your e-mail address is confirmed.",
     "verifyEmailLinked": "We also connected {count, plural, one {one order} other {# orders}} placed without an account with this address.",
-    "verifyEmailInvalid": "The confirmation link is invalid or has expired. Log in and ask for a new one.",
+    "verifyEmailInvalid": "The confirmation link was already used or has expired. If you already confirmed your account, log in. Otherwise log in and we will send the link again.",
     "profileHeading": "My details",
     "profileNote": "We use them to fill in your order automatically. You can leave empty the fields you don't want to save.",
     "phone": "Phone",

@@ -50,20 +50,19 @@ export async function POST(request: NextRequest) {
     }),
   ]);
 
-  // Same browser that created the account: log it in right away. Otherwise
-  // (link opened in the mail app) the person logs in with the password; the
-  // browser that is waiting is logged in by the status check.
-  let loggedIn = false;
+  // Whoever opens the link has read the e-mail sent to that address, which is
+  // the proof we ask for, so the browser that opened it is logged in right away
+  // (mail app, another window, same browser). The window that created the
+  // account and is waiting is logged in too, by the status check.
+  await createCustomerSession(customer.id);
   if ((await getPendingCustomerId()) === customer.id) {
-    await createCustomerSession(customer.id);
     await clearPendingVerification();
-    loggedIn = true;
   }
 
   return NextResponse.json({
     ok: true,
     linkedOrders: linked.count,
-    loggedIn,
+    loggedIn: true,
     email: customer.email,
   });
 }

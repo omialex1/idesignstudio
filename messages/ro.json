@@ -135,7 +135,7 @@
     "verifyingEmail": "Se confirmă adresa...",
     "verifyEmailDone": "Adresa de e-mail a fost confirmată.",
     "verifyEmailLinked": "Am legat de cont și {count, plural, one {o comandă} other {# comenzi}} făcute fără cont cu această adresă.",
-    "verifyEmailInvalid": "Linkul de confirmare este invalid sau a expirat. Intră în cont și cere un link nou.",
+    "verifyEmailInvalid": "Linkul de confirmare a fost deja folosit sau a expirat. Dacă ți-ai confirmat deja contul, conectează-te. Altfel, conectează-te și îți retrimitem linkul.",
     "profileHeading": "Datele mele",
     "profileNote": "Le folosim ca să-ți completăm automat comanda. Poți lăsa goale câmpurile pe care nu vrei să le salvezi.",
     "phone": "Telefon",

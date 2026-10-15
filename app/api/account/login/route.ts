@@ -8,6 +8,7 @@ import {
   MINUTE,
   checkRateLimits,
   clientIp,
+  refundRateLimit,
   tooManyRequests,
 } from "@/lib/security/rate-limit";
 
@@ -62,5 +63,8 @@ export async function POST(request: NextRequest) {
   }
 
   await createCustomerSession(customer.id);
+  // a successful login is not a guess: give its attempt back
+  await refundRateLimit("login-ip", clientIp(request));
+  await refundRateLimit("login-email", normalizedEmail);
   return NextResponse.json({ ok: true });
 }

@@ -7,7 +7,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 
 type State =
   | { status: "working" }
-  // loggedIn: this browser created the account and is now logged in
+  // loggedIn: the browser that opened the link is now logged in
   | { status: "done"; linked: number; loggedIn: boolean; email: string }
   | { status: "invalid" };
 
@@ -35,7 +35,7 @@ function VerifyEmail() {
           setTimeout(() => {
             router.push("/account");
             router.refresh();
-          }, 1500);
+          }, 900);
         }
         setState(
           res.ok
