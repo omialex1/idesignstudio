@@ -15,10 +15,9 @@ function getSecret() {
   return new TextEncoder().encode(secret);
 }
 
-// Who is using the admin panel. `id` is null only for the old shared password,
-// which works just until the first account has chosen its own password.
+// Who is using the admin panel.
 export type AdminIdentity = {
-  id: string | null;
+  id: string;
   username: string;
   email: string | null;
   isOwner: boolean;
@@ -27,25 +26,15 @@ export type AdminIdentity = {
   twoFactorEnabled: boolean;
 };
 
-export const LEGACY_ADMIN: AdminIdentity = {
-  id: null,
-  username: "Admin (parola veche)",
-  email: null,
-  isOwner: false,
-  twoFactorEnabled: true,
-};
-
-type SessionUser = { id: string; sessionVersion: number } | null;
-
-// `user` is null for the old shared-password login.
 export async function createAdminSession(
-  user: SessionUser,
+  user: { id: string; sessionVersion: number },
   remember = false,
 ) {
   const seconds = remember ? REMEMBER_SESSION_SECONDS : SHORT_SESSION_SECONDS;
   const token = await new SignJWT({
     role: "admin",
-    ...(user ? { uid: user.id, v: user.sessionVersion } : {}),
+    uid: user.id,
+    v: user.sessionVersion,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -80,14 +69,6 @@ export async function verifyAdminSessionToken(
   }
 }
 
-// True while nobody has an account with a password yet.
-export async function legacyLoginAllowed(): Promise<boolean> {
-  const withPassword = await prisma.adminUser.count({
-    where: { passwordHash: { not: null } },
-  });
-  return withPassword === 0;
-}
-
 // The signed-in person, checked against the database every time: a deactivated
 // or deleted account, or a password changed since, stops working at once.
 export const getCurrentAdmin = cache(
@@ -108,9 +89,7 @@ export const getCurrentAdmin = cache(
     if (payload.role !== "admin") return null;
 
     const uid = typeof payload.uid === "string" ? payload.uid : null;
-    if (!uid) {
-      return (await legacyLoginAllowed()) ? LEGACY_ADMIN : null;
-    }
+    if (!uid) return null;
 
     const user = await prisma.adminUser.findUnique({ where: { id: uid } });
     if (

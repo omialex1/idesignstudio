@@ -7,17 +7,6 @@ import SecurityPanel from "@/components/admin/SecurityPanel";
 export default async function AdminSecurityPage() {
   const admin = await getCurrentAdmin();
   if (!admin) redirect("/admin/login");
-  if (!admin.id) {
-    return (
-      <div className="flex flex-col gap-4">
-        <h1 className="font-display text-2xl text-taupe-800">Securitate</h1>
-        <p className="text-sm text-taupe-600">
-          Ești conectat cu parola veche comună, fără cont personal.
-        </p>
-      </div>
-    );
-  }
-
   const user = await prisma.adminUser.findUnique({
     where: { id: admin.id },
     include: {

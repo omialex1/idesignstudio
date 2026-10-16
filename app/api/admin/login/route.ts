@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/client";
-import {
-  createAdminSession,
-  createPending2fa,
-  legacyLoginAllowed,
-} from "@/lib/admin/auth";
-import { getAdminPasswordHash } from "@/lib/admin/password";
+import { createPending2fa } from "@/lib/admin/auth";
 import { finishAdminLogin } from "@/lib/admin/login";
 import {
   MINUTE,
@@ -31,7 +26,7 @@ export async function POST(request: NextRequest) {
   const password = typeof body.password === "string" ? body.password : "";
   const remember = body.remember === true;
 
-  if (password.length === 0) {
+  if (identifier.length === 0 || password.length === 0) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
 
@@ -40,16 +35,12 @@ export async function POST(request: NextRequest) {
   // the address (counted by the typed name, even if no such account exists).
   const rules = [
     { action: "admin-login-ip", id: ip, limit: 10, windowMs: 15 * MINUTE },
-    ...(identifier
-      ? [
-          {
-            action: "admin-login-account",
-            id: identifier,
-            limit: 5,
-            windowMs: 15 * MINUTE,
-          },
-        ]
-      : []),
+    {
+      action: "admin-login-account",
+      id: identifier,
+      limit: 5,
+      windowMs: 15 * MINUTE,
+    },
   ];
   const wait = await checkRateLimits(rules);
   if (wait) return tooManyRequests(wait);
@@ -58,25 +49,6 @@ export async function POST(request: NextRequest) {
     await Promise.all(
       rules.map((r) => refundRateLimit(r.action, r.id)),
     );
-  }
-
-  // No name typed: only the old shared password, and only until the first
-  // account has chosen its own password.
-  if (!identifier) {
-    if (!(await legacyLoginAllowed())) {
-      await bcrypt.compare(password, getDummyHash());
-      return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
-    }
-    const hash = await getAdminPasswordHash();
-    if (!hash) {
-      return NextResponse.json({ error: "not_configured" }, { status: 500 });
-    }
-    if (!(await bcrypt.compare(password, hash))) {
-      return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
-    }
-    await createAdminSession(null, false);
-    await giveBackAttempts();
-    return NextResponse.json({ ok: true });
   }
 
   const key = identifier.toLowerCase();
