@@ -46,13 +46,13 @@ function Form({ kind }: { kind: "invite" | "reset" }) {
       body: JSON.stringify({ token, password, kind }),
     }).catch(() => null);
 
+    const data = await res?.json().catch(() => null);
     if (res?.ok) {
-      // a full page load, so the freshly set login is used right away
-      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full page load on purpose (see above)
-      window.location.assign("/admin");
+      // a full page load, so the freshly set login is used right away; with
+      // two-step login set up the person still has to log in with a code
+      window.location.assign(data?.needsLogin ? "/admin/login" : "/admin");
       return;
     }
-    const data = await res?.json().catch(() => null);
     setError(
       res?.status === 429
         ? "Prea multe încercări. Încearcă din nou peste puțin timp."

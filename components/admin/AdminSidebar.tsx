@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/admin/orders", label: "Comenzi", exact: false },
   { href: "/admin/log", label: "Jurnal", exact: false },
   { href: "/admin/users", label: "Conturi admin", exact: false },
+  { href: "/admin/security", label: "Securitate", exact: false },
 ];
 
 export default function AdminSidebar({ username }: { username: string }) {

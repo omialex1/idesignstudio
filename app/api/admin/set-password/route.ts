@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
 import { prisma } from "@/lib/db/client";
-import { createAdminSession } from "@/lib/admin/auth";
 import { ADMIN_MIN_PASSWORD_LENGTH } from "@/lib/admin/password";
 import { logAdminAction } from "@/lib/admin/log";
-import { DEVICE_COOKIE, registerLoginDevice } from "@/lib/admin/users";
+import { finishAdminLogin } from "@/lib/admin/login";
 import { hashResetToken } from "@/lib/customer/reset-token";
 import {
   HOUR,
@@ -13,8 +11,6 @@ import {
   clientIp,
   tooManyRequests,
 } from "@/lib/security/rate-limit";
-
-const DEVICE_COOKIE_SECONDS = 60 * 60 * 24 * 400;
 
 // Used by the invitation link (kind "invite") and the reset link (kind
 // "reset"): the person chooses a password, which only they know, and is logged
@@ -70,28 +66,18 @@ export async function POST(request: NextRequest) {
     data: { passwordHash, sessionVersion: { increment: 1 } },
   });
 
-  const cookieStore = await cookies();
-  const deviceId = await registerLoginDevice(
-    user,
-    cookieStore.get(DEVICE_COOKIE)?.value,
-    request.headers.get("user-agent"),
-    ip,
-  );
-  cookieStore.set(DEVICE_COOKIE, deviceId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: DEVICE_COOKIE_SECONDS,
-  });
+  // Someone with two-step login set up must still give a code, so a reset link
+  // alone (an e-mail account is enough to get one) never opens the admin.
+  if (user.totpEnabledAt) {
+    await logAdminAction(user, "Parolă schimbată (resetare)");
+    return NextResponse.json({ ok: true, needsLogin: true });
+  }
 
-  await prisma.adminUser.update({
-    where: { id: user.id },
-    data: { lastLoginAt: new Date() },
-  });
-  await createAdminSession(updated, false);
-  await logAdminAction(
-    user,
+  await finishAdminLogin(
+    updated,
+    false,
+    request,
+    ip,
     kind === "invite" ? "Cont activat (parolă aleasă)" : "Parolă schimbată (resetare)",
   );
   return NextResponse.json({ ok: true });

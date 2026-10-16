@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import {
   deleteAdminAction,
   inviteAdminAction,
+  resetTwoFactorAction,
   sendLinkAction,
   setAdminActiveAction,
 } from "@/lib/admin/user-actions";
@@ -15,6 +16,7 @@ export type AdminUserRow = {
   isOwner: boolean;
   isActive: boolean;
   hasPassword: boolean;
+  hasTwoFactor: boolean;
   lastLogin: string | null;
 };
 
@@ -86,9 +88,30 @@ export default function AdminUsersPanel({
                 </p>
                 <p className="text-xs text-taupe-500">
                   {user.email} · {status(user)}
+                  {user.hasPassword &&
+                    (user.hasTwoFactor ? " · 2FA activ" : " · fără 2FA încă")}
                   {user.lastLogin && ` · ultima conectare ${user.lastLogin}`}
                 </p>
               </div>
+
+              {user.id !== currentId && user.hasTwoFactor && (
+                <button
+                  type="button"
+                  disabled={pending}
+                  className={smallButton}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Resetezi autentificarea în doi pași a lui ${user.username}? Își va configura-o din nou la următoarea conectare. Fă asta doar dacă ți-a cerut chiar el/ea.`,
+                      )
+                    ) {
+                      run(() => resetTwoFactorAction(user.id));
+                    }
+                  }}
+                >
+                  Resetează 2FA
+                </button>
+              )}
 
               {canManage && !user.isOwner && (
                 <div className="flex flex-wrap gap-2">

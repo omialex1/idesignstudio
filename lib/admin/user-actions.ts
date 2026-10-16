@@ -3,11 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/admin/auth";
+import { sendEmail } from "@/lib/email/client";
+import { adminAccountChangedEmail } from "@/lib/email/templates/admin-account";
 import { logAdminAction } from "@/lib/admin/log";
 import {
   USERNAME_PATTERN,
   sendAdminInvite,
   sendAdminReset,
+  officeEmail,
   usernameKey,
 } from "@/lib/admin/users";
 
@@ -136,4 +139,64 @@ export async function deleteAdminAction(id: string): Promise<Result> {
   );
   revalidatePath("/admin/users");
   return { message: "Contul a fost șters. Istoricul lui rămâne în jurnal." };
+}
+
+// Lost phone and no backup codes: the OTHER administrator clears the person's
+// two-step login. They sign in with the password and set it up again. Both the
+// person and the office mailbox are told by e-mail.
+export async function resetTwoFactorAction(id: string): Promise<Result> {
+  const admin = await requireAdmin();
+  if (!admin.id) throw new Error("unauthorized");
+  const user = await prisma.adminUser.findUnique({ where: { id } });
+  if (!user) return { error: true, message: "Contul nu mai există." };
+  if (user.id === admin.id) {
+    return {
+      error: true,
+      message:
+        "Nu îți poți reseta singur autentificarea. Cere celuilalt administrator.",
+    };
+  }
+  if (!user.totpEnabledAt) {
+    return {
+      error: true,
+      message: "Contul nu are autentificare în doi pași activată.",
+    };
+  }
+
+  await prisma.$transaction([
+    prisma.adminBackupCode.deleteMany({ where: { adminUserId: user.id } }),
+    prisma.adminUser.update({
+      where: { id: user.id },
+      data: {
+        totpSecret: null,
+        totpEnabledAt: null,
+        totpLastStep: null,
+        sessionVersion: { increment: 1 },
+      },
+    }),
+  ]);
+  await logAdminAction(
+    admin,
+    "Autentificare în doi pași resetată",
+    user.username,
+  );
+
+  const { subject, html } = adminAccountChangedEmail(
+    user.username,
+    `autentificarea în doi pași a fost resetată de ${admin.username}. La următoarea conectare trebuie configurată din nou`,
+  );
+  const recipients = [user.email, officeEmail()].filter(
+    (to): to is string => Boolean(to),
+  );
+  await Promise.all(
+    recipients.map((to) =>
+      sendEmail({ to, subject, html }).catch((err) =>
+        console.error("Could not send the 2FA reset notice", err),
+      ),
+    ),
+  );
+  revalidatePath("/admin/users");
+  return {
+    message: `Autentificarea lui ${user.username} a fost resetată. La următoarea conectare o configurează din nou.`,
+  };
 }

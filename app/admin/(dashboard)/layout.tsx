@@ -11,6 +11,8 @@ export default async function AdminDashboardLayout({
   // checked (still active, password not changed since).
   const admin = await getCurrentAdmin();
   if (!admin) redirect("/admin/login");
+  // two-step login is required: until it is set up, only the set-up page opens
+  if (!admin.twoFactorEnabled) redirect("/admin/2fa-setup");
 
   return (
     <div className="flex min-h-screen">

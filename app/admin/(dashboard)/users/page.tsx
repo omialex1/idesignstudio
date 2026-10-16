@@ -25,6 +25,7 @@ export default async function AdminUsersPage() {
           isOwner: u.isOwner,
           isActive: u.isActive,
           hasPassword: Boolean(u.passwordHash),
+          hasTwoFactor: u.totpEnabledAt !== null,
           lastLogin: u.lastLoginAt ? formatDateTime(u.lastLoginAt, "ro") : null,
         }))}
       />

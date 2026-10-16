@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
 import { prisma } from "@/lib/db/client";
-import { createAdminSession, legacyLoginAllowed } from "@/lib/admin/auth";
+import {
+  createAdminSession,
+  createPending2fa,
+  legacyLoginAllowed,
+} from "@/lib/admin/auth";
 import { getAdminPasswordHash } from "@/lib/admin/password";
-import { logAdminAction } from "@/lib/admin/log";
-import { DEVICE_COOKIE, registerLoginDevice } from "@/lib/admin/users";
+import { finishAdminLogin } from "@/lib/admin/login";
 import {
   MINUTE,
   checkRateLimits,
@@ -21,8 +23,6 @@ function getDummyHash() {
   dummyHash ??= bcrypt.hashSync("not-a-real-password", 12);
   return dummyHash;
 }
-
-const DEVICE_COOKIE_SECONDS = 60 * 60 * 24 * 400;
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
@@ -92,27 +92,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }
 
-  const cookieStore = await cookies();
-  const deviceId = await registerLoginDevice(
-    user,
-    cookieStore.get(DEVICE_COOKIE)?.value,
-    request.headers.get("user-agent"),
-    ip,
-  );
-  cookieStore.set(DEVICE_COOKIE, deviceId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: DEVICE_COOKIE_SECONDS,
-  });
+  // Right password. With two-step login set up, the code is still needed.
+  if (user.totpEnabledAt) {
+    await createPending2fa(user, remember);
+    // the password attempt is not held against the person; the code has its own limit
+    await giveBackAttempts();
+    return NextResponse.json({ ok: true, needs2fa: true });
+  }
 
-  await prisma.adminUser.update({
-    where: { id: user.id },
-    data: { lastLoginAt: new Date() },
-  });
-  await createAdminSession(user, remember);
-  await logAdminAction(user, "Conectare");
+  await finishAdminLogin(user, remember, request, ip);
   await giveBackAttempts();
   return NextResponse.json({ ok: true });
 }

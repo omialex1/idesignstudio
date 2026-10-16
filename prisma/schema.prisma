@@ -312,25 +312,32 @@ model RateLimit {
 // People who can use the admin panel (stage 1 of the admin accounts: each
 // person has their own login, with a short username shown in the activity log).
 model AdminUser {
-  id             String           @id @default(cuid())
+  id             String            @id @default(cuid())
   // as written ("Bea"), shown in the activity log
   username       String
   // lower-case, used to log in and to keep names unique
-  usernameKey    String           @unique
-  email          String           @unique
+  usernameKey    String            @unique
+  email          String            @unique
   // empty until the invitation has been accepted
   passwordHash   String?
   // the owner is the only one who can invite, deactivate and delete admin accounts
-  isOwner        Boolean          @default(false)
-  isActive       Boolean          @default(true)
+  isOwner        Boolean           @default(false)
+  isActive       Boolean           @default(true)
   // raised when the password changes, so older logins stop working
-  sessionVersion Int              @default(0)
+  sessionVersion Int               @default(0)
   lastLoginAt    DateTime?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  // Two-step login (authenticator app). The secret is stored encrypted and only
+  // counts once totpEnabledAt is set (the person has proved their app works).
+  totpSecret     String?
+  totpEnabledAt  DateTime?
+  // time step of the last accepted code, so a code cannot be used twice
+  totpLastStep   Int?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
   tokens         AdminUserToken[]
   devices        AdminDevice[]
   logs           AdminLog[]
+  backupCodes    AdminBackupCode[]
 }
 
 // Single-use links sent by e-mail: the invitation to a new account and the
@@ -373,4 +380,17 @@ model AdminLog {
   createdAt   DateTime   @default(now())
 
   @@index([createdAt])
+}
+
+// One-time codes for when the authenticator app is not at hand. Stored only as
+// a keyed hash; each works once.
+model AdminBackupCode {
+  id          String    @id @default(cuid())
+  adminUserId String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  codeHash    String
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([adminUserId])
 }
