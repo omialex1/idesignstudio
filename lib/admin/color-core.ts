@@ -133,3 +133,39 @@ export async function setCategoryUsesColors(mainCategoryId: string, value: boole
     data: { usesColors: value },
   });
 }
+
+// Saves a new order for the colours of one category (drag and drop in the
+// admin): the shop shows them in this order. Colours missing from the list keep
+// their place after the listed ones.
+export async function reorderColors(
+  mainCategoryId: string,
+  orderedIds: string[],
+): Promise<void> {
+  const rows = await prisma.color.findMany({
+    where: { mainCategoryId },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    select: { id: true, sortOrder: true },
+  });
+  const known = new Set(rows.map((r) => r.id));
+  const listed = orderedIds.filter(
+    (id, i) => known.has(id) && orderedIds.indexOf(id) === i,
+  );
+  const listedSet = new Set(listed);
+  const finalOrder = [
+    ...listed,
+    ...rows.map((r) => r.id).filter((id) => !listedSet.has(id)),
+  ];
+  const current = new Map(rows.map((r) => [r.id, r.sortOrder]));
+  const changes = finalOrder
+    .map((id, index) => ({ id, sortOrder: index + 1 }))
+    .filter((c) => current.get(c.id) !== c.sortOrder);
+  if (changes.length === 0) return;
+  await prisma.$transaction(
+    changes.map((c) =>
+      prisma.color.update({
+        where: { id: c.id },
+        data: { sortOrder: c.sortOrder },
+      }),
+    ),
+  );
+}

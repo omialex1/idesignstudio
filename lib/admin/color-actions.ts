@@ -8,6 +8,7 @@ import type { FormErrors } from "@/lib/admin/form-validation";
 import {
   createColor,
   removeColor,
+  reorderColors,
   setCategoryUsesColors,
   updateColor,
 } from "@/lib/admin/color-core";
@@ -72,6 +73,27 @@ export async function setUsesColorsAction(
   await logAdminAction(
     admin,
     value ? "Categorie: culori activate" : "Categorie: culori dezactivate",
+    await mainCategoryName(mainCategoryId),
+  );
+  refresh();
+  return { ok: true };
+}
+
+export async function reorderColorsAction(
+  mainCategoryId: string,
+  orderedIds: string[],
+): Promise<{ ok: true }> {
+  const admin = await requireAdmin();
+  if (
+    !Array.isArray(orderedIds) ||
+    orderedIds.some((id) => typeof id !== "string")
+  ) {
+    throw new Error("invalid");
+  }
+  await reorderColors(mainCategoryId, orderedIds);
+  await logAdminAction(
+    admin,
+    "Culori reordonate",
     await mainCategoryName(mainCategoryId),
   );
   refresh();

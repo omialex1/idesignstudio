@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { controlClass, FieldError } from "@/components/admin/FormBits";
 import { normalizeHex, swatchStyle } from "@/lib/colors-shared";
 import {
   createColorAction,
   deleteColorAction,
+  reorderColorsAction,
   setUsesColorsAction,
   updateColorAction,
 } from "@/lib/admin/color-actions";
@@ -46,10 +47,13 @@ function ColorRow({
   mainId,
   item,
   nextNumber,
+  position,
 }: {
   mainId: string;
   item: ColorItem | null;
   nextNumber: number;
+  // place in the list (1, 2, 3...) of an existing colour, for the "Nr." box
+  position?: number;
 }) {
   const router = useRouter();
   const [hex, setHex] = useState(item?.hex ?? "#C0A080");
@@ -114,7 +118,7 @@ function ColorRow({
           <input
             name="sortOrder"
             type="number"
-            defaultValue={item ? item.sortOrder : nextNumber}
+            defaultValue={item ? (position ?? item.sortOrder) : nextNumber}
             aria-invalid={!!errors.sortOrder}
             className={controlClass(!!errors.sortOrder)}
           />
@@ -245,6 +249,51 @@ export default function ColorEditor({
 
   const nextNumber = Math.max(0, ...colors.map((c) => c.sortOrder)) + 1;
 
+  // The order shown while (and right after) dragging; the saved order comes back
+  // from the server with the next refresh.
+  const [moved, setMoved] = useState<string[] | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+  const [orderError, setOrderError] = useState(false);
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const ordered = moved
+    ? [
+        ...moved
+          .map((id) => colors.find((c) => c.id === id))
+          .filter((c): c is ColorItem => Boolean(c)),
+        ...colors.filter((c) => !moved.includes(c.id)),
+      ]
+    : colors;
+
+  async function saveOrder(ids: string[]) {
+    setMoved(ids);
+    setOrderError(false);
+    try {
+      await reorderColorsAction(mainId, ids);
+      router.refresh();
+    } catch {
+      setOrderError(true);
+      setMoved(null);
+    }
+  }
+
+  function moveTo(id: string, targetIndex: number) {
+    const ids = ordered.map((c) => c.id);
+    const from = ids.indexOf(id);
+    if (
+      from < 0 ||
+      targetIndex < 0 ||
+      targetIndex >= ids.length ||
+      from === targetIndex
+    ) {
+      return;
+    }
+    ids.splice(from, 1);
+    ids.splice(targetIndex, 0, id);
+    void saveOrder(ids);
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <label className="flex items-start gap-3 rounded-2xl border border-cream-300 bg-white shadow-sm p-5 text-sm text-taupe-700">
@@ -273,17 +322,91 @@ export default function ColorEditor({
         <>
           <p className="max-w-2xl text-sm text-taupe-500">
             Culorile de mai jos sunt singurele pe care le pot alege clienții.
-            „Nr.” e ordinea în care apar în magazin. Poți scrie valoarea hex
-            direct sau alege culoarea din selector.
+            <strong className="font-medium text-taupe-700">
+              {" "}
+              Trage de mânerul ⠿ (sau folosește săgețile) ca să le muți.
+            </strong>{" "}
+            Ordinea de aici este exact ordinea în care apar în magazin. Poți
+            scrie valoarea hex direct sau alege culoarea din selector.
           </p>
+          {orderError && (
+            <p className="text-sm text-red-600">
+              Nu am putut salva ordinea. Încearcă din nou.
+            </p>
+          )}
           <div className="flex flex-col gap-3">
-            {colors.map((c) => (
-              <ColorRow
-                key={`${c.id}-${c.hex}-${c.nameRo}-${c.nameEn}-${c.sortOrder}-${c.isActive}`}
-                mainId={mainId}
-                item={c}
-                nextNumber={nextNumber}
-              />
+            {ordered.map((c, index) => (
+              <div
+                key={c.id}
+                ref={(el) => {
+                  rowRefs.current[c.id] = el;
+                }}
+                onDragOver={(e) => {
+                  if (!dragId) return;
+                  e.preventDefault();
+                  if (overId !== c.id) setOverId(c.id);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (dragId && dragId !== c.id) moveTo(dragId, index);
+                  setDragId(null);
+                  setOverId(null);
+                }}
+                className={`flex items-stretch gap-2 rounded-xl ${
+                  overId === c.id && dragId && dragId !== c.id
+                    ? "outline outline-2 outline-salamander-400"
+                    : ""
+                } ${dragId === c.id ? "opacity-50" : ""}`}
+              >
+                <div className="flex shrink-0 flex-col items-center justify-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => moveTo(c.id, index - 1)}
+                    disabled={index === 0}
+                    aria-label={`Mută „${c.nameRo}” mai sus`}
+                    className="rounded px-1.5 text-taupe-500 hover:bg-cream-100 disabled:opacity-30"
+                  >
+                    ▲
+                  </button>
+                  <span
+                    draggable
+                    onDragStart={(e) => {
+                      setDragId(c.id);
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/plain", c.id);
+                      const row = rowRefs.current[c.id];
+                      if (row) e.dataTransfer.setDragImage(row, 20, 20);
+                    }}
+                    onDragEnd={() => {
+                      setDragId(null);
+                      setOverId(null);
+                    }}
+                    title="Trage ca să muți"
+                    aria-hidden="true"
+                    className="cursor-grab select-none rounded px-1.5 py-1 text-lg leading-none text-taupe-500 hover:bg-cream-100 active:cursor-grabbing"
+                  >
+                    ⠿
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => moveTo(c.id, index + 1)}
+                    disabled={index === ordered.length - 1}
+                    aria-label={`Mută „${c.nameRo}” mai jos`}
+                    className="rounded px-1.5 text-taupe-500 hover:bg-cream-100 disabled:opacity-30"
+                  >
+                    ▼
+                  </button>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <ColorRow
+                    key={`${c.id}-${c.hex}-${c.nameRo}-${c.nameEn}-${index}-${c.isActive}`}
+                    mainId={mainId}
+                    item={c}
+                    nextNumber={nextNumber}
+                    position={index + 1}
+                  />
+                </div>
+              </div>
             ))}
           </div>
 
