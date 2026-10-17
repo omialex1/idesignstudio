@@ -223,6 +223,16 @@ model Order {
   paidAt            DateTime?
   // True when the customer wrote a locality that is not in our list; Bea checks it before shipping
   addressUnverified Boolean       @default(false)
+  // Oblio invoice made by hand from the admin (button "Genereaza factura")
+  invoiceSeries     String?
+  invoiceNumber     String?
+  invoiceUrl        String?
+  invoicedAt        DateTime?
+  // set while the invoice is being made, so two clicks cannot make two invoices
+  invoiceClaimedAt  DateTime?
+  invoiceError      String?
+  // Bea marked the order as finished (for example shipped)
+  completedAt       DateTime?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   items             OrderItem[]
