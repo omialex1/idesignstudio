@@ -4,12 +4,18 @@
 import { MAX_DISCOUNT_PERCENT } from "@/lib/pricing";
 import { isCategoryColor } from "@/lib/category-colors";
 
-export const VARIANT_SLOTS = 4;
+// The most variants a product can have. The form starts with INITIAL_VARIANT_ROWS
+// and has a button to add more up to this number.
+export const VARIANT_SLOTS = 8;
+export const INITIAL_VARIANT_ROWS = 4;
 // Quantity price tiers (invitations): up to this many rows.
 export const TIER_SLOTS = 6;
 // Pieces (parts with their own colour choice) per variant, and per product
 // without variants.
-export const PIECE_SLOTS = 5;
+// The most pieces. Must stay at 10 or less: the sort order below gives each
+// variant ten places (variant v, piece j -> v*10+j), so more would overlap.
+export const PIECE_SLOTS = 10;
+export const INITIAL_PIECE_ROWS = 5;
 
 // Pieces of all variants and of the product itself live in one table with a
 // unique sort order per product: variant v, piece j -> v*10+j; product-level

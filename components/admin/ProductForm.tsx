@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import {
+  INITIAL_PIECE_ROWS,
+  INITIAL_VARIANT_ROWS,
   PIECE_SLOTS,
   TIER_SLOTS,
   VARIANT_SLOTS,
@@ -135,6 +137,23 @@ export default function ProductForm({
     Array.from(
       { length: VARIANT_SLOTS },
       (_, i) => d.variants[i]?.nameRo ?? "",
+    ),
+  );
+
+  // How many variant rows and piece rows are shown. They start at the usual
+  // number (or at what the product already has) and the "Adaugă" buttons add more.
+  const [variantRows, setVariantRows] = useState(() =>
+    Math.min(VARIANT_SLOTS, Math.max(INITIAL_VARIANT_ROWS, d.variants.length)),
+  );
+  const [pieceRows, setPieceRows] = useState(() =>
+    Math.min(PIECE_SLOTS, Math.max(INITIAL_PIECE_ROWS, d.components.length)),
+  );
+  const [variantPieceRows, setVariantPieceRows] = useState<number[]>(() =>
+    Array.from({ length: VARIANT_SLOTS }, (_, i) =>
+      Math.min(
+        PIECE_SLOTS,
+        Math.max(INITIAL_PIECE_ROWS, d.variants[i]?.pieces.length ?? 0),
+      ),
     ),
   );
 
@@ -619,7 +638,7 @@ export default function ProductForm({
             variantă, mai jos.
           </p>
         </div>
-        {Array.from({ length: PIECE_SLOTS }, (_, i) => {
+        {Array.from({ length: pieceRows }, (_, i) => {
           const c = d.components[i];
           const error = errors[`componentNameRo${i}`];
           return (
@@ -643,6 +662,15 @@ export default function ProductForm({
             </div>
           );
         })}
+        {pieceRows < PIECE_SLOTS && (
+          <button
+            type="button"
+            onClick={() => setPieceRows((n) => Math.min(PIECE_SLOTS, n + 1))}
+            className="w-fit rounded-full border border-taupe-400 px-4 py-1.5 text-xs font-medium text-taupe-700 transition-colors hover:bg-cream-100"
+          >
+            + Adaugă o piesă
+          </button>
+        )}
       </section>
 
       <section
@@ -672,7 +700,7 @@ export default function ProductForm({
             onChange={(e) => setActiveVariant(Number(e.target.value))}
             className={controlClass(false, "bg-white")}
           >
-            {Array.from({ length: VARIANT_SLOTS }, (_, i) => {
+            {Array.from({ length: variantRows }, (_, i) => {
               const bad = variantWithError(errors) === i;
               const label = variantNames[i]?.trim()
                 ? `Varianta ${i + 1} – ${variantNames[i].trim()}`
@@ -685,7 +713,19 @@ export default function ProductForm({
             })}
           </select>
         </Field>
-        {Array.from({ length: VARIANT_SLOTS }, (_, i) => {
+        {variantRows < VARIANT_SLOTS && (
+          <button
+            type="button"
+            onClick={() => {
+              setActiveVariant(variantRows);
+              setVariantRows((n) => Math.min(VARIANT_SLOTS, n + 1));
+            }}
+            className="w-fit rounded-full border border-taupe-400 px-4 py-1.5 text-xs font-medium text-taupe-700 transition-colors hover:bg-cream-100"
+          >
+            + Adaugă o variantă
+          </button>
+        )}
+        {Array.from({ length: variantRows }, (_, i) => {
           const v = d.variants[i];
           const nameError = errors[`variantNameRo${i}`];
           const priceError = errors[`variantPriceRon${i}`];
@@ -744,7 +784,7 @@ export default function ProductForm({
                 <p className="mt-1 text-xs font-medium text-taupe-600">
                   Piese și culori pentru această variantă
                 </p>
-                {Array.from({ length: PIECE_SLOTS }, (_, j) => {
+                {Array.from({ length: variantPieceRows[i] }, (_, j) => {
                   const piece = v?.pieces[j];
                   const pieceError = errors[`variantPieceNameRo${i}_${j}`];
                   return (
@@ -768,6 +808,21 @@ export default function ProductForm({
                     </div>
                   );
                 })}
+                {variantPieceRows[i] < PIECE_SLOTS && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVariantPieceRows((rows) =>
+                        rows.map((n, k) =>
+                          k === i ? Math.min(PIECE_SLOTS, n + 1) : n,
+                        ),
+                      )
+                    }
+                    className="w-fit rounded-full border border-taupe-400 px-4 py-1.5 text-xs font-medium text-taupe-700 transition-colors hover:bg-cream-100"
+                  >
+                    + Adaugă o piesă
+                  </button>
+                )}
               </div>
             </div>
           );
