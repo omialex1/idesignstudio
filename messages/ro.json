@@ -26,6 +26,7 @@
     "button": "Caută",
     "open": "Caută",
     "close": "Închide căutarea",
+    "suggestions": "Sugestii",
     "hint": "Scrie numele unui produs, o categorie sau un cuvânt din descriere.",
     "resultsFor": "{count, plural, one {# produs găsit pentru „{query}”} few {# produse găsite pentru „{query}”} other {# de produse găsite pentru „{query}”}}",
     "noResults": "Nu am găsit produse pentru „{query}”.",

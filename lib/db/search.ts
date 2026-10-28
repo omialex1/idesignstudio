@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db/client";
 import {
+  MAX_QUERY_LENGTH,
   matchesAllWords,
+  normalizeSearch,
   queryWords,
   scoreMatch,
 } from "@/lib/search";
@@ -85,4 +87,77 @@ export async function searchProducts(
     .sort((a, b) => b.score - a.score)
     .slice(0, MAX_RESULTS)
     .map((s) => s.result);
+}
+
+// ---- suggestions while typing ----
+
+export type Suggestion = { name: string; href: string };
+
+type SuggestEntry = {
+  // shown name per language (only the part before " – ", as on the cards)
+  names: Record<string, string>;
+  href: string;
+};
+
+let suggestCache: { at: number; entries: SuggestEntry[] } | null = null;
+const SUGGEST_CACHE_MS = 60 * 1000;
+
+// The names of all active products, kept for a minute so typing does not hit the
+// database on every letter.
+async function suggestEntries(): Promise<SuggestEntry[]> {
+  if (suggestCache && Date.now() - suggestCache.at < SUGGEST_CACHE_MS) {
+    return suggestCache.entries;
+  }
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    select: {
+      slug: true,
+      translations: { select: { locale: true, name: true } },
+      category: {
+        select: { slug: true, mainCategory: { select: { slug: true } } },
+      },
+    },
+  });
+  const entries: SuggestEntry[] = [];
+  for (const p of products) {
+    if (!p.category.mainCategory) continue;
+    const names: Record<string, string> = {};
+    for (const t of p.translations) names[t.locale] = t.name.split(" – ")[0];
+    entries.push({
+      names,
+      href: `/${p.category.mainCategory.slug}/${p.category.slug}/${p.slug}`,
+    });
+  }
+  suggestCache = { at: Date.now(), entries };
+  return entries;
+}
+
+// Up to 3 product names that start with what was typed (or, next, have a word
+// that starts with it), ignoring diacritics and case.
+export async function suggestProducts(
+  query: string,
+  locale: string,
+): Promise<Suggestion[]> {
+  const typed = normalizeSearch(query.trim().slice(0, MAX_QUERY_LENGTH)).replace(
+    /\s+/g,
+    " ",
+  );
+  if (typed.length < 2) return [];
+
+  const ranked: { rank: number; name: string; href: string }[] = [];
+  for (const entry of await suggestEntries()) {
+    // matched against the name shown, in the customer's language
+    const name = entry.names[locale] ?? entry.names.ro ?? Object.values(entry.names)[0];
+    if (!name) continue;
+    const key = normalizeSearch(name);
+    let rank = 0;
+    if (key.startsWith(typed)) rank = 2;
+    else if (key.split(/[^a-z0-9]+/).some((w) => w && w.startsWith(typed))) rank = 1;
+    if (rank === 0) continue;
+    ranked.push({ rank, name, href: entry.href });
+  }
+  return ranked
+    .sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name, locale))
+    .slice(0, 3)
+    .map(({ name, href }) => ({ name, href }));
 }

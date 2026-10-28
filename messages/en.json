@@ -26,6 +26,7 @@
     "button": "Search",
     "open": "Search",
     "close": "Close search",
+    "suggestions": "Suggestions",
     "hint": "Type a product name, a category or a word from the description.",
     "resultsFor": "{count, plural, one {# product found for “{query}”} other {# products found for “{query}”}}",
     "noResults": "No products found for “{query}”.",
