@@ -1,4 +1,5 @@
 import { isUnfinishedOrder } from "@/lib/admin/unfinished";
+import { matchesAllWords, queryWords, MAX_QUERY_LENGTH } from "@/lib/search";
 
 // The three groups Bea filters orders by, plus the ones nobody acts on.
 export type OrderStage = "procesare" | "finalizata" | "anulata" | "neterminata";
@@ -13,6 +14,41 @@ type StageOrder = {
   status: string;
   completedAt: Date | null;
 };
+
+// What a search in the orders list looks at.
+type SearchableOrder = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  customerEmail: string;
+  phone: string;
+  addressLine: string;
+  city: string;
+  county: string;
+  companyName: string | null;
+  companyCui: string | null;
+  invoiceSeries: string | null;
+  invoiceNumber: string | null;
+  items: { productNameSnapshot: string }[];
+};
+
+function orderText(o: SearchableOrder): string {
+  return [
+    o.id,
+    o.firstName,
+    o.lastName,
+    o.customerEmail,
+    o.phone,
+    o.addressLine,
+    o.city,
+    o.county,
+    o.companyName ?? "",
+    o.companyCui ?? "",
+    o.invoiceSeries ?? "",
+    o.invoiceNumber ?? "",
+    ...o.items.map((i) => i.productNameSnapshot),
+  ].join(" ");
+}
 
 export function orderStage(order: StageOrder): OrderStage {
   if (order.status === "CANCELED") return "anulata";
@@ -43,6 +79,8 @@ export type OrderFilter = {
   year: number | null;
   month: number | null;
   day: number | null;
+  // words typed in the search box ("" when empty)
+  q: string;
   // also show failed / abandoned card payments
   showUnfinished: boolean;
 };
@@ -57,6 +95,7 @@ export function parseOrderFilter(params: {
   an?: string;
   luna?: string;
   zi?: string;
+  q?: string;
   all?: string;
 }): OrderFilter {
   const stage =
@@ -70,19 +109,23 @@ export function parseOrderFilter(params: {
     year: toNumber(params.an, 2000, 2100),
     month: toNumber(params.luna, 1, 12),
     day: toNumber(params.zi, 1, 31),
+    q: (params.q ?? "").trim().slice(0, MAX_QUERY_LENGTH),
     showUnfinished: params.all === "1",
   };
 }
 
 export function filterOrders<
-  T extends StageOrder & { createdAt: Date },
+  T extends StageOrder & SearchableOrder & { createdAt: Date },
 >(orders: T[], filter: OrderFilter): T[] {
+  const words = queryWords(filter.q);
   return orders.filter((o) => {
+    if (words.length > 0 && !matchesAllWords(words, orderText(o))) return false;
     const stage = orderStage(o);
     if (filter.stage) {
       if (stage !== filter.stage) return false;
-    } else if (stage === "neterminata") {
-      // "All": only hide the old unfinished ones, as before
+    } else if (stage === "neterminata" && words.length === 0) {
+      // "All": only hide the old unfinished ones, as before (a typed search
+      // looks at everything)
       if (!filter.showUnfinished && isUnfinishedOrder(o as never)) return false;
     }
     if (filter.year || filter.month || filter.day) {

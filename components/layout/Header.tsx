@@ -6,6 +6,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart/store";
 import { CART_ADDED_EVENT } from "@/components/cart/CartToast";
+import SearchForm from "@/components/layout/SearchForm";
 
 export default function Header({
   categories,
@@ -14,6 +15,7 @@ export default function Header({
 }) {
   const tCart = useTranslations("Cart");
   const tAccount = useTranslations("Account");
+  const tSearch = useTranslations("Search");
   const locale = useLocale();
   const pathname = usePathname();
 
@@ -24,6 +26,7 @@ export default function Header({
     : 0;
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // On every page except the homepage and the account pages the bar slides away and comes back when
   // the mouse reaches the top edge. It is shown for a moment after each page
@@ -110,6 +113,15 @@ export default function Header({
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!searchOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [searchOpen]);
+
   const navLinks = categories.map((c) => ({
     href: `/${c.slug}`,
     label: c.name,
@@ -132,7 +144,10 @@ export default function Header({
             type="button"
             aria-label="Menu"
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => {
+              setSearchOpen(false);
+              setMenuOpen((open) => !open);
+            }}
             className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-cream-100 transition-colors hover:text-gold-400 lg:hidden"
           >
             <svg
@@ -189,6 +204,35 @@ export default function Header({
             ))}
           </div>
 
+          <button
+            type="button"
+            aria-label={searchOpen ? tSearch("close") : tSearch("open")}
+            aria-expanded={searchOpen}
+            onClick={() => {
+              setMenuOpen(false);
+              setSearchOpen((open) => !open);
+            }}
+            className="hidden h-8 w-8 sm:flex sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              className="h-4 w-4"
+              aria-hidden="true"
+            >
+              {searchOpen ? (
+                <path d="M6 6l12 12M18 6L6 18" />
+              ) : (
+                <>
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.5-3.5" />
+                </>
+              )}
+            </svg>
+          </button>
+
           <Link
             href="/account"
             // not prefetched: while logged out that answer is a redirect to the
@@ -236,8 +280,22 @@ export default function Header({
         </div>
       </div>
 
+      {searchOpen && (
+        <div className="mx-auto mt-2 max-w-6xl rounded-3xl border border-white/15 bg-choc/80 px-4 py-3 text-cream-100 backdrop-blur-md sm:px-6">
+          <SearchForm
+            tone="dark"
+            autoFocus
+            onSubmitted={() => setSearchOpen(false)}
+          />
+        </div>
+      )}
+
       {menuOpen && (
         <nav className="mx-auto mt-2 max-w-6xl rounded-3xl border border-white/15 bg-choc/80 px-6 py-3 text-cream-100 backdrop-blur-md lg:hidden">
+          {/* on phones the search icon would not fit in the bar, so it lives here */}
+          <div className="pb-2 sm:hidden">
+            <SearchForm tone="dark" onSubmitted={() => setMenuOpen(false)} />
+          </div>
           <ul className="flex flex-col">
             {navLinks.map((link) => (
               <li key={link.href}>

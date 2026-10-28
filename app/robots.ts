@@ -8,6 +8,7 @@ export default function robots(): MetadataRoute.Robots {
     `/${l}/account`,
     `/${l}/cart`,
     `/${l}/checkout`,
+    `/${l}/search`,
   ]);
 
   return {

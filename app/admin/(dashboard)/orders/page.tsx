@@ -76,6 +76,7 @@ export default async function AdminOrdersPage({
     an?: string;
     luna?: string;
     zi?: string;
+    q?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -92,10 +93,11 @@ export default async function AdminOrdersPage({
   ).sort((x, y) => y - x);
 
   const hasFilter = Boolean(
-    filter.stage || filter.year || filter.month || filter.day,
+    filter.q || filter.stage || filter.year || filter.month || filter.day,
   );
   // keeps the chosen filters when the "unfinished" switch is clicked
   const keep = new URLSearchParams();
+  if (filter.q) keep.set("q", filter.q);
   if (filter.stage) keep.set("stare", filter.stage);
   if (filter.year) keep.set("an", String(filter.year));
   if (filter.month) keep.set("luna", String(filter.month));
@@ -113,6 +115,16 @@ export default async function AdminOrdersPage({
         className="flex flex-wrap items-end gap-3 rounded-2xl border border-cream-300 bg-white p-4 shadow-sm"
       >
         {filter.showUnfinished && <input type="hidden" name="all" value="1" />}
+        <label className="flex min-w-48 flex-1 flex-col gap-1 text-xs font-medium text-taupe-500">
+          Caută
+          <input
+            type="search"
+            name="q"
+            defaultValue={filter.q}
+            placeholder="Nume, e-mail, telefon, produs, nr. comandă sau factură"
+            className={selectClass}
+          />
+        </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
           Stare
           <select name="stare" defaultValue={filter.stage ?? ""} className={selectClass}>

@@ -20,6 +20,17 @@
     "heroTitle": "Iubește-ți casa din nou",
     "heroPhotoAlt": "Vaze printate 3D, o invitație și un caiet pe un suport împletit, pe o pânză bej"
   },
+  "Search": {
+    "title": "Căutare",
+    "placeholder": "Caută produse",
+    "button": "Caută",
+    "open": "Caută",
+    "close": "Închide căutarea",
+    "hint": "Scrie numele unui produs, o categorie sau un cuvânt din descriere.",
+    "resultsFor": "{count, plural, one {# produs găsit pentru „{query}”} few {# produse găsite pentru „{query}”} other {# de produse găsite pentru „{query}”}}",
+    "noResults": "Nu am găsit produse pentru „{query}”.",
+    "tryAnother": "Încearcă alt cuvânt, un termen mai scurt sau caută după categorie (de exemplu „ghiveci”, „vază”, „organizator”)."
+  },
   "Shop": {
     "noProducts": "Nu exista inca produse in aceasta categorie.",
     "inStock": "In stoc",

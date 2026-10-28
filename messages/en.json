@@ -20,6 +20,17 @@
     "heroTitle": "Fall in love with your home again",
     "heroPhotoAlt": "3D-printed vases, an invitation and a notebook on a woven mat, on a beige linen cloth"
   },
+  "Search": {
+    "title": "Search",
+    "placeholder": "Search products",
+    "button": "Search",
+    "open": "Search",
+    "close": "Close search",
+    "hint": "Type a product name, a category or a word from the description.",
+    "resultsFor": "{count, plural, one {# product found for “{query}”} other {# products found for “{query}”}}",
+    "noResults": "No products found for “{query}”.",
+    "tryAnother": "Try another word, a shorter term, or search by category (for example “planter”, “vase”, “organizer”)."
+  },
   "Shop": {
     "noProducts": "No products in this category yet.",
     "inStock": "In stock",

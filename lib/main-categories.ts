@@ -87,6 +87,7 @@ export const RESERVED_SLUGS = [
   "account",
   "cart",
   "checkout",
+  "search",
   "terms",
   "privacy",
   "withdrawal",
