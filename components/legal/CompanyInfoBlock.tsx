@@ -28,6 +28,15 @@ export default async function CompanyInfoBlock({
           {t("companyEmail")}
         </a>
       </p>
+      <p>
+        {t("companyOfficeLabel")}{" "}
+        <a
+          href={`mailto:${t("companyOfficeEmail")}`}
+          className={`hover:underline ${dark ? "text-cream-50 underline" : "text-salamander-600"}`}
+        >
+          {t("companyOfficeEmail")}
+        </a>
+      </p>
     </div>
   );
 }
