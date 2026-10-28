@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { createInvoice, type OblioInvoiceRequest } from "@/lib/oblio";
+import { sendAlert } from "@/lib/alerts";
 import type { Order, OrderItem } from "@/lib/generated/prisma";
 
 export type OrderWithItems = Order & { items: OrderItem[] };
@@ -143,6 +144,16 @@ export async function generateInvoice(orderId: string): Promise<InvoiceResult> {
         data: { invoiceClaimedAt: null, invoiceError: message },
       })
       .catch(() => {});
+    await sendAlert({
+      key: `invoice-failed-${order.id}`,
+      subject: "Factura nu s-a generat în Oblio",
+      lines: [
+        `Comanda #${order.id.slice(0, 8)}: Oblio nu a creat factura.`,
+        `Motiv: ${message}`,
+        "Butonul „Generează factura” rămâne disponibil pe comandă, în admin.",
+      ],
+      throttleMs: 6 * 60 * 60 * 1000,
+    });
     return { ok: false, reason: "failed", message };
   }
 }

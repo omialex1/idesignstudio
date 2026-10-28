@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { markOrderPaid } from "@/lib/orders/payment";
+import { sendAlert } from "@/lib/alerts";
 import {
   NETOPIA_CANCELED_STATUSES,
   NETOPIA_FAILED_STATUSES,
@@ -39,6 +40,17 @@ export async function POST(request: NextRequest) {
           where: { id: claimedId },
           select: { notes: true, status: true },
         });
+        if (known && known.status === "PENDING") {
+          await sendAlert({
+            key: "netopia-ipn-rejected",
+            subject: "Confirmare de plată de la Netopia respinsă",
+            lines: [
+              `O comandă (#${claimedId.slice(0, 8)}) a primit de la Netopia o confirmare pe care site-ul a respins-o.`,
+              `Motiv: ${verification.detail}`,
+              "Comanda se verifică și automat la fiecare 10 minute, dar merită verificat certificatul public Netopia din Vercel (NETOPIA_PUBLIC_KEY).",
+            ],
+          });
+        }
         if (
           known &&
           known.status === "PENDING" &&

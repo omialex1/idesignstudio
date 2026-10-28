@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
+import { sendAlert } from "@/lib/alerts";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,15 @@ export async function GET(request: NextRequest) {
     await prisma.category.count();
   } catch (err) {
     console.error("Keepalive database check failed", err);
+    await sendAlert({
+      key: "database-down",
+      subject: "Baza de date nu răspunde",
+      lines: [
+        "Verificarea zilnică nu a putut citi din baza de date (Supabase).",
+        "Verifică proiectul în Supabase (poate fi pus pe pauză sau să aibă o problemă).",
+      ],
+      throttleMs: 6 * 60 * 60 * 1000,
+    });
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 

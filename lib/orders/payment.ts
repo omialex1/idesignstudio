@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { noteFailure, sendAlert } from "@/lib/alerts";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import {
   NETOPIA_CANCELED_STATUSES,
@@ -70,7 +71,20 @@ export async function reconcileCardOrder(order: {
     orderId: order.id,
     ntpId: order.ntpId,
   });
-  if (!result) return order.status;
+  if (!result) {
+    // Netopia did not answer or the answer could not be read; one miss is normal,
+    // several in an hour are worth a look
+    await noteFailure({
+      key: "netopia-status",
+      threshold: 3,
+      subject: "Nu pot afla starea plăților de la Netopia",
+      lines: [
+        "Verificarea automată a plăților (la fiecare 10 minute) nu primește răspuns valid de la Netopia, de cel puțin 3 ori în ultima oră.",
+        "Comenzile cu cardul rămân în așteptare până se rezolvă. Verifică cheia NETOPIA_API_KEY din Vercel și starea Netopia.",
+      ],
+    });
+    return order.status;
+  }
 
   if (NETOPIA_PAID_STATUSES.includes(result.status)) {
     // never trust a status for a different amount
@@ -80,6 +94,15 @@ export async function reconcileCardOrder(order: {
         result.amountCents,
         order.totalCents,
       );
+      await sendAlert({
+        key: `amount-mismatch-${order.id}`,
+        subject: "Sumă plătită diferită de cea a comenzii",
+        lines: [
+          `Comanda #${order.id.slice(0, 8)}: Netopia raportează plata cu o sumă diferită de total (${order.totalCents / 100} RON în comandă, ${(result.amountCents ?? 0) / 100} RON la Netopia).`,
+          "Comanda NU a fost marcată plătită. Verifică în Netopia.",
+        ],
+        throttleMs: 24 * 60 * 60 * 1000,
+      });
       return order.status;
     }
     await markOrderPaid(order.id, order.ntpId);

@@ -7,6 +7,7 @@ import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import { finalPriceCents, variantPricing } from "@/lib/pricing";
 import { validateAddress } from "@/lib/address/validate";
 import { verifyCaptcha } from "@/lib/security/turnstile";
+import { noteFailure } from "@/lib/alerts";
 import {
   DAY,
   HOUR,
@@ -553,6 +554,16 @@ export async function POST(request: NextRequest) {
           .join(" | ")
           .slice(0, 500),
       },
+    });
+    await noteFailure({
+      key: "card-start",
+      threshold: 3,
+      subject: "Plata cu cardul nu pornește",
+      lines: [
+        "Cel puțin 3 comenzi cu cardul nu au putut porni plata în ultima oră.",
+        `Ultimul motiv tehnic: ${reason || "necunoscut"}`,
+        "Verifică în Netopia că punctul de vânzare e activ și că cheia din Vercel (NETOPIA_API_KEY) e cea corectă.",
+      ],
     });
     // a short technical reason (no secrets are ever part of these messages), so a
     // failed payment can be diagnosed from what the customer sees
