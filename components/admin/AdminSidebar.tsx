@@ -26,15 +26,18 @@ export default function AdminSidebar({ username }: { username: string }) {
   }
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r border-cream-200 bg-white">
-      <div className="border-b border-cream-200 px-5 py-5">
+    // Stays in place while the page scrolls: as tall as the window, with the
+    // buttons in the middle (scrolling inside if there are many) and the name
+    // and "Deconectare" pinned at the bottom, always in view.
+    <aside className="sticky top-0 flex h-screen w-56 shrink-0 flex-col self-start border-r border-cream-200 bg-white">
+      <div className="shrink-0 border-b border-cream-200 px-5 py-5">
         <p className="font-display text-lg text-taupe-800">
           iDesignStudio<span className="text-salamander-500">.ro</span>
         </p>
         <p className="text-xs text-taupe-400">Admin</p>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 p-3">
+      <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3">
         {navLinks.map((link) => {
           const isActive = link.exact
             ? pathname === link.href
@@ -55,7 +58,7 @@ export default function AdminSidebar({ username }: { username: string }) {
         })}
       </nav>
 
-      <div className="border-t border-cream-200 p-3">
+      <div className="shrink-0 border-t border-cream-200 p-3">
         <p className="px-3 pb-2 text-xs text-taupe-400">
           Conectat ca <span className="font-semibold text-taupe-600">{username}</span>
         </p>
