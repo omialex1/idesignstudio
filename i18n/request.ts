@@ -14,6 +14,9 @@ export default getRequestConfig(async ({ locale }) => {
     }
   }
 
+  // a made-up address (for example /api/x/y) must end as "not found", not as an error
+  if (!hasLocale(routing.locales, locale)) notFound();
+
   return {
     locale,
     messages: (await import(`../messages/${locale}.json`)).default,

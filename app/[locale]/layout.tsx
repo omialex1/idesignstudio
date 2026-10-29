@@ -36,6 +36,8 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  // an address like /api/x/y is read as language "api": no translations for it
+  if (!hasLocale(routing.locales, locale)) return {};
   const t = await getTranslations({ locale, namespace: "Metadata" });
   return {
     metadataBase: new URL(siteUrl()),

@@ -1,5 +1,7 @@
 import Image from "next/image";
+import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { getVisibleMainCategories } from "@/lib/main-categories";
 import { categoryColorClass } from "@/lib/category-colors";
@@ -16,6 +18,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) return {};
   return { alternates: pageAlternates(locale), title: { absolute: (await getTranslations({ locale, namespace: "Metadata" }))("title") } };
 }
 
