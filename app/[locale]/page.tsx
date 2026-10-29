@@ -117,7 +117,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       <section className="relative -mt-[68px] overflow-hidden bg-cream-50">
         {/* soft blurred copy of the photo as the backdrop, fading into the page */}
         <Image
-          src="/images/hero-wide.jpg"
+          src="/images/hero-triptych.jpg"
           alt=""
           fill
           sizes="96px"
@@ -145,14 +145,14 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-28 sm:px-6 sm:pt-24 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
           {/* gradient frame: champagne gold fading to terracotta */}
           <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_6px_18px_rgba(60,40,25,0.14)]">
-            <div className="relative aspect-[520/380] overflow-hidden rounded-[calc(1.75rem-3px)]">
+            <div className="relative aspect-[16/9] overflow-hidden rounded-[calc(1.75rem-3px)]">
               <Image
-                src="/images/hero-wide.jpg"
+                src="/images/hero-triptych.jpg"
                 alt={t("heroPhotoAlt")}
                 fill
                 priority
                 sizes="(min-width: 1024px) 620px, 92vw"
-                className="hero-zoom object-cover object-[0%_50%]"
+                className="hero-zoom object-cover object-center"
               />
             </div>
           </div>
