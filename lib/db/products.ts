@@ -135,6 +135,7 @@ export async function getProductDetail(productSlug: string, locale: string) {
     ...translateProduct(product, locale),
     images: product.images,
     hasColorOptions: product.hasColorOptions,
+    excludedColors: product.excludedColors,
     tieredPricing: product.tieredPricing && tiers.length > 0,
     tiers,
     availableQuantity: Math.max(

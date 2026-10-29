@@ -15,12 +15,16 @@ export type PaletteColor = {
 // order set in the admin. Empty for categories without colours.
 export async function getPaletteColors(
   mainCategoryId: string,
+  // colours this product does not offer (slugs)
+  excluded: string[] = [],
 ): Promise<PaletteColor[]> {
   const rows = await prisma.color.findMany({
     where: { mainCategoryId, isActive: true, mainCategory: { usesColors: true } },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
-  return rows.map((c) => ({
+  return rows
+    .filter((c) => !excluded.includes(c.slug))
+    .map((c) => ({
     id: c.slug,
     ro: c.nameRo,
     en: c.nameEn,

@@ -37,7 +37,7 @@ export default async function ProductDetailPage({
   // Colours are only offered in categories that use them (3D-printed items).
   const colors =
     main.usesColors && product.hasColorOptions
-      ? await getPaletteColors(main.id)
+      ? await getPaletteColors(main.id, product.excludedColors)
       : [];
   const inStock = product.quantityOnHand > 0;
   const basePath = `/${main.slug}`;

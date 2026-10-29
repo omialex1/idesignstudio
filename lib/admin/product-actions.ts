@@ -228,6 +228,8 @@ function readProductForm(formData: FormData) {
     enLongDescription: enLongDescription || null,
     priceCents,
     hasColorOptions,
+    // filled in by applyColorRules (needs the category's colours)
+    excludedColors: [] as string[],
     tieredPricing,
     variants,
     productPieces,
@@ -243,13 +245,30 @@ type ProductFormData = ReturnType<typeof readProductForm>;
 
 // Colour choices exist only in categories that use colours (3D prints). For any
 // other category the product gets no colour option and no colour pieces.
-async function applyColorRules(data: ProductFormData) {
+async function applyColorRules(data: ProductFormData, formData: FormData) {
   const category = await prisma.category.findUnique({
     where: { id: data.categoryId },
-    select: { mainCategory: { select: { usesColors: true } } },
+    select: { mainCategoryId: true, mainCategory: { select: { usesColors: true } } },
   });
-  if (category?.mainCategory?.usesColors) return;
+  if (category?.mainCategory?.usesColors) {
+    // The colours ticked in the form are the ones offered; every other active
+    // colour of the category is saved as "excluded". Without the list in the
+    // form (no colours shown), nothing is excluded.
+    data.excludedColors = [];
+    if (formData.get("colorChoiceShown") === "1" && data.hasColorOptions) {
+      const allowed = new Set(formData.getAll("allowedColor").map(String));
+      const palette = await prisma.color.findMany({
+        where: { mainCategoryId: category.mainCategoryId ?? "", isActive: true },
+        select: { slug: true },
+      });
+      data.excludedColors = palette
+        .map((c) => c.slug)
+        .filter((slug) => !allowed.has(slug));
+    }
+    return;
+  }
   data.hasColorOptions = false;
+  data.excludedColors = [];
   data.productPieces = [];
   for (const variant of data.variants) variant.pieces = [];
 }
@@ -308,6 +327,7 @@ type ProductSnapshot = {
   quantityOnHand: number | null;
   lowStockThreshold: number | null;
   variants: string;
+  excludedColors: string;
 };
 
 // What the activity log needs to tell a change apart: price, stock, visibility.
@@ -330,6 +350,7 @@ async function productSnapshot(
     tieredPricing: product.tieredPricing,
     quantityOnHand: product.inventory?.quantityOnHand ?? null,
     lowStockThreshold: product.inventory?.lowStockThreshold ?? null,
+    excludedColors: [...product.excludedColors].sort().join(", "),
     variants: product.variants
       .map(
         (v) =>
@@ -353,6 +374,13 @@ function describeProductChanges(
     );
   }
   if (before.variants !== after.variants) changes.push("variante/prețuri pe cantitate modificate");
+  if (before.excludedColors !== after.excludedColors) {
+    changes.push(
+      after.excludedColors
+        ? `culori scoase de la produs: ${after.excludedColors}`
+        : "toate culorile categoriei sunt disponibile",
+    );
+  }
   if (before.tieredPricing !== after.tieredPricing) {
     changes.push(
       after.tieredPricing
@@ -386,7 +414,7 @@ export async function createProduct(
   if (hasErrors(errors)) return { errors };
 
   const data = readProductForm(formData);
-  await applyColorRules(data);
+  await applyColorRules(data, formData);
 
   const created = await prisma.product.create({
     data: {
@@ -396,6 +424,7 @@ export async function createProduct(
       currency: "RON",
       isActive: data.isActive,
       hasColorOptions: data.hasColorOptions,
+      excludedColors: data.excludedColors,
       tieredPricing: data.tieredPricing,
       variants: {
         create: data.variants.map((v) => ({
@@ -461,7 +490,7 @@ export async function updateProduct(
   if (hasErrors(errors)) return { errors };
 
   const data = readProductForm(formData);
-  await applyColorRules(data);
+  await applyColorRules(data, formData);
   const before = await productSnapshot(productId);
 
   const updated = await prisma.product.update({
@@ -472,6 +501,7 @@ export async function updateProduct(
       priceCents: data.priceCents,
       isActive: data.isActive,
       hasColorOptions: data.hasColorOptions,
+      excludedColors: data.excludedColors,
       tieredPricing: data.tieredPricing,
       variants: {
         deleteMany: {

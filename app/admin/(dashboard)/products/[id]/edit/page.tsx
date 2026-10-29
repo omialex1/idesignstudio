@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import {
   getCategoryOptions,
   getColorMainIds,
+  getColorPalettesForAdmin,
   getMainCategoryOptions,
   getProductForEdit,
 } from "@/lib/admin/queries";
@@ -18,12 +19,14 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
   const { created, photoError } = await searchParams;
-  const [product, categories, mainCategories, colorMainIds] = await Promise.all([
-    getProductForEdit(id),
-    getCategoryOptions(),
-    getMainCategoryOptions(),
-    getColorMainIds(),
-  ]);
+  const [product, categories, mainCategories, colorMainIds, palettes] =
+    await Promise.all([
+      getProductForEdit(id),
+      getCategoryOptions(),
+      getMainCategoryOptions(),
+      getColorMainIds(),
+      getColorPalettesForAdmin(),
+    ]);
 
   if (!product) notFound();
 
@@ -52,6 +55,7 @@ export default async function EditProductPage({
         categories={categories}
         mainCategories={mainCategories}
         colorMainIds={colorMainIds}
+        palettes={palettes}
         submitLabel="Salvează modificările"
         defaultValues={{
           categoryId: product.categoryId,
@@ -66,6 +70,7 @@ export default async function EditProductPage({
             ? ""
             : (product.priceCents / 100).toFixed(2),
           hasColorOptions: product.hasColorOptions,
+          excludedColors: product.excludedColors,
           tieredPricing: product.tieredPricing,
           tiers: product.tieredPricing
             ? product.variants.map((v) => ({

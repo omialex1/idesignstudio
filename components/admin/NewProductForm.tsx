@@ -5,16 +5,19 @@ import { useRouter } from "next/navigation";
 import { createProduct } from "@/lib/admin/product-actions";
 import ProductForm from "@/components/admin/ProductForm";
 import PhotoPicker, { type PickedPhoto } from "@/components/admin/PhotoPicker";
+import type { PaletteOption } from "@/lib/admin/queries";
 type CategoryOption = { id: string; name: string; mainCategoryId: string };
 
 export default function NewProductForm({
   categories,
   mainCategories,
   colorMainIds,
+  palettes,
 }: {
   categories: CategoryOption[];
   mainCategories: { id: string; name: string }[];
   colorMainIds: string[];
+  palettes: Record<string, PaletteOption[]>;
 }) {
   const router = useRouter();
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
@@ -46,6 +49,7 @@ export default function NewProductForm({
       categories={categories}
       mainCategories={mainCategories}
       colorMainIds={colorMainIds}
+      palettes={palettes}
       submitLabel="Creează produs"
       extra={<PhotoPicker photos={photos} onChange={setPhotos} />}
     />

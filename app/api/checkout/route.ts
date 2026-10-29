@@ -324,7 +324,15 @@ export async function POST(request: NextRequest) {
     const pieces = product.components.filter((c) =>
       variant ? c.variantId === variant.id : !c.variantId,
     );
-    const palette = paletteByMain.get(product.category.mainCategoryId ?? "");
+    const fullPalette = paletteByMain.get(product.category.mainCategoryId ?? "");
+    // colours the admin took out for this product cannot be ordered
+    const palette = fullPalette
+      ? new Map(
+          [...fullPalette].filter(
+            ([slug]) => !product.excludedColors.includes(slug),
+          ),
+        )
+      : undefined;
     const colorsEnabled =
       product.hasColorOptions && !!palette && palette.size > 0;
     const expected = colorsEnabled

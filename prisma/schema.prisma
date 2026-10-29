@@ -107,6 +107,9 @@ model Product {
   currency        String               @default("RON")
   isActive        Boolean              @default(true)
   hasColorOptions Boolean              @default(true)
+  // Slugs of colours of the category that THIS product does not offer. Empty: the
+  // customer can pick any active colour of the category (new colours included).
+  excludedColors  String[]             @default([])
   // Price depends on how many pieces are bought: the variants are then price
   // tiers (minQuantity + unit price) that the customer cannot pick, only read.
   tieredPricing   Boolean              @default(false)

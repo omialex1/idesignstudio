@@ -1,15 +1,17 @@
 import {
   getCategoryOptions,
   getColorMainIds,
+  getColorPalettesForAdmin,
   getMainCategoryOptions,
 } from "@/lib/admin/queries";
 import NewProductForm from "@/components/admin/NewProductForm";
 
 export default async function NewProductPage() {
-  const [categories, mainCategories, colorMainIds] = await Promise.all([
+  const [categories, mainCategories, colorMainIds, palettes] = await Promise.all([
     getCategoryOptions(),
     getMainCategoryOptions(),
     getColorMainIds(),
+    getColorPalettesForAdmin(),
   ]);
 
   return (
@@ -19,6 +21,7 @@ export default async function NewProductPage() {
         categories={categories}
         mainCategories={mainCategories}
         colorMainIds={colorMainIds}
+        palettes={palettes}
       />
     </div>
   );

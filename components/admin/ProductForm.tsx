@@ -1,6 +1,8 @@
 "use client";
 
 import { isRedirectError } from "@/lib/admin/redirect-error";
+import type { PaletteOption } from "@/lib/admin/queries";
+import { swatchStyle } from "@/lib/colors-shared";
 import { useState } from "react";
 import {
   INITIAL_PIECE_ROWS,
@@ -51,6 +53,8 @@ export type ProductFormDefaults = {
   enLongDescription: string;
   priceRon: string;
   hasColorOptions: boolean;
+  // slugs of the category colours this product does NOT offer
+  excludedColors: string[];
   tieredPricing: boolean;
   tiers: TierDefaults[];
   variants: VariantDefaults[];
@@ -88,6 +92,7 @@ export default function ProductForm({
   categories,
   mainCategories,
   colorMainIds = [],
+  palettes = {},
   defaultValues,
   submitLabel,
   extra,
@@ -99,6 +104,8 @@ export default function ProductForm({
   mainCategories: MainCategoryOption[];
   // main categories whose products are made in a colour the customer picks
   colorMainIds?: string[];
+  // the colours of each main category that uses colours (to pick the ones offered)
+  palettes?: Record<string, PaletteOption[]>;
   defaultValues?: ProductFormDefaults;
   submitLabel: string;
   // Extra sections shown just above the submit button (e.g. photos).
@@ -116,6 +123,7 @@ export default function ProductForm({
     enLongDescription: "",
     priceRon: "",
     hasColorOptions: true,
+    excludedColors: [],
     tieredPricing: false,
     tiers: [],
     variants: [],
@@ -170,6 +178,17 @@ export default function ProductForm({
   const subcategories = allCategories.filter((c) => c.mainCategoryId === line);
   // Colour choices exist only for categories that use colours (3D prints).
   const showColors = colorMainIds.includes(line);
+  // Which colours of the category this product offers (all, unless some were
+  // taken out). Kept per category: changing the category starts again from "all".
+  const palette = palettes[line] ?? [];
+  const [colorsOn, setColorsOn] = useState(d.hasColorOptions);
+  const [offered, setOffered] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(
+      Object.values(palettes)
+        .flat()
+        .map((c) => [c.slug, !d.excludedColors.includes(c.slug)]),
+    ),
+  );
   const [adding, setAdding] = useState(false);
   const [newNameRo, setNewNameRo] = useState("");
   const [newNameEn, setNewNameEn] = useState("");
@@ -604,6 +623,7 @@ export default function ProductForm({
               type="checkbox"
               name="hasColorOptions"
               defaultChecked={d.hasColorOptions}
+              onChange={(e) => setColorsOn(e.target.checked)}
               className="h-4 w-4 rounded border-cream-200"
             />
             Clientul alege culorile (produs făcut la comandă)
@@ -628,6 +648,83 @@ export default function ProductForm({
           Vizibil pe site
         </label>
       </section>
+
+      {showColors && colorsOn && palette.length > 0 && (
+        <section className="flex flex-col gap-3 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
+          <input type="hidden" name="colorChoiceShown" value="1" />
+          <div>
+            <h2 className="font-display text-lg text-taupe-800">
+              Culori disponibile pentru acest produs
+            </h2>
+            <p className="mt-1 text-xs text-taupe-400">
+              Bifează culorile din categorie pe care clientul le poate alege la
+              acest produs. Culoarea debifată nu apare la produs și nu se poate
+              comanda. O culoare nouă adăugată în categorie apare singură aici
+              și la produs, bifată.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-x-3 gap-y-2">
+            <button
+              type="button"
+              onClick={() =>
+                setOffered((cur) => ({
+                  ...cur,
+                  ...Object.fromEntries(palette.map((c) => [c.slug, true])),
+                }))
+              }
+              className="rounded-full border border-taupe-400 px-3 py-1 text-xs font-medium text-taupe-700 hover:bg-cream-100"
+            >
+              Bifează toate
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setOffered((cur) => ({
+                  ...cur,
+                  ...Object.fromEntries(palette.map((c) => [c.slug, false])),
+                }))
+              }
+              className="rounded-full border border-taupe-400 px-3 py-1 text-xs font-medium text-taupe-700 hover:bg-cream-100"
+            >
+              Debifează toate
+            </button>
+          </div>
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {palette.map((c) => (
+              <li key={c.slug}>
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-cream-200 px-3 py-2 text-sm text-taupe-700 hover:border-salamander-400">
+                  <input
+                    type="checkbox"
+                    name="allowedColor"
+                    value={c.slug}
+                    checked={offered[c.slug] ?? true}
+                    onChange={(e) =>
+                      setOffered((cur) => ({ ...cur, [c.slug]: e.target.checked }))
+                    }
+                    className="h-4 w-4 rounded border-cream-200"
+                  />
+                  {c.swatchImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={`/colors/${c.slug}.webp`}
+                      alt=""
+                      className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-cream-300"
+                    />
+                  ) : (
+                    <span
+                      className="h-6 w-6 shrink-0 rounded-full ring-1 ring-cream-300"
+                      style={swatchStyle(c.hex)}
+                      aria-hidden="true"
+                    />
+                  )}
+                  {c.nameRo}
+                </label>
+              </li>
+            ))}
+          </ul>
+          {errors.allowedColor && <FieldError message={errors.allowedColor} />}
+        </section>
+      )}
 
       <section
         className={`flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6 ${showColors && !tiered ? "" : "hidden"}`}

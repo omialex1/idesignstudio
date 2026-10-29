@@ -122,6 +122,11 @@ export function validateProductForm(fd: FormData): FormErrors {
     }
   }
 
+  // when the list of offered colours is shown, at least one must stay ticked
+  if (fd.get("colorChoiceShown") === "1" && fd.getAll("allowedColor").length === 0) {
+    errors.allowedColor = "Bifează cel puțin o culoare pe care clientul o poate alege.";
+  }
+
   for (let j = 0; j < PIECE_SLOTS; j++) {
     if (!text(fd, `componentNameRo${j}`) && text(fd, `componentNameEn${j}`)) {
       errors[`componentNameRo${j}`] =

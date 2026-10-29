@@ -118,3 +118,32 @@ export async function getOrdersForAdmin() {
     orderBy: { createdAt: "desc" },
   });
 }
+
+// The active colours of every main category that uses colours, for the product
+// form (which of them this product offers).
+export type PaletteOption = {
+  slug: string;
+  nameRo: string;
+  hex: string;
+  swatchImage: boolean;
+};
+
+export async function getColorPalettesForAdmin(): Promise<
+  Record<string, PaletteOption[]>
+> {
+  const rows = await prisma.color.findMany({
+    where: { isActive: true, mainCategory: { usesColors: true } },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    select: { slug: true, nameRo: true, hex: true, swatchImage: true, mainCategoryId: true },
+  });
+  const byMain: Record<string, PaletteOption[]> = {};
+  for (const c of rows) {
+    (byMain[c.mainCategoryId] ??= []).push({
+      slug: c.slug,
+      nameRo: c.nameRo,
+      hex: c.hex,
+      swatchImage: c.swatchImage,
+    });
+  }
+  return byMain;
+}
