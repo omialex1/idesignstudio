@@ -145,7 +145,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-28 sm:px-6 sm:pt-24 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
           {/* gradient frame: champagne gold fading to terracotta */}
           <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_6px_18px_rgba(60,40,25,0.14)]">
-            <div className="relative aspect-[16/9] overflow-hidden rounded-[calc(1.75rem-3px)]">
+            <div className="relative aspect-[16/9] overflow-hidden rounded-[calc(1.75rem-3px)] [container-type:inline-size]">
               <Image
                 src="/images/hero-triptych.jpg"
                 alt={t("heroPhotoAlt")}
@@ -154,6 +154,22 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 sizes="(min-width: 1024px) 620px, 92vw"
                 className="hero-zoom object-cover object-center"
               />
+              {/* the three captions are real text over the photo, so they follow the
+                  language and stay sharp at any size (about 2.5% of the photo width) */}
+              {[
+                { left: "14.6%", title: t("heroCaption1Title"), sub: t("heroCaption1Sub") },
+                { left: "50%", title: t("heroCaption2Title"), sub: t("heroCaption2Sub") },
+                { left: "87.3%", title: t("heroCaption3Title"), sub: t("heroCaption3Sub") },
+              ].map((caption) => (
+                <p
+                  key={caption.left}
+                  className="pointer-events-none absolute top-[8%] -translate-x-1/2 whitespace-nowrap text-center leading-[1.2] text-taupe-800"
+                  style={{ left: caption.left, fontSize: "clamp(10px, 2.5cqw, 24px)" }}
+                >
+                  <span className="block font-semibold">{caption.title}</span>
+                  <span className="block italic">{caption.sub}</span>
+                </p>
+              ))}
             </div>
           </div>
 
