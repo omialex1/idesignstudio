@@ -381,7 +381,6 @@ export default function ProductPurchase({
 
           {targets.length > 1 && (
             <div className="flex flex-col gap-2">
-              <p className="text-xs text-taupe-500">{t("colorsTargetHint")}</p>
               <div className="flex flex-wrap gap-2">
                 {targets.map((target) => {
                   const own = picked[target.id] ?? [];
@@ -449,11 +448,13 @@ export default function ProductPurchase({
                   : t("colorsFor", { name: active.name ?? "" })}
             </p>
           )}
-          <p className="-mt-2 text-xs text-taupe-500">
-            {active.maxColors === 1
-              ? t("colorsHintOne")
-              : t("colorsHint", { max: active.maxColors })}
-          </p>
+          {/* one colour per piece is the rule today, so there is nothing more to say;
+              the hint only shows if a piece ever allows several colours */}
+          {active.maxColors > 1 && (
+            <p className="-mt-2 text-xs text-taupe-500">
+              {t("colorsHint", { max: active.maxColors })}
+            </p>
+          )}
 
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">
             {colors.map((color) => {
@@ -502,10 +503,10 @@ export default function ProductPurchase({
           >
             {justAdded ? tCart("added") : tCart("addToCart")}
           </button>
-          {missingColors && (
-            <p className="text-xs text-taupe-500">
-              {targets.length > 1 ? t("pickColorAll") : t("pickColorFirst")}
-            </p>
+          {/* with one thing to colour the heading above is enough; with several
+              pieces, say what is still missing */}
+          {missingColors && targets.length > 1 && (
+            <p className="text-xs text-taupe-500">{t("pickColorAll")}</p>
           )}
         </div>
       )}
