@@ -1,12 +1,11 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import ProductTile, { shortName } from "@/components/product/ProductTile";
+import FilterableProducts from "@/components/shop/FilterableProducts";
 import SearchForm from "@/components/layout/SearchForm";
-import Reveal from "@/components/layout/Reveal";
 import { searchProducts } from "@/lib/db/search";
 import { MAX_QUERY_LENGTH } from "@/lib/search";
 import { categoryColorClass } from "@/lib/category-colors";
-import { formatPrice } from "@/lib/format";
+import type { ShopProduct } from "@/lib/shop-filters";
 
 // Search results are not pages to find through Google.
 export const metadata: Metadata = {
@@ -26,7 +25,6 @@ export default async function SearchPage({
   const query = (Array.isArray(q) ? q[0] : q)?.trim().slice(0, MAX_QUERY_LENGTH) ?? "";
 
   const t = await getTranslations("Search");
-  const tShop = await getTranslations("Shop");
   const results = query ? await searchProducts(query, locale) : [];
 
   return (
@@ -45,23 +43,24 @@ export default async function SearchPage({
       </div>
 
       {results.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
-          {results.map((r, i) => {
-            const price = formatPrice(r.priceCents, r.currency, locale);
-            return (
-              <Reveal key={r.id} index={i % 3}>
-                <ProductTile
-                  href={`/${r.mainSlug}/${r.categorySlug}/${r.slug}`}
-                  name={shortName(r.name)}
-                  imageUrl={r.imageUrl}
-                  placeholderClass={categoryColorClass(r.mainColorKey)}
-                  priceLabel={r.hasVariants ? tShop("fromPrice", { price }) : price}
-                  note={r.inStock ? undefined : tShop("outOfStock")}
-                />
-              </Reveal>
-            );
-          })}
-        </div>
+        <FilterableProducts
+          relevanceFirst
+          products={results.map(
+            (r): ShopProduct => ({
+              id: r.id,
+              href: `/${r.mainSlug}/${r.categorySlug}/${r.slug}`,
+              name: r.name,
+              priceCents: r.priceCents,
+              currency: r.currency,
+              imageUrl: r.imageUrl,
+              hasVariants: r.hasVariants,
+              inStock: r.inStock,
+              createdAt: r.createdAt,
+              colors: [],
+              placeholderClass: categoryColorClass(r.mainColorKey),
+            }),
+          )}
+        />
       )}
 
       {query && results.length === 0 && (

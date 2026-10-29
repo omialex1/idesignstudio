@@ -14,6 +14,9 @@ export type ProductWithTranslation = {
   imageUrl: string | null;
   // True when the price is the cheapest of several variants.
   hasVariants: boolean;
+  createdAt: string;
+  hasColorOptions: boolean;
+  excludedColors: string[];
 };
 
 function translateProduct(
@@ -31,6 +34,9 @@ function translateProduct(
     inventory: { quantityOnHand: number } | null;
     images?: { url: string }[];
     variants?: { id: string }[];
+    createdAt: Date;
+    hasColorOptions: boolean;
+    excludedColors: string[];
   },
   locale: string,
 ): ProductWithTranslation {
@@ -49,6 +55,9 @@ function translateProduct(
     quantityOnHand: product.inventory?.quantityOnHand ?? 0,
     imageUrl: product.images?.[0]?.url ?? null,
     hasVariants: (product.variants?.length ?? 0) > 0,
+    createdAt: product.createdAt.toISOString(),
+    hasColorOptions: product.hasColorOptions,
+    excludedColors: product.excludedColors,
   };
 }
 

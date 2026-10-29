@@ -51,7 +51,9 @@ const hourFormat = new Intl.DateTimeFormat("ro-RO", {
 });
 
 // What Bea sees in the confirmation before the invoice is made.
-function invoiceSummary(o: Awaited<ReturnType<typeof getOrdersForAdmin>>[number]) {
+function invoiceSummary(
+  o: Awaited<ReturnType<typeof getOrdersForAdmin>>[number],
+) {
   const client = o.companyName
     ? `${o.companyName} (CUI ${o.companyCui})`
     : `${o.firstName} ${o.lastName}`;
@@ -111,80 +113,99 @@ export default async function AdminOrdersPage({
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-2xl text-taupe-800">Comenzi</h1>
 
-      <form
-        method="get"
-        className="flex flex-wrap items-end gap-3 rounded-2xl border border-cream-300 bg-white p-4 shadow-sm"
-      >
-        {filter.showUnfinished && <input type="hidden" name="all" value="1" />}
-        <label className="flex min-w-48 flex-1 flex-col gap-1 text-xs font-medium text-taupe-500">
-          Caută
-          <input
-            type="search"
-            name="q"
-            defaultValue={filter.q}
-            placeholder="Nume, e-mail, telefon, produs, nr. comandă sau factură"
-            className={selectClass}
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
-          Stare
-          <select name="stare" defaultValue={filter.stage ?? ""} className={selectClass}>
-            <option value="">Toate</option>
-            {Object.entries(STAGE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
-          An
-          <select name="an" defaultValue={filter.year ?? ""} className={selectClass}>
-            <option value="">Toți</option>
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
-          Luna
-          <select name="luna" defaultValue={filter.month ?? ""} className={selectClass}>
-            <option value="">Toate</option>
-            {MONTHS.map((name, i) => (
-              <option key={name} value={i + 1}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
-          Ziua
-          <select name="zi" defaultValue={filter.day ?? ""} className={selectClass}>
-            <option value="">Toate</option>
-            {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="submit"
-          className="rounded-full bg-salamander-500 px-5 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
-        >
-          Aplică
-        </button>
-        {hasFilter && (
-          <Link
-            href={filter.showUnfinished ? "/admin/orders?all=1" : "/admin/orders"}
-            className="py-2 text-sm font-medium text-salamander-600 hover:underline"
+      <AdminCard title="Căutare și filtre" bodyClassName="p-4">
+        <form method="get" className="flex flex-wrap items-end gap-3">
+          {filter.showUnfinished && (
+            <input type="hidden" name="all" value="1" />
+          )}
+          <label className="flex min-w-48 flex-1 flex-col gap-1 text-xs font-medium text-taupe-500">
+            Caută
+            <input
+              type="search"
+              name="q"
+              defaultValue={filter.q}
+              placeholder="Nume, e-mail, telefon, produs, nr. comandă sau factură"
+              className={selectClass}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
+            Stare
+            <select
+              name="stare"
+              defaultValue={filter.stage ?? ""}
+              className={selectClass}
+            >
+              <option value="">Toate</option>
+              {Object.entries(STAGE_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
+            An
+            <select
+              name="an"
+              defaultValue={filter.year ?? ""}
+              className={selectClass}
+            >
+              <option value="">Toți</option>
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
+            Luna
+            <select
+              name="luna"
+              defaultValue={filter.month ?? ""}
+              className={selectClass}
+            >
+              <option value="">Toate</option>
+              {MONTHS.map((name, i) => (
+                <option key={name} value={i + 1}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
+            Ziua
+            <select
+              name="zi"
+              defaultValue={filter.day ?? ""}
+              className={selectClass}
+            >
+              <option value="">Toate</option>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="submit"
+            className="rounded-full bg-salamander-500 px-5 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
           >
-            Resetează
-          </Link>
-        )}
-      </form>
+            Aplică
+          </button>
+          {hasFilter && (
+            <Link
+              href={
+                filter.showUnfinished ? "/admin/orders?all=1" : "/admin/orders"
+              }
+              className="py-2 text-sm font-medium text-salamander-600 hover:underline"
+            >
+              Resetează
+            </Link>
+          )}
+        </form>
+      </AdminCard>
 
       <p className="-mt-3 text-sm text-taupe-500">
         {orders.length === 1 ? "1 comandă" : `${orders.length} comenzi`}
@@ -335,7 +356,9 @@ export default async function AdminOrdersPage({
                   colSpan={7}
                   className="px-4 py-6 text-center text-taupe-400"
                 >
-                  {hasFilter ? "Nicio comandă pentru filtrele alese." : "Nicio comandă încă."}
+                  {hasFilter
+                    ? "Nicio comandă pentru filtrele alese."
+                    : "Nicio comandă încă."}
                 </td>
               </tr>
             )}

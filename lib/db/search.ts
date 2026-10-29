@@ -19,6 +19,7 @@ export type SearchResult = {
   imageUrl: string | null;
   hasVariants: boolean;
   inStock: boolean;
+  createdAt: string;
 };
 
 const MAX_RESULTS = 60;
@@ -79,6 +80,7 @@ export async function searchProducts(
         imageUrl: p.images[0]?.url ?? null,
         hasVariants: p.variants.length > 0,
         inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
+        createdAt: p.createdAt.toISOString(),
       },
     });
   }
