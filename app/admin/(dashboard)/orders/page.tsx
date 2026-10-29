@@ -1,3 +1,4 @@
+import AdminCard from "@/components/admin/AdminCard";
 import { getOrdersForAdmin } from "@/lib/admin/queries";
 import { formatPrice } from "@/lib/format";
 import { itemDetails } from "@/lib/orders/item-details";
@@ -204,7 +205,7 @@ export default async function AdminOrdersPage({
         )}
       </p>
 
-      <div className="overflow-x-auto rounded-2xl border border-cream-300 bg-white shadow-sm">
+      <AdminCard title="Comenzi" bodyClassName="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-cream-200 text-taupe-500">
             <tr>
@@ -340,7 +341,7 @@ export default async function AdminOrdersPage({
             )}
           </tbody>
         </table>
-      </div>
+      </AdminCard>
     </div>
   );
 }

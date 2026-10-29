@@ -1,3 +1,4 @@
+import AdminCard from "@/components/admin/AdminCard";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/client";
 import { getCurrentAdmin } from "@/lib/admin/auth";
@@ -24,7 +25,7 @@ export default async function AdminLogPage() {
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-cream-200 bg-white">
+      <AdminCard title="Activitate" bodyClassName="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-cream-200 text-xs uppercase text-taupe-400">
             <tr>
@@ -61,7 +62,7 @@ export default async function AdminLogPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </AdminCard>
     </div>
   );
 }

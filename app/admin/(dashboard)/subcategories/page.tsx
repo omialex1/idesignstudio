@@ -1,3 +1,4 @@
+import AdminCard from "@/components/admin/AdminCard";
 import Link from "next/link";
 import { getSubcategoriesForAdmin } from "@/lib/admin/queries";
 import { deleteSubcategory } from "@/lib/admin/subcategory-actions";
@@ -18,7 +19,7 @@ export default async function AdminSubcategoriesPage() {
         </Link>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-cream-300 bg-white shadow-sm">
+      <AdminCard title="Subcategorii" bodyClassName="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-cream-200 text-taupe-500">
             <tr>
@@ -71,7 +72,7 @@ export default async function AdminSubcategoriesPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </AdminCard>
     </div>
   );
 }

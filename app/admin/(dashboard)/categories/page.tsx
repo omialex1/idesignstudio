@@ -1,3 +1,4 @@
+import AdminCard from "@/components/admin/AdminCard";
 import Link from "next/link";
 import { getMainCategoriesForAdmin } from "@/lib/admin/queries";
 import { deleteMainCategory } from "@/lib/admin/main-category-actions";
@@ -30,7 +31,7 @@ export default async function AdminCategoriesPage() {
         .
       </p>
 
-      <div className="overflow-x-auto rounded-2xl border border-cream-300 bg-white shadow-sm">
+      <AdminCard title="Categorii principale" bodyClassName="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-cream-200 text-taupe-500">
             <tr>
@@ -90,7 +91,7 @@ export default async function AdminCategoriesPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </AdminCard>
     </div>
   );
 }

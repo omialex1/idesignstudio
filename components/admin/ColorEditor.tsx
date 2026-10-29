@@ -1,5 +1,6 @@
 "use client";
 
+import AdminCard from "@/components/admin/AdminCard";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { controlClass, FieldError } from "@/components/admin/FormBits";
@@ -24,7 +25,15 @@ export type ColorItem = {
   isActive: boolean;
 };
 
-function Swatch({ hex, slug, photo }: { hex: string; slug?: string; photo?: boolean }) {
+function Swatch({
+  hex,
+  slug,
+  photo,
+}: {
+  hex: string;
+  slug?: string;
+  photo?: boolean;
+}) {
   return photo && slug ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -105,116 +114,125 @@ function ColorRow({
   const pickerValue = normalizeHex(hex) ?? "#000000";
 
   return (
-    <form
-      key={formKey}
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-2 rounded-xl border border-cream-300 bg-white shadow-sm p-4"
-    >
-      <div className="flex flex-wrap items-start gap-3">
-        <Swatch hex={hex} slug={item?.slug} photo={item?.swatchImage && pickerValue === normalizeHex(item.hex)} />
-
-        <label className="flex w-20 flex-col gap-1 text-xs text-taupe-500">
-          Nr.
-          <input
-            name="sortOrder"
-            type="number"
-            defaultValue={item ? (position ?? item.sortOrder) : nextNumber}
-            aria-invalid={!!errors.sortOrder}
-            className={controlClass(!!errors.sortOrder)}
+    <form key={formKey} onSubmit={handleSubmit}>
+      <AdminCard
+        title={item ? item.nameRo : "Culoare nouă"}
+        bodyClassName="flex flex-col gap-2 p-4"
+      >
+        <div className="flex flex-wrap items-start gap-3">
+          <Swatch
+            hex={hex}
+            slug={item?.slug}
+            photo={item?.swatchImage && pickerValue === normalizeHex(item.hex)}
           />
-        </label>
 
-        <label className="flex min-w-40 flex-1 flex-col gap-1 text-xs text-taupe-500">
-          Nume (Română)
-          <input
-            name="nameRo"
-            defaultValue={item?.nameRo ?? ""}
-            aria-invalid={!!errors.nameRo}
-            className={controlClass(!!errors.nameRo)}
-          />
-        </label>
-
-        <label className="flex min-w-40 flex-1 flex-col gap-1 text-xs text-taupe-500">
-          Nume (Engleză)
-          <input
-            name="nameEn"
-            defaultValue={item?.nameEn ?? ""}
-            className={controlClass()}
-          />
-        </label>
-
-        <div className="flex flex-col gap-1 text-xs text-taupe-500">
-          Culoare (hex)
-          <div className="flex items-center gap-2">
+          <label className="flex w-20 flex-col gap-1 text-xs text-taupe-500">
+            Nr.
             <input
-              type="color"
-              value={pickerValue}
-              onChange={(e) => setHex(e.target.value.toUpperCase())}
-              aria-label="Alege culoarea din paletă"
-              className="h-10 w-12 cursor-pointer rounded-lg border border-cream-300 bg-white shadow-sm p-1"
+              name="sortOrder"
+              type="number"
+              defaultValue={item ? (position ?? item.sortOrder) : nextNumber}
+              aria-invalid={!!errors.sortOrder}
+              className={controlClass(!!errors.sortOrder)}
             />
+          </label>
+
+          <label className="flex min-w-40 flex-1 flex-col gap-1 text-xs text-taupe-500">
+            Nume (Română)
             <input
-              name="hex"
-              value={hex}
-              onChange={(e) => setHex(e.target.value)}
-              aria-invalid={!!errors.hex}
-              placeholder="#C0A080"
-              className={`${controlClass(!!errors.hex)} w-28 font-mono`}
+              name="nameRo"
+              defaultValue={item?.nameRo ?? ""}
+              aria-invalid={!!errors.nameRo}
+              className={controlClass(!!errors.nameRo)}
             />
+          </label>
+
+          <label className="flex min-w-40 flex-1 flex-col gap-1 text-xs text-taupe-500">
+            Nume (Engleză)
+            <input
+              name="nameEn"
+              defaultValue={item?.nameEn ?? ""}
+              className={controlClass()}
+            />
+          </label>
+
+          <div className="flex flex-col gap-1 text-xs text-taupe-500">
+            Culoare (hex)
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={pickerValue}
+                onChange={(e) => setHex(e.target.value.toUpperCase())}
+                aria-label="Alege culoarea din paletă"
+                className="h-10 w-12 cursor-pointer rounded-lg border border-cream-300 bg-white shadow-sm p-1"
+              />
+              <input
+                name="hex"
+                value={hex}
+                onChange={(e) => setHex(e.target.value)}
+                aria-invalid={!!errors.hex}
+                placeholder="#C0A080"
+                className={`${controlClass(!!errors.hex)} w-28 font-mono`}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {errors.nameRo && <FieldError message={errors.nameRo} />}
-      {errors.hex && <FieldError message={errors.hex} />}
-      {errors.sortOrder && <FieldError message={errors.sortOrder} />}
-      {errors._form && <FieldError message={errors._form} />}
-      {item?.swatchImage && (
-        <p className="text-xs text-taupe-400">
-          Are poză de textură. Dacă schimbi culoarea hex, în magazin se
-          afișează cercul în noua culoare.
-        </p>
-      )}
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {item ? (
-          <label className="flex items-center gap-2 text-sm text-taupe-700">
-            <input
-              type="checkbox"
-              name="isActive"
-              defaultChecked={item.isActive}
-              className="h-4 w-4 rounded border-cream-200"
-            />
-            Activă (clienții o pot alege)
-          </label>
-        ) : (
-          <span className="text-xs text-taupe-400">
-            Culoarea nouă apare imediat în magazin.
-          </span>
+        {errors.nameRo && <FieldError message={errors.nameRo} />}
+        {errors.hex && <FieldError message={errors.hex} />}
+        {errors.sortOrder && <FieldError message={errors.sortOrder} />}
+        {errors._form && <FieldError message={errors._form} />}
+        {item?.swatchImage && (
+          <p className="text-xs text-taupe-400">
+            Are poză de textură. Dacă schimbi culoarea hex, în magazin se
+            afișează cercul în noua culoare.
+          </p>
         )}
-        <div className="flex items-center gap-4">
-          {saved && !pending && (
-            <span className="text-xs font-medium text-green-700">Salvat</span>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {item ? (
+            <label className="flex items-center gap-2 text-sm text-taupe-700">
+              <input
+                type="checkbox"
+                name="isActive"
+                defaultChecked={item.isActive}
+                className="h-4 w-4 rounded border-cream-200"
+              />
+              Activă (clienții o pot alege)
+            </label>
+          ) : (
+            <span className="text-xs text-taupe-400">
+              Culoarea nouă apare imediat în magazin.
+            </span>
           )}
-          {item && (
+          <div className="flex items-center gap-4">
+            {saved && !pending && (
+              <span className="text-xs font-medium text-green-700">Salvat</span>
+            )}
+            {item && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={pending}
+                className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+              >
+                Șterge
+              </button>
+            )}
             <button
-              type="button"
-              onClick={handleDelete}
+              type="submit"
               disabled={pending}
-              className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+              className="rounded-full bg-salamander-500 px-5 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
             >
-              Șterge
+              {pending
+                ? "Se salvează..."
+                : item
+                  ? "Salvează"
+                  : "Adaugă culoarea"}
             </button>
-          )}
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-full bg-salamander-500 px-5 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:opacity-60"
-          >
-            {pending ? "Se salvează..." : item ? "Salvează" : "Adaugă culoarea"}
-          </button>
+          </div>
         </div>
-      </div>
+      </AdminCard>
     </form>
   );
 }
@@ -296,27 +314,29 @@ export default function ColorEditor({
 
   return (
     <div className="flex flex-col gap-5">
-      <label className="flex items-start gap-3 rounded-2xl border border-cream-300 bg-white shadow-sm p-5 text-sm text-taupe-700">
-        <input
-          type="checkbox"
-          checked={enabled}
-          disabled={busy}
-          onChange={(e) => toggle(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded border-cream-200"
-        />
-        <span>
-          <span className="font-medium text-taupe-800">
-            Produsele din „{mainName}” se fac la comandă, în culoarea aleasă de
-            client
+      <AdminCard title="Culori pentru această categorie" bodyClassName="p-5">
+        <label className="flex items-start gap-3 text-sm text-taupe-700">
+          <input
+            type="checkbox"
+            checked={enabled}
+            disabled={busy}
+            onChange={(e) => toggle(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-cream-200"
+          />
+          <span>
+            <span className="font-medium text-taupe-800">
+              Produsele din „{mainName}” se fac la comandă, în culoarea aleasă
+              de client
+            </span>
+            <br />
+            <span className="text-xs text-taupe-500">
+              Bifat: în magazin apare paleta de mai jos, iar la produse apare
+              opțiunea „Clientul alege culorile”. Debifat: categoria nu arată
+              deloc culori, nici în magazin, nici în formularul de produs.
+            </span>
           </span>
-          <br />
-          <span className="text-xs text-taupe-500">
-            Bifat: în magazin apare paleta de mai jos, iar la produse apare
-            opțiunea „Clientul alege culorile”. Debifat: categoria nu arată
-            deloc culori, nici în magazin, nici în formularul de produs.
-          </span>
-        </span>
-      </label>
+        </label>
+      </AdminCard>
 
       {enabled && (
         <>

@@ -1,6 +1,7 @@
 "use client";
 
 import { isRedirectError } from "@/lib/admin/redirect-error";
+import AdminCard from "@/components/admin/AdminCard";
 import type { PaletteOption } from "@/lib/admin/queries";
 import { swatchStyle } from "@/lib/colors-shared";
 import { useState } from "react";
@@ -307,8 +308,7 @@ export default function ProductForm({
       noValidate
       className="flex max-w-2xl flex-col gap-8"
     >
-      <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
-        <h2 className="font-display text-lg text-taupe-800">General</h2>
+      <AdminCard title="General" bodyClassName="flex flex-col gap-4 p-6">
 
         <Field label="Categorie principală" required>
           <select
@@ -436,9 +436,9 @@ export default function ProductForm({
             className={controlClass(!!errors.slug)}
           />
         </Field>
-      </section>
+      </AdminCard>
 
-      <section className="overflow-hidden rounded-2xl border-2 border-gold-600 bg-white shadow-md">
+      <section className="overflow-hidden rounded-2xl border-2 border-choc bg-white shadow-md">
         <div className="flex flex-wrap items-center justify-between gap-3 bg-choc px-6 py-3 text-cream-50">
           <h2 className="font-display text-xl">Nume și descrieri</h2>
           <div
@@ -536,8 +536,7 @@ export default function ProductForm({
         </div>
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white p-6 shadow-sm">
-        <h2 className="font-display text-lg text-taupe-800">Preț și afișare</h2>
+      <AdminCard title="Preț și afișare" bodyClassName="flex flex-col gap-4 p-6">
 
         <label className="flex items-center gap-2 text-sm text-taupe-700">
           <input
@@ -647,16 +646,16 @@ export default function ProductForm({
           />
           Vizibil pe site
         </label>
-      </section>
+      </AdminCard>
 
       {showColors && colorsOn && palette.length > 0 && (
-        <section className="flex flex-col gap-3 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
+        <AdminCard
+          title="Culori disponibile pentru acest produs"
+          bodyClassName="flex flex-col gap-3 p-6"
+        >
           <input type="hidden" name="colorChoiceShown" value="1" />
           <div>
-            <h2 className="font-display text-lg text-taupe-800">
-              Culori disponibile pentru acest produs
-            </h2>
-            <p className="mt-1 text-xs text-taupe-400">
+            <p className="text-xs text-taupe-400">
               Bifează culorile din categorie pe care clientul le poate alege la
               acest produs. Culoarea debifată nu apare la produs și nu se poate
               comanda. O culoare nouă adăugată în categorie apare singură aici
@@ -723,17 +722,16 @@ export default function ProductForm({
             ))}
           </ul>
           {errors.allowedColor && <FieldError message={errors.allowedColor} />}
-        </section>
+        </AdminCard>
       )}
 
-      <section
-        className={`flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6 ${showColors && !tiered ? "" : "hidden"}`}
+      <AdminCard
+        title="Piese și culori (produse fără variante)"
+        className={showColors && !tiered ? "" : "hidden"}
+        bodyClassName="flex flex-col gap-4 p-6"
       >
         <div>
-          <h2 className="font-display text-lg text-taupe-800">
-            Piese și culori (produse fără variante)
-          </h2>
-          <p className="mt-1 text-xs text-taupe-400">
+          <p className="text-xs text-taupe-400">
             Pentru produsele la care clientul alege culorile (bifa de mai sus)
             și care nu au variante. Adaugă fiecare piesă (ex: Ghiveci,
             Farfurie), iar clientul alege câte o culoare pentru fiecare. Dacă nu
@@ -775,16 +773,15 @@ export default function ProductForm({
             + Adaugă o piesă
           </button>
         )}
-      </section>
+      </AdminCard>
 
-      <section
-        className={`flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6 ${tiered ? "hidden" : ""}`}
+      <AdminCard
+        title="Variante (seturi)"
+        className={tiered ? "hidden" : ""}
+        bodyClassName="flex flex-col gap-4 p-6"
       >
         <div>
-          <h2 className="font-display text-lg text-taupe-800">
-            Variante (seturi)
-          </h2>
-          <p className="mt-1 text-xs text-taupe-400">
+          <p className="text-xs text-taupe-400">
             Opțional. Fiecare variantă este ce cumpără clientul (ex: Mare, Mic,
             Set), cu prețul ei și cu piesele ei. Reducerea (%) face din variantă
             un set: prețul ei se calculează automat ca suma celorlalte variante,
@@ -931,10 +928,9 @@ export default function ProductForm({
             </div>
           );
         })}
-      </section>
+      </AdminCard>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
-        <h2 className="font-display text-lg text-taupe-800">Inventar</h2>
+      <AdminCard title="Inventar" bodyClassName="flex flex-col gap-4 p-6">
 
         <Field label="Cantitate în stoc" required error={errors.quantityOnHand}>
           <input
@@ -962,7 +958,7 @@ export default function ProductForm({
             className={controlClass(!!errors.lowStockThreshold)}
           />
         </Field>
-      </section>
+      </AdminCard>
 
       {extra}
 

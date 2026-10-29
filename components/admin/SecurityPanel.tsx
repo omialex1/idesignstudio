@@ -1,5 +1,6 @@
 "use client";
 
+import AdminCard from "@/components/admin/AdminCard";
 import { useState } from "react";
 import BackupCodes from "@/components/admin/BackupCodes";
 
@@ -44,8 +45,7 @@ export default function SecurityPanel({
   }
 
   return (
-    <section className="rounded-2xl border border-cream-200 bg-white p-6">
-      <h2 className="font-display text-lg text-taupe-800">Coduri de rezervă</h2>
+    <AdminCard title="Coduri de rezervă">
       {codes ? (
         <div className="mt-4">
           <BackupCodes
@@ -91,6 +91,6 @@ export default function SecurityPanel({
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </>
       )}
-    </section>
+    </AdminCard>
   );
 }

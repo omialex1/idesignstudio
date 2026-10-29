@@ -1,5 +1,6 @@
 "use client";
 
+import AdminCard from "@/components/admin/AdminCard";
 import { useState, useTransition } from "react";
 import {
   deleteAdminAction,
@@ -65,7 +66,7 @@ export default function AdminUsersPanel({
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-2xl border border-cream-200 bg-white">
+      <AdminCard title="Conturi" bodyClassName="">
         <ul className="divide-y divide-cream-100">
           {users.map((user) => (
             <li
@@ -165,14 +166,11 @@ export default function AdminUsersPanel({
             </li>
           ))}
         </ul>
-      </section>
+      </AdminCard>
 
       {canManage ? (
-        <section className="rounded-2xl border border-cream-200 bg-white p-5">
-          <h2 className="font-display text-lg text-taupe-800">
-            Invită un administrator nou
-          </h2>
-          <p className="mt-1 text-sm text-taupe-500">
+        <AdminCard title="Invită un administrator nou" bodyClassName="p-5">
+          <p className="text-sm text-taupe-500">
             Primește un e-mail cu un link prin care își alege singur parola.
           </p>
           <form
@@ -217,7 +215,7 @@ export default function AdminUsersPanel({
               Trimite invitația
             </button>
           </form>
-        </section>
+        </AdminCard>
       ) : (
         <p className="text-sm text-taupe-500">
           Doar proprietarul (Bea) poate invita, dezactiva sau șterge conturi de

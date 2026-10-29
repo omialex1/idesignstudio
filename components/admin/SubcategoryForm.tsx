@@ -1,5 +1,6 @@
 "use client";
 
+import AdminCard from "@/components/admin/AdminCard";
 import { isRedirectError } from "@/lib/admin/redirect-error";
 import { useState } from "react";
 import {
@@ -113,8 +114,9 @@ export default function SubcategoryForm({
       onSubmit={handleSubmit}
       onInput={clearError}
       noValidate
-      className="flex max-w-2xl flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6"
+      className="max-w-2xl"
     >
+      <AdminCard title="Subcategorie" bodyClassName="flex flex-col gap-4 p-6">
       <Field label="Categorie principală" required error={errors.mainCategoryId}>
         <select
           name="mainCategoryId"
@@ -205,6 +207,7 @@ export default function SubcategoryForm({
       )}
 
       <SubmitButton label={submitLabel} pending={pending} />
+      </AdminCard>
     </form>
   );
 }

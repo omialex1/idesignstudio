@@ -1,5 +1,6 @@
 "use client";
 
+import AdminCard from "@/components/admin/AdminCard";
 import { useRef, useState } from "react";
 import { compressImage } from "@/lib/images/client-compress";
 import { MAX_IMAGES_PER_PRODUCT } from "@/lib/images/product-images";
@@ -60,10 +61,9 @@ export default function PhotoPicker({
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6">
+    <AdminCard title="Fotografii" bodyClassName="flex flex-col gap-4 p-6">
       <div>
-        <h2 className="font-display text-lg text-taupe-800">Fotografii</h2>
-        <p className="mt-1 text-xs text-taupe-400">
+        <p className="text-xs text-taupe-400">
           Până la {MAX_IMAGES_PER_PRODUCT} fotografii (JPG, PNG sau WebP). Se
           redimensionează automat și se încarcă după ce salvezi produsul. Prima
           fotografie apare pe cardul produsului.
@@ -124,6 +124,6 @@ export default function PhotoPicker({
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
-    </section>
+    </AdminCard>
   );
 }

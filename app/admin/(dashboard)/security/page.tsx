@@ -1,3 +1,4 @@
+import AdminCard from "@/components/admin/AdminCard";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/client";
 import { getCurrentAdmin } from "@/lib/admin/auth";
@@ -19,11 +20,8 @@ export default async function AdminSecurityPage() {
     <div className="flex max-w-2xl flex-col gap-6">
       <h1 className="font-display text-2xl text-taupe-800">Securitate</h1>
 
-      <section className="rounded-2xl border border-cream-200 bg-white p-6">
-        <h2 className="font-display text-lg text-taupe-800">
-          Autentificare în doi pași
-        </h2>
-        <p className="mt-1 text-sm text-taupe-600">
+      <AdminCard title="Autentificare în doi pași">
+        <p className="text-sm text-taupe-600">
           Activă
           {user.totpEnabledAt &&
             ` din ${formatDateTime(user.totpEnabledAt, "ro")}`}
@@ -34,7 +32,7 @@ export default async function AdminSecurityPage() {
           Dacă îți pierzi telefonul și nu ai coduri de rezervă, celălalt
           administrator îți poate reseta autentificarea din „Conturi admin”.
         </p>
-      </section>
+      </AdminCard>
 
       <SecurityPanel
         username={user.username}

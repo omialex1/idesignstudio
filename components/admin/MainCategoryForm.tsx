@@ -1,5 +1,6 @@
 "use client";
 
+import AdminCard from "@/components/admin/AdminCard";
 import { isRedirectError } from "@/lib/admin/redirect-error";
 import { useState } from "react";
 import {
@@ -117,8 +118,9 @@ export default function MainCategoryForm({
       onSubmit={handleSubmit}
       onInput={clearError}
       noValidate
-      className="flex max-w-2xl flex-col gap-4 rounded-2xl border border-cream-300 bg-white shadow-sm p-6"
+      className="max-w-2xl"
     >
+      <AdminCard title="Categorie principală" bodyClassName="flex flex-col gap-4 p-6">
       {slugLocked ? (
         <div className="flex flex-col gap-1 text-sm">
           <span className="font-medium text-taupe-700">Adresa (slug)</span>
@@ -248,6 +250,7 @@ export default function MainCategoryForm({
       )}
 
       <SubmitButton label={submitLabel} pending={pending} />
+      </AdminCard>
     </form>
   );
 }

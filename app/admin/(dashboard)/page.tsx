@@ -1,3 +1,4 @@
+import AdminCard from "@/components/admin/AdminCard";
 import Link from "next/link";
 import { getDashboardStats, getProductsForAdmin } from "@/lib/admin/queries";
 
@@ -77,9 +78,8 @@ function StatCard({
         ? "text-red-600"
         : "text-taupe-800";
   return (
-    <div className="rounded-2xl border border-cream-300 bg-white shadow-sm p-5">
-      <p className="text-sm text-taupe-500">{label}</p>
-      <p className={`mt-1 font-display text-3xl ${color}`}>{value}</p>
-    </div>
+    <AdminCard title={label} compact bodyClassName="p-4">
+      <p className={`font-display text-3xl ${color}`}>{value}</p>
+    </AdminCard>
   );
 }
