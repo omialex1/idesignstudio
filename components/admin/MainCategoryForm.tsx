@@ -1,5 +1,6 @@
 "use client";
 
+import { isRedirectError } from "@/lib/admin/redirect-error";
 import { useState } from "react";
 import {
   hasErrors,
@@ -78,6 +79,7 @@ export default function MainCategoryForm({
 
     setErrors({});
     setPending(true);
+    let leaving = false;
     try {
       const result = (await onSubmit(formData)) as
         | { errors?: FormErrors }
@@ -85,10 +87,15 @@ export default function MainCategoryForm({
       if (result?.errors && hasErrors(result.errors)) {
         showErrors(result.errors, form);
       }
-    } catch {
-      showErrors({ _form: "Nu am putut salva categoria. Încearcă din nou." }, form);
+    } catch (err) {
+      if (isRedirectError(err)) {
+        // saved: the page is moving on (the button stays disabled until it does)
+        leaving = true;
+      } else {
+        showErrors({ _form: "Nu am putut salva categoria. Încearcă din nou." }, form);
+      }
     } finally {
-      setPending(false);
+      if (!leaving) setPending(false);
     }
   }
 
