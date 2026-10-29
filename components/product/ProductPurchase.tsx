@@ -374,7 +374,9 @@ export default function ProductPurchase({
       {inStock && active && (
         <fieldset className="flex flex-col gap-3">
           <legend className="text-sm font-medium text-taupe-700">
-            {t("chooseColors")}
+            {targets.length <= 1 && active.maxColors === 1
+              ? t("chooseColor")
+              : t("chooseColors")}
           </legend>
 
           {targets.length > 1 && (
@@ -436,13 +438,17 @@ export default function ProductPurchase({
             </div>
           )}
 
-          <p className="text-sm font-medium text-taupe-700">
-            {active.id === ALL_COMPONENTS_ID
-              ? t("colorsForSet")
-              : active.name
-                ? t("colorsFor", { name: active.name })
-                : t("chooseColors")}
-          </p>
+          {(active.id === ALL_COMPONENTS_ID || active.name) && (
+            <p className="text-sm font-medium text-taupe-700">
+              {active.id === ALL_COMPONENTS_ID
+                ? active.maxColors === 1
+                  ? t("colorForSet")
+                  : t("colorsForSet")
+                : active.maxColors === 1
+                  ? t("colorFor", { name: active.name ?? "" })
+                  : t("colorsFor", { name: active.name ?? "" })}
+            </p>
+          )}
           <p className="-mt-2 text-xs text-taupe-500">
             {active.maxColors === 1
               ? t("colorsHintOne")
