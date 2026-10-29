@@ -27,6 +27,47 @@ export default function ProductImageManager({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Order shown while a photo is dragged and until the server answers. It only
+  // counts while the saved order is still the one it was made from.
+  const savedOrder = images.map((i) => i.id).join(",");
+  const [moved, setMoved] = useState<{ base: string; ids: string[] } | null>(
+    null,
+  );
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+  const shown =
+    moved && moved.base === savedOrder
+      ? moved.ids
+          .map((id) => images.find((i) => i.id === id))
+          .filter((i): i is Image => Boolean(i))
+      : images;
+
+  async function saveOrder(ids: string[]) {
+    setMoved({ base: savedOrder, ids });
+    setError(null);
+    const res = await fetch(`/api/admin/products/${productId}/images/order`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    }).catch(() => null);
+    if (!res?.ok) {
+      setError("Nu am putut salva ordinea. Încearcă din nou.");
+      setMoved(null);
+    }
+    router.refresh();
+  }
+
+  function dropOn(targetId: string) {
+    if (!dragId || dragId === targetId) return;
+    const ids = shown.map((i) => i.id);
+    const from = ids.indexOf(dragId);
+    const to = ids.indexOf(targetId);
+    if (from < 0 || to < 0) return;
+    ids.splice(from, 1);
+    ids.splice(to, 0, dragId);
+    void saveOrder(ids);
+  }
+
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     setBusy(true);
@@ -81,21 +122,48 @@ export default function ProductImageManager({
         <h2 className="font-display text-lg text-taupe-800">Fotografii</h2>
         <p className="mt-1 text-xs text-taupe-400">
           Până la {MAX_IMAGES} fotografii (JPG, PNG sau WebP). Se redimensionează
-          automat. Prima fotografie apare pe cardul produsului.
+          automat. Prima fotografie apare pe cardul produsului. Trage o
+          fotografie peste alta ca să schimbi ordinea.
         </p>
       </div>
 
       {images.length > 0 && (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {images.map((img, index) => (
+          {shown.map((img, index) => (
             <li
               key={img.id}
-              className="flex flex-col gap-2 rounded-xl border border-cream-200 p-2"
+              draggable={!busy}
+              onDragStart={(e) => {
+                setDragId(img.id);
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", img.id);
+              }}
+              onDragEnd={() => {
+                setDragId(null);
+                setOverId(null);
+              }}
+              onDragOver={(e) => {
+                if (!dragId) return;
+                e.preventDefault();
+                if (overId !== img.id) setOverId(img.id);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                dropOn(img.id);
+                setDragId(null);
+                setOverId(null);
+              }}
+              className={`flex cursor-grab flex-col gap-2 rounded-xl border p-2 active:cursor-grabbing ${
+                overId === img.id && dragId && dragId !== img.id
+                  ? "border-salamander-400 outline outline-2 outline-salamander-400"
+                  : "border-cream-200"
+              } ${dragId === img.id ? "opacity-50" : ""}`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.url}
                 alt=""
+                draggable={false}
                 className="aspect-square w-full rounded-lg object-cover"
               />
               <div className="flex items-center justify-between text-xs">
