@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { sendAlert } from "@/lib/alerts";
+import { purgeOldAdminLogs } from "@/lib/admin/log";
 
 export const dynamic = "force-dynamic";
 
 // Called once a day by a Vercel cron job so the free Supabase project sees
-// regular activity and doesn't auto-pause.
+// regular activity and doesn't auto-pause. It also deletes admin activity log
+// lines older than 12 months.
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (secret && request.headers.get("authorization") !== `Bearer ${secret}`) {
@@ -28,5 +30,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  const purgedLogs = await purgeOldAdminLogs();
+  return NextResponse.json({ ok: true, purgedLogs });
 }
