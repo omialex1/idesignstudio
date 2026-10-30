@@ -17,6 +17,7 @@ import {
   type FormErrors,
 } from "@/lib/admin/form-validation";
 import { variantPricing } from "@/lib/pricing";
+import { pricePointsOf, recordPrices } from "@/lib/price-history";
 import { rangeLabel, tierRanges } from "@/lib/tiers";
 
 // Slug problems that only the database can tell (already used by another product).
@@ -467,6 +468,7 @@ export async function createProduct(
   });
 
   await savePieces(created.id, data, created.variants);
+  await recordPrices(created.id, pricePointsOf(data));
 
   await logAdminAction(
     admin,
@@ -579,6 +581,7 @@ export async function updateProduct(
   });
 
   await savePieces(productId, data, updated.variants);
+  await recordPrices(productId, pricePointsOf(data));
 
   const after = await productSnapshot(productId);
   if (before && after) {

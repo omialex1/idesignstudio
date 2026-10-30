@@ -99,22 +99,22 @@ model CategoryTranslation {
 }
 
 model Product {
-  id              String               @id @default(cuid())
+  id              String                @id @default(cuid())
   categoryId      String
-  category        Category             @relation(fields: [categoryId], references: [id])
-  slug            String               @unique
+  category        Category              @relation(fields: [categoryId], references: [id])
+  slug            String                @unique
   priceCents      Int
-  currency        String               @default("RON")
-  isActive        Boolean              @default(true)
-  hasColorOptions Boolean              @default(true)
+  currency        String                @default("RON")
+  isActive        Boolean               @default(true)
+  hasColorOptions Boolean               @default(true)
   // Slugs of colours of the category that THIS product does not offer. Empty: the
   // customer can pick any active colour of the category (new colours included).
-  excludedColors  String[]             @default([])
+  excludedColors  String[]              @default([])
   // Price depends on how many pieces are bought: the variants are then price
   // tiers (minQuantity + unit price) that the customer cannot pick, only read.
-  tieredPricing   Boolean              @default(false)
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  tieredPricing   Boolean               @default(false)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
   variants        ProductVariant[]
   components      ProductComponent[]
   translations    ProductTranslation[]
@@ -122,6 +122,23 @@ model Product {
   inventory       Inventory?
   orderItems      OrderItem[]
   groupItems      ProductGroupItem[]
+  // in several groups with a discount: the group whose discount applies (null: the biggest)
+  discountGroupId String?
+  priceHistory    ProductPriceHistory[]
+}
+
+// Every price a product (or one of its variants) has had, with the moment it started.
+// Needed to show the lowest price of the last 30 days next to a reduction.
+model ProductPriceHistory {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // the variant's position, or -1 for a product without variants
+  variantKey Int      @default(-1)
+  priceCents Int
+  startedAt  DateTime @default(now())
+
+  @@index([productId, variantKey, startedAt])
 }
 
 model ProductVariant {
@@ -182,6 +199,8 @@ model ProductGroupType {
   showOnSite  Boolean        @default(false)
   // groups of this kind carry a discount in percent
   hasDiscount Boolean        @default(false)
+  // when a discount of this kind is live, its name (e.g. "Black Friday") is shown by the price
+  showLabel   Boolean        @default(false)
   sortOrder   Int            @default(0)
   groups      ProductGroup[]
 }
@@ -197,6 +216,13 @@ model ProductGroup {
   discountPercent Int?
   // show the products in a random order on the site (new order at every visit)
   shuffle         Boolean            @default(false)
+  // the discount is applied on the site (off until switched on)
+  discountLive    Boolean            @default(false)
+  // when it was switched on (the price before it is the lowest of the 30 days before)
+  liveSince       DateTime?
+  // optional period; both empty: indefinite
+  startsAt        DateTime?
+  endsAt          DateTime?
   // optional cap on the number of products (null: no limit)
   maxItems        Int?
   createdAt       DateTime           @default(now())
@@ -212,6 +238,8 @@ model ProductGroupItem {
   product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   // the order the products were chosen in (and are shown in)
   sortOrder Int          @default(0)
+  // discount on or off for this product only; null: follows the group
+  live      Boolean?
 
   @@unique([groupId, productId])
   @@index([productId])
