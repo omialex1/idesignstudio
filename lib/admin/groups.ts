@@ -32,6 +32,8 @@ export type GroupProduct = {
   chosenGroupId: string | null;
   // the other groups with a discount this product is in
   otherDiscounts: { groupId: string; name: string; percent: number }[];
+  // priced by quantity (invitations): such products get no discount
+  tiered: boolean;
 };
 
 export type GroupSummary = {
@@ -143,6 +145,7 @@ function toGroupProduct(p: ProductRow): GroupProduct {
     live: null,
     chosenGroupId: p.discountGroupId,
     otherDiscounts: [],
+    tiered: p.tieredPricing,
   };
 }
 

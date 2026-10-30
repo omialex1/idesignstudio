@@ -17,6 +17,19 @@ type GroupChoice = {
   maxItems: number | null;
   count: number;
   member: boolean;
+  // discount of the group, and this product's own switch in it (null: follows the group)
+  discountPercent?: number | null;
+  discountLive?: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  live?: boolean | null;
+};
+
+type DiscountState = {
+  chosenGroupId: string | null;
+  tiered: boolean;
+  // the discount customers get right now
+  now: { percent: number; groupId: string; groupName: string } | null;
 };
 
 // A choice made on the "new product" page: the product does not exist yet, so
@@ -42,6 +55,7 @@ export default function ProductGroupsCard({
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [types, setTypes] = useState<GroupTypeInfo[]>([]);
+  const [discount, setDiscount] = useState<DiscountState | null>(null);
   const [newTypeId, setNewTypeId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +73,15 @@ export default function ProductGroupsCard({
         ...g,
         member: g.member ?? false,
       })),
+    );
+    setDiscount(
+      productId
+        ? {
+            chosenGroupId: data.chosenGroupId ?? null,
+            tiered: data.tiered === true,
+            now: data.now ?? null,
+          }
+        : null,
     );
     const typesRes = await fetch("/api/admin/group-types").catch(() => null);
     if (typesRes?.ok) {
@@ -97,6 +120,10 @@ export default function ProductGroupsCard({
   const memberGroups = productId
     ? groups.filter((g) => g.member)
     : groups.filter((g) => pendingIds.has(g.id));
+  // the groups of this product that carry a discount
+  const discountGroups = memberGroups.filter(
+    (g) => g.type.hasDiscount && (g.discountPercent ?? 0) > 0,
+  );
 
   async function post(path: string, body: unknown) {
     const res = await fetch(path, {
@@ -105,6 +132,31 @@ export default function ProductGroupsCard({
       body: JSON.stringify(body),
     }).catch(() => null);
     return { ok: !!res?.ok, data: await res?.json().catch(() => null) };
+  }
+
+  async function setLive(g: GroupChoice, value: string) {
+    if (!productId) return;
+    setBusy(true);
+    setError(null);
+    const { ok } = await post(`/api/admin/products/${productId}/groups`, {
+      groupId: g.id,
+      live: value === "group" ? null : value === "on",
+    });
+    setBusy(false);
+    if (!ok) setError("Nu am putut schimba discountul produsului.");
+    await load();
+  }
+
+  async function choose(value: string) {
+    if (!productId) return;
+    setBusy(true);
+    setError(null);
+    const { ok } = await post(`/api/admin/products/${productId}/groups`, {
+      choose: value === "auto" ? null : value,
+    });
+    setBusy(false);
+    if (!ok) setError("Nu am putut alege discountul.");
+    await load();
   }
 
   async function add(g: GroupChoice) {
@@ -240,6 +292,78 @@ export default function ProductGroupsCard({
           </span>
         )}
       </div>
+
+      {productId && discount && discountGroups.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <h3 className="text-sm font-semibold text-taupe-800">Discounturi</h3>
+          {discount.tiered ? (
+            <p className="text-xs text-taupe-600">
+              Produsul are preț pe cantități (invitații): nu primește discount din grup.
+            </p>
+          ) : (
+            <>
+              <p
+                className={`text-sm font-semibold ${
+                  discount.now ? "text-red-700" : "text-taupe-600"
+                }`}
+              >
+                {discount.now
+                  ? `Acum clienții primesc −${discount.now.percent}% (din „${discount.now.groupName}”).`
+                  : "Acum clienții nu primesc niciun discount la acest produs."}
+              </p>
+              <ul className="flex flex-col gap-2">
+                {discountGroups.map((g) => (
+                  <li
+                    key={g.id}
+                    className="flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm"
+                  >
+                    <span className="font-medium">
+                      {g.name} −{g.discountPercent}%
+                    </span>
+                    <span className="text-xs text-taupe-500">
+                      grupul e {g.discountLive ? "pornit" : "oprit"}
+                    </span>
+                    <select
+                      value={g.live === null || g.live === undefined ? "group" : g.live ? "on" : "off"}
+                      onChange={(e) => setLive(g, e.target.value)}
+                      disabled={busy}
+                      aria-label={`Discountul „${g.name}” la acest produs`}
+                      className="ml-auto rounded-lg border border-cream-300 bg-white px-2 py-1 text-xs"
+                    >
+                      <option value="group">Urmează grupul</option>
+                      <option value="on">Pornit pentru acest produs</option>
+                      <option value="off">Oprit pentru acest produs</option>
+                    </select>
+                  </li>
+                ))}
+              </ul>
+              {discountGroups.length > 1 && (
+                <label className="flex flex-col gap-1 text-xs font-medium text-taupe-700">
+                  ⚠ Produsul e în {discountGroups.length} grupuri cu discount. Se
+                  aplică un singur discount:
+                  <select
+                    value={
+                      discountGroups.some((g) => g.id === discount.chosenGroupId)
+                        ? (discount.chosenGroupId as string)
+                        : "auto"
+                    }
+                    onChange={(e) => choose(e.target.value)}
+                    disabled={busy}
+                    className="w-fit rounded-lg border border-cream-300 bg-white px-2 py-1.5 text-sm font-normal"
+                  >
+                    <option value="auto">Cel mai mare (automat)</option>
+                    {discountGroups.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        „{g.name}” (−{g.discountPercent}%)
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       <div ref={root} className="flex flex-wrap items-center gap-3">
         <button

@@ -27,9 +27,31 @@ type Editor = {
   discount: string;
   // a new random order on the site at every visit
   shuffle: boolean;
+  // discount: applied on the site, and the period (local date-time text);
+  // without a period the discount has no end
+  discountLive: boolean;
+  periodOn: boolean;
+  startsAt: string;
+  endsAt: string;
+  // the discount chosen for products in several groups: a group id, "self" (this
+  // group) or null (the biggest); missing: unchanged
+  choices: Record<string, string | null>;
   maxItems: string;
   // in the order they were chosen
   items: GroupProduct[];
+};
+
+// "2026-11-27T00:00" (local time) from an ISO date, and back
+function toLocalInput(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+const fromLocalInput = (text: string): string | null => {
+  const d = text ? new Date(text) : null;
+  return d && !Number.isNaN(d.getTime()) ? d.toISOString() : null;
 };
 
 const money = (cents: number) =>
@@ -136,6 +158,85 @@ function ProductPhoto({ product }: { product: GroupProduct }) {
   );
 }
 
+// What the period means right now, in words.
+function periodStatus(e: Pick<Editor, "discountLive" | "periodOn" | "startsAt" | "endsAt">) {
+  if (!e.discountLive) return "Oprit: prețurile din magazin nu se schimbă.";
+  if (!e.periodOn) return "Pornit, fără dată de sfârșit.";
+  const now = Date.now();
+  const from = e.startsAt ? new Date(e.startsAt).getTime() : null;
+  const to = e.endsAt ? new Date(e.endsAt).getTime() : null;
+  if (from !== null && now < from) return "Pornit, dar așteaptă începutul perioadei.";
+  if (to !== null && now >= to) return "Perioada s-a încheiat: discountul nu se mai aplică.";
+  return "Pornit și în perioadă: se aplică acum.";
+}
+
+// The discount column of a product in the group: its own on/off switch and, when
+// it is also in another group with a discount, which of them applies.
+function DiscountCell({
+  product,
+  groupId,
+  groupPercent,
+  choice,
+  onLive,
+  onChoice,
+}: {
+  product: GroupProduct;
+  groupId: string | null;
+  groupPercent: number | null;
+  choice: string | null | undefined;
+  onLive: (live: boolean | null) => void;
+  onChoice: (value: string | null) => void;
+}) {
+  const raw = choice !== undefined ? choice : product.chosenGroupId;
+  const current = raw === null ? "auto" : raw === groupId ? "self" : raw;
+  const field =
+    "rounded-lg border border-cream-300 bg-white px-2 py-1 text-xs text-taupe-800";
+  return (
+    <div className="flex min-w-44 flex-col gap-1.5">
+      <select
+        value={product.live === null ? "group" : product.live ? "on" : "off"}
+        onChange={(e) =>
+          onLive(e.target.value === "group" ? null : e.target.value === "on")
+        }
+        aria-label={`Discount pentru ${product.name}`}
+        className={field}
+      >
+        <option value="group">Urmează grupul</option>
+        <option value="on">Pornit pentru acest produs</option>
+        <option value="off">Oprit pentru acest produs</option>
+      </select>
+      {product.otherDiscounts.length > 0 && (
+        <div className="flex flex-col gap-1 rounded-lg border border-amber-300 bg-amber-50 p-1.5">
+          <span className="text-[11px] font-semibold text-amber-900">
+            ⚠ Și în{" "}
+            {product.otherDiscounts
+              .map((o) => `„${o.name}” −${o.percent}%`)
+              .join(", ")}
+          </span>
+          <select
+            value={current}
+            onChange={(e) =>
+              onChoice(e.target.value === "auto" ? null : e.target.value)
+            }
+            aria-label={`Ce discount se aplică la ${product.name}`}
+            className={field}
+          >
+            <option value="auto">Se aplică cel mai mare (automat)</option>
+            <option value="self">
+              Se aplică acest grup{groupPercent ? ` (−${groupPercent}%)` : ""}
+            </option>
+            {product.otherDiscounts.map((o) => (
+              <option key={o.groupId} value={o.groupId}>
+                Se aplică „{o.name}” (−{o.percent}%)
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // One row of the "Tipuri de grup" panel: rename, what it does, delete.
 function TypeRow({
   type,
@@ -149,18 +250,20 @@ function TypeRow({
   const [name, setName] = useState(type.name);
   const [showOnSite, setShowOnSite] = useState(type.showOnSite);
   const [hasDiscount, setHasDiscount] = useState(type.hasDiscount);
+  const [showLabel, setShowLabel] = useState(type.showLabel);
   const [busy, setBusy] = useState(false);
   const changed =
     name.trim() !== type.name ||
     showOnSite !== type.showOnSite ||
-    hasDiscount !== type.hasDiscount;
+    hasDiscount !== type.hasDiscount ||
+    (hasDiscount && showLabel !== type.showLabel);
 
   async function save() {
     setBusy(true);
     const res = await fetch(`/api/admin/group-types/${type.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, showOnSite, hasDiscount }),
+      body: JSON.stringify({ name, showOnSite, hasDiscount, showLabel }),
     }).catch(() => null);
     setBusy(false);
     if (!res?.ok) {
@@ -218,6 +321,17 @@ function TypeRow({
         />
         Are discount %
       </label>
+      {hasDiscount && (
+        <label className="flex items-center gap-2 text-sm text-taupe-700">
+          <input
+            type="checkbox"
+            checked={showLabel}
+            onChange={(e) => setShowLabel(e.target.checked)}
+            className="h-4 w-4 accent-salamander-500"
+          />
+          Arată numele tipului pe site, lângă preț
+        </label>
+      )}
       <span className="text-xs text-taupe-500">
         {type.groupCount} {type.groupCount === 1 ? "grup" : "grupuri"}
       </span>
@@ -273,8 +387,13 @@ export default function GroupsWindow() {
           e.typeId,
           e.discount,
           e.shuffle,
+          e.discountLive,
+          e.periodOn,
+          e.startsAt,
+          e.endsAt,
+          e.choices,
           e.maxItems,
-          e.items.map((i) => i.id),
+          e.items.map((i) => [i.id, i.live]),
         ])
       : "";
   const dirty = editor !== null && snapshot(editor) !== saved;
@@ -316,6 +435,11 @@ export default function GroupsWindow() {
       typeId: group.type.id,
       discount: group.discountPercent ? String(group.discountPercent) : "",
       shuffle: group.shuffle === true,
+      discountLive: group.discountLive === true,
+      periodOn: !!(group.startsAt || group.endsAt),
+      startsAt: toLocalInput(group.startsAt),
+      endsAt: toLocalInput(group.endsAt),
+      choices: {},
       maxItems: group.maxItems ? String(group.maxItems) : "",
       items: group.items,
     });
@@ -328,6 +452,11 @@ export default function GroupsWindow() {
       typeId,
       discount: "",
       shuffle: false,
+      discountLive: false,
+      periodOn: false,
+      startsAt: "",
+      endsAt: "",
+      choices: {},
       maxItems: "",
       items: withProduct ? [withProduct] : [],
     });
@@ -403,6 +532,9 @@ export default function GroupsWindow() {
       ? Number(editor.maxItems)
       : null;
   const currentType = types.find((t) => t.id === editor?.typeId);
+  const conflictCount = editor
+    ? editor.items.filter((i) => !i.tiered && i.otherDiscounts.length > 0).length
+    : 0;
   const discountNumber =
     /^\d+$/.test(editor?.discount ?? "") &&
     Number(editor?.discount) >= 1 &&
@@ -426,7 +558,40 @@ export default function GroupsWindow() {
     } else {
       setMessage(null);
     }
-    update({ items: [...editor.items, ...fresh.slice(0, room)] });
+    const added = fresh.slice(0, room);
+    update({ items: [...editor.items, ...added] });
+    if (currentType?.hasDiscount) loadConflicts(added);
+  }
+
+  // products that are already in another group with a discount: shown with a
+  // warning, so the discount that applies can be chosen
+  async function loadConflicts(list: GroupProduct[]) {
+    if (list.length === 0) return;
+    const ids = list.map((p) => p.id);
+    const res = await fetch(
+      `/api/admin/groups/search?conflicts=${ids.join(",")}&exclude=${editor?.id ?? ""}`,
+    ).catch(() => null);
+    if (!res?.ok) return;
+    const data: {
+      others: Record<string, GroupProduct["otherDiscounts"]>;
+      chosen: Record<string, string | null>;
+    } = await res.json();
+    setEditor((e) =>
+      e
+        ? {
+            ...e,
+            items: e.items.map((i) =>
+              ids.includes(i.id)
+                ? {
+                    ...i,
+                    otherDiscounts: data.others[i.id] ?? [],
+                    chosenGroupId: data.chosen[i.id] ?? null,
+                  }
+                : i,
+            ),
+          }
+        : e,
+    );
   }
 
   async function attachCategory(c: CategoryHit) {
@@ -469,12 +634,29 @@ export default function GroupsWindow() {
       setMessage({ ok: false, text: "Discountul trebuie să fie între 1 și 100%." });
       return;
     }
+    const startsAt = editor.periodOn ? fromLocalInput(editor.startsAt) : null;
+    const endsAt = editor.periodOn ? fromLocalInput(editor.endsAt) : null;
+    if (startsAt && endsAt && new Date(endsAt) <= new Date(startsAt)) {
+      setMessage({ ok: false, text: "Sfârșitul perioadei trebuie să fie după început." });
+      return;
+    }
+    if (currentType?.hasDiscount && editor.discountLive && discountNumber === null) {
+      setMessage({ ok: false, text: "Alege un discount înainte să-l aplici pe site." });
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const body = JSON.stringify({
       name: editor.name,
       typeId: editor.typeId,
       discountPercent: currentType?.hasDiscount ? discountNumber : null,
+      discountLive: currentType?.hasDiscount === true && editor.discountLive,
+      startsAt,
+      endsAt,
+      itemLive: Object.fromEntries(
+        editor.items.filter((i) => i.live !== null).map((i) => [i.id, i.live]),
+      ),
+      choices: editor.choices,
       shuffle: editor.shuffle,
       maxItems: maxItems,
       productIds: editor.items.map((i) => i.id),
@@ -505,6 +687,18 @@ export default function GroupsWindow() {
       id,
       discount:
         currentType?.hasDiscount && discountNumber ? String(discountNumber) : "",
+      discountLive: currentType?.hasDiscount === true && editor.discountLive,
+      choices: {},
+      // the choices just saved are now the products' own
+      items: editor.items.map((i) =>
+        i.id in editor.choices
+          ? {
+              ...i,
+              chosenGroupId:
+                editor.choices[i.id] === "self" ? id : editor.choices[i.id],
+            }
+          : i,
+      ),
     };
     setEditor(next);
     setSaved(snapshot(next));
@@ -682,6 +876,11 @@ export default function GroupsWindow() {
                 <b className="block text-taupe-800">{g.name}</b>
                 <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-taupe-500">
                   <TypeBadge type={g.type} />
+                  {g.discountLive && g.discountPercent ? (
+                    <span className="rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                      LIVE
+                    </span>
+                  ) : null}
                   {g.discountPercent ? `−${g.discountPercent}%` : ""} {g.count}{" "}
                   {g.count === 1 ? "produs" : "produse"}
                 </span>
@@ -724,7 +923,7 @@ export default function GroupsWindow() {
                 <ul className="flex flex-col gap-2">
                   {types.map((t) => (
                     <TypeRow
-                      key={`${t.id}-${t.name}-${t.showOnSite}-${t.hasDiscount}`}
+                      key={`${t.id}-${t.name}-${t.showOnSite}-${t.hasDiscount}-${t.showLabel}`}
                       type={t}
                       onSaved={typesChanged}
                       onError={setTypeMessage}
@@ -777,7 +976,10 @@ export default function GroupsWindow() {
                         <button
                           key={t.id}
                           type="button"
-                          onClick={() => update({ typeId: t.id })}
+                          onClick={() => {
+                            update({ typeId: t.id });
+                            if (t.hasDiscount) loadConflicts(editor.items);
+                          }}
                           className={`px-4 py-2 text-sm ${
                             editor.typeId === t.id
                               ? "bg-choc font-semibold text-white"
@@ -849,10 +1051,83 @@ export default function GroupsWindow() {
                         %
                       </label>
                     </div>
-                    <p className="text-xs text-taupe-500">
-                      Deocamdată discountul doar se salvează la grup; nu schimbă
-                      încă prețurile din magazin.
-                    </p>
+                    <label className="flex items-start gap-2 border-t border-amber-200 pt-3 text-sm text-taupe-800">
+                      <input
+                        type="checkbox"
+                        checked={editor.discountLive}
+                        onChange={(e) => update({ discountLive: e.target.checked })}
+                        className="mt-0.5 h-4 w-4 accent-salamander-500"
+                      />
+                      <span>
+                        <b>Aplică pe site</b>
+                        <span className="block text-xs text-taupe-600">
+                          Bifat și salvat: produsele din grup se vând la prețul
+                          redus pe site, în coș, la plată și pe factură. Nebifat:
+                          discountul e doar salvat, prețurile nu se schimbă. Poți
+                          porni sau opri discountul și pentru un singur produs,
+                          în tabelul de mai jos.
+                        </span>
+                      </span>
+                    </label>
+                    <div className="flex flex-col gap-2 text-sm text-taupe-800">
+                      <span className="font-semibold">Perioadă</span>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="period"
+                          checked={!editor.periodOn}
+                          onChange={() => update({ periodOn: false })}
+                          className="h-4 w-4 accent-salamander-500"
+                        />
+                        Nedeterminată (rămâne activ până îl oprești tu)
+                      </label>
+                      <label className="flex flex-wrap items-center gap-2">
+                        <input
+                          type="radio"
+                          name="period"
+                          checked={editor.periodOn}
+                          onChange={() => update({ periodOn: true })}
+                          className="h-4 w-4 accent-salamander-500"
+                        />
+                        Între
+                        <input
+                          type="datetime-local"
+                          value={editor.startsAt}
+                          onChange={(e) =>
+                            update({ startsAt: e.target.value, periodOn: true })
+                          }
+                          aria-label="Începutul perioadei"
+                          className={controlClass(false, "w-52")}
+                        />
+                        și
+                        <input
+                          type="datetime-local"
+                          value={editor.endsAt}
+                          onChange={(e) =>
+                            update({ endsAt: e.target.value, periodOn: true })
+                          }
+                          aria-label="Sfârșitul perioadei"
+                          className={controlClass(false, "w-52")}
+                        />
+                      </label>
+                      <p className="text-xs text-taupe-600">
+                        {periodStatus(editor)}
+                      </p>
+                    </div>
+                    {conflictCount > 0 && (
+                      <p
+                        role="status"
+                        className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-medium text-amber-900"
+                      >
+                        ⚠ {conflictCount}{" "}
+                        {conflictCount === 1
+                          ? "produs e și într-un alt grup"
+                          : "produse sunt și în alte grupuri"}{" "}
+                        cu discount. Un produs primește un singur discount: în
+                        tabelul de mai jos alegi care se aplică (implicit, cel
+                        mai mare).
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -1076,6 +1351,9 @@ export default function GroupsWindow() {
                           <th className="px-1 py-2" />
                           <th className="px-3 py-2">Nume</th>
                           <th className="px-3 py-2">Stoc</th>
+                          {currentType?.hasDiscount && (
+                            <th className="px-3 py-2">Discount</th>
+                          )}
                           <th className="px-1 py-2" />
                           <th className="px-3 py-2" />
                         </tr>
@@ -1093,6 +1371,34 @@ export default function GroupsWindow() {
                               <ProductName product={p} stacked />
                             </td>
                             <td className="px-3 py-1.5">{p.stock}</td>
+                            {currentType?.hasDiscount && (
+                              <td className="px-3 py-1.5 align-top">
+                                {p.tiered ? (
+                                  <span className="text-xs text-taupe-500">
+                                    Preț pe cantități: fără discount
+                                  </span>
+                                ) : (
+                                  <DiscountCell
+                                    product={p}
+                                    groupId={editor.id}
+                                    groupPercent={discountNumber}
+                                    choice={editor.choices[p.id]}
+                                    onLive={(live) =>
+                                      update({
+                                        items: editor.items.map((i) =>
+                                          i.id === p.id ? { ...i, live } : i,
+                                        ),
+                                      })
+                                    }
+                                    onChoice={(value) =>
+                                      update({
+                                        choices: { ...editor.choices, [p.id]: value },
+                                      })
+                                    }
+                                  />
+                                )}
+                              </td>
+                            )}
                             <td className="px-1 py-1.5">
                               <Info product={p} />
                             </td>
