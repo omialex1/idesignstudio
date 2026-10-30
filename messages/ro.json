@@ -52,6 +52,8 @@
     "colorsChosen": "Alese: {names}",
     "pickColorFirst": "Alege o culoare ca să poți comanda.",
     "filtersLabel": "Sortare și filtre",
+    "filtersButton": "Filtre",
+    "resetShort": "Resetează",
     "sortBy": "Sortează",
     "sortDefault": "Recomandate",
     "sortRelevance": "Cele mai potrivite",

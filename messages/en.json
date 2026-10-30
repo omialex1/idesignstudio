@@ -52,6 +52,8 @@
     "colorsChosen": "Selected: {names}",
     "pickColorFirst": "Pick a colour to order.",
     "filtersLabel": "Sorting and filters",
+    "filtersButton": "Filters",
+    "resetShort": "Reset",
     "sortBy": "Sort by",
     "sortDefault": "Recommended",
     "sortRelevance": "Best match",
