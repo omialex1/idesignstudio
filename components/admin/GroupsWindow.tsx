@@ -2,13 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { GroupKind, GroupProduct, GroupSummary } from "@/lib/admin/groups";
+import type { GroupProduct, GroupSummary } from "@/lib/admin/groups";
+import type { GroupTypeRow } from "@/lib/admin/group-types";
 import {
   GROUPS_CHANGED_EVENT,
   OPEN_GROUPS_EVENT,
   type OpenGroupsDetail,
 } from "@/components/admin/groups-events";
 import { controlClass } from "@/components/admin/FormBits";
+import TypeBadge from "@/components/admin/TypeBadge";
 
 type CategoryHit = {
   id: string;
@@ -20,19 +22,12 @@ type Editor = {
   // null while it is a new, unsaved group
   id: string | null;
   name: string;
-  kind: GroupKind;
+  typeId: string;
+  // 1..100 as typed ("" for none)
+  discount: string;
   maxItems: string;
   // in the order they were chosen
   items: GroupProduct[];
-};
-
-const KIND_LABEL: Record<GroupKind, string> = {
-  recommended: "Merge bine cu",
-  promo: "Promoțional",
-};
-const KIND_NOTE: Record<GroupKind, string> = {
-  recommended: "apare pe site",
-  promo: "intern",
 };
 
 const money = (cents: number) =>
@@ -74,7 +69,7 @@ function Info({ product }: { product: GroupProduct }) {
       className="group relative inline-flex h-5 w-5 shrink-0 cursor-help items-center justify-center rounded-full border-[1.5px] border-taupe-500 text-xs font-bold text-taupe-500"
     >
       i
-      <span className="pointer-events-none absolute right-7 top-[-6px] z-30 hidden w-56 rounded-xl bg-choc px-3 py-2 text-left text-xs font-normal leading-snug text-cream-100 group-hover:block group-focus:block">
+      <span className="pointer-events-none absolute top-[-6px] right-7 z-30 hidden w-56 rounded-xl bg-choc px-3 py-2 text-left text-xs leading-snug font-normal text-cream-100 group-hover:block group-focus:block">
         <b className="block">{product.name}</b>
         {product.description || "Fără descriere."}
       </span>
@@ -82,17 +77,105 @@ function Info({ product }: { product: GroupProduct }) {
   );
 }
 
-function KindBadge({ kind }: { kind: GroupKind }) {
+// One row of the "Tipuri de grup" panel: rename, what it does, delete.
+function TypeRow({
+  type,
+  onSaved,
+  onError,
+}: {
+  type: GroupTypeRow;
+  onSaved: () => void;
+  onError: (text: string) => void;
+}) {
+  const [name, setName] = useState(type.name);
+  const [showOnSite, setShowOnSite] = useState(type.showOnSite);
+  const [hasDiscount, setHasDiscount] = useState(type.hasDiscount);
+  const [busy, setBusy] = useState(false);
+  const changed =
+    name.trim() !== type.name ||
+    showOnSite !== type.showOnSite ||
+    hasDiscount !== type.hasDiscount;
+
+  async function save() {
+    setBusy(true);
+    const res = await fetch(`/api/admin/group-types/${type.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, showOnSite, hasDiscount }),
+    }).catch(() => null);
+    setBusy(false);
+    if (!res?.ok) {
+      onError("Nu am putut salva tipul. Scrie un nume de până la 40 de caractere.");
+      return;
+    }
+    onSaved();
+  }
+
+  async function remove() {
+    if (!window.confirm(`Ștergi tipul „${type.name}”?`)) return;
+    setBusy(true);
+    const res = await fetch(`/api/admin/group-types/${type.id}`, {
+      method: "DELETE",
+    }).catch(() => null);
+    setBusy(false);
+    if (!res?.ok) {
+      const data = await res?.json().catch(() => null);
+      onError(
+        data?.error === "in_use"
+          ? `Tipul „${type.name}” are ${data.groups} ${data.groups === 1 ? "grup" : "grupuri"}. Mută-le mai întâi la alt tip.`
+          : data?.error === "last"
+            ? "Trebuie să rămână cel puțin un tip."
+            : "Nu am putut șterge tipul.",
+      );
+      return;
+    }
+    onSaved();
+  }
+
   return (
-    <span
-      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-        kind === "recommended"
-          ? "bg-green-100 text-green-800"
-          : "bg-amber-100 text-amber-800"
-      }`}
-    >
-      {KIND_LABEL[kind]}
-    </span>
+    <li className="flex flex-wrap items-center gap-3 rounded-xl border border-cream-200 bg-white p-3">
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        maxLength={40}
+        aria-label="Numele tipului"
+        className={controlClass(false, "w-48")}
+      />
+      <label className="flex items-center gap-2 text-sm text-taupe-700">
+        <input
+          type="checkbox"
+          checked={showOnSite}
+          onChange={(e) => setShowOnSite(e.target.checked)}
+          className="h-4 w-4 accent-salamander-500"
+        />
+        Apare pe site ca „Merge bine cu”
+      </label>
+      <label className="flex items-center gap-2 text-sm text-taupe-700">
+        <input
+          type="checkbox"
+          checked={hasDiscount}
+          onChange={(e) => setHasDiscount(e.target.checked)}
+          className="h-4 w-4 accent-salamander-500"
+        />
+        Are discount %
+      </label>
+      <span className="text-xs text-taupe-500">
+        {type.groupCount} {type.groupCount === 1 ? "grup" : "grupuri"}
+      </span>
+      <span className="ml-auto flex gap-2">
+        <button
+          type="button"
+          onClick={save}
+          disabled={busy || !changed || !name.trim()}
+          className={btnMain}
+        >
+          Salvează
+        </button>
+        <button type="button" onClick={remove} disabled={busy} className={btnDanger}>
+          Șterge
+        </button>
+      </span>
+    </li>
   );
 }
 
@@ -100,6 +183,7 @@ export default function GroupsWindow() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [groups, setGroups] = useState<GroupSummary[]>([]);
+  const [types, setTypes] = useState<GroupTypeRow[]>([]);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [saved, setSaved] = useState<string>("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(
@@ -107,6 +191,9 @@ export default function GroupsWindow() {
   );
   const [busy, setBusy] = useState(false);
   const [kindMenu, setKindMenu] = useState(false);
+  const [managingTypes, setManagingTypes] = useState(false);
+  const [newTypeName, setNewTypeName] = useState("");
+  const [typeMessage, setTypeMessage] = useState<string | null>(null);
 
   // search
   const [query, setQuery] = useState("");
@@ -122,13 +209,27 @@ export default function GroupsWindow() {
 
   const snapshot = (e: Editor | null) =>
     e
-      ? JSON.stringify([e.name, e.kind, e.maxItems, e.items.map((i) => i.id)])
+      ? JSON.stringify([
+          e.name,
+          e.typeId,
+          e.discount,
+          e.maxItems,
+          e.items.map((i) => i.id),
+        ])
       : "";
   const dirty = editor !== null && snapshot(editor) !== saved;
 
   async function refreshGroups() {
     const res = await fetch("/api/admin/groups").catch(() => null);
     if (res?.ok) setGroups((await res.json()).groups);
+  }
+
+  async function refreshTypes(): Promise<GroupTypeRow[]> {
+    const res = await fetch("/api/admin/group-types").catch(() => null);
+    if (!res?.ok) return types;
+    const list: GroupTypeRow[] = (await res.json()).types;
+    setTypes(list);
+    return list;
   }
 
   function startEditor(e: Editor) {
@@ -139,6 +240,7 @@ export default function GroupsWindow() {
     setHits(null);
     setChecked([]);
     setComparing(false);
+    setManagingTypes(false);
   }
 
   async function openGroup(id: string) {
@@ -151,32 +253,39 @@ export default function GroupsWindow() {
     startEditor({
       id: group.id,
       name: group.name,
-      kind: group.kind,
+      typeId: group.type.id,
+      discount: group.discountPercent ? String(group.discountPercent) : "",
       maxItems: group.maxItems ? String(group.maxItems) : "",
       items: group.items,
     });
   }
 
-  function newGroup(kind: GroupKind, withProduct?: GroupProduct) {
+  function newGroup(typeId: string, withProduct?: GroupProduct) {
     startEditor({
       id: null,
       name: "",
-      kind,
+      typeId,
+      discount: "",
       maxItems: "",
       items: withProduct ? [withProduct] : [],
     });
     setKindMenu(false);
   }
 
-  // opened from the menu, the filter or a product
+  // opened from the menu or a product
   useEffect(() => {
-    const onOpen = (e: Event) => {
+    const onOpen = async (e: Event) => {
       const detail = ((e as CustomEvent).detail ?? {}) as OpenGroupsDetail;
       setOpen(true);
       refreshGroups();
+      const list = await refreshTypes();
       if (detail.groupId) openGroup(detail.groupId);
-      else if (detail.newWith) newGroup("recommended", detail.newWith);
-      else setEditor(null);
+      else if (detail.newWith) {
+        newGroup(
+          (list.find((t) => t.showOnSite) ?? list[0])?.id ?? "",
+          detail.newWith,
+        );
+      } else setEditor(null);
     };
     window.addEventListener(OPEN_GROUPS_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_GROUPS_EVENT, onOpen);
@@ -186,14 +295,13 @@ export default function GroupsWindow() {
   function close() {
     if (
       dirty &&
-      !window.confirm(
-        "Ai modificări nesalvate în grup. Închizi fără să salvezi?",
-      )
+      !window.confirm("Ai modificări nesalvate în grup. Închizi fără să salvezi?")
     ) {
       return;
     }
     setOpen(false);
     setEditor(null);
+    setManagingTypes(false);
   }
 
   useEffect(() => {
@@ -231,6 +339,13 @@ export default function GroupsWindow() {
   const maxItems =
     editor && /^\d+$/.test(editor.maxItems) && Number(editor.maxItems) > 0
       ? Number(editor.maxItems)
+      : null;
+  const currentType = types.find((t) => t.id === editor?.typeId);
+  const discountNumber =
+    /^\d+$/.test(editor?.discount ?? "") &&
+    Number(editor?.discount) >= 1 &&
+    Number(editor?.discount) <= 100
+      ? Number(editor?.discount)
       : null;
 
   function attach(products: GroupProduct[]) {
@@ -288,11 +403,16 @@ export default function GroupsWindow() {
       setMessage({ ok: false, text: "Scrie un nume pentru grup." });
       return;
     }
+    if (currentType?.hasDiscount && editor.discount && discountNumber === null) {
+      setMessage({ ok: false, text: "Discountul trebuie să fie între 1 și 100%." });
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const body = JSON.stringify({
       name: editor.name,
-      kind: editor.kind,
+      typeId: editor.typeId,
+      discountPercent: currentType?.hasDiscount ? discountNumber : null,
       maxItems: maxItems,
       productIds: editor.items.map((i) => i.id),
     });
@@ -317,11 +437,17 @@ export default function GroupsWindow() {
       return;
     }
     const id = editor.id ?? data.id;
-    const next = { ...editor, id };
+    const next = {
+      ...editor,
+      id,
+      discount:
+        currentType?.hasDiscount && discountNumber ? String(discountNumber) : "",
+    };
     setEditor(next);
     setSaved(snapshot(next));
     setMessage({ ok: true, text: "Grup salvat." });
     refreshGroups();
+    refreshTypes();
     window.dispatchEvent(new Event(GROUPS_CHANGED_EVENT));
     router.refresh();
   }
@@ -332,8 +458,9 @@ export default function GroupsWindow() {
       !window.confirm(
         `Ștergi grupul „${editor.name}”? Produsele rămân, doar grupul dispare.`,
       )
-    )
+    ) {
       return;
+    }
     setBusy(true);
     const res = await fetch(`/api/admin/groups/${editor.id}`, {
       method: "DELETE",
@@ -345,6 +472,7 @@ export default function GroupsWindow() {
     }
     setEditor(null);
     refreshGroups();
+    refreshTypes();
     window.dispatchEvent(new Event(GROUPS_CHANGED_EVENT));
     router.refresh();
   }
@@ -354,11 +482,38 @@ export default function GroupsWindow() {
     if (
       dirty &&
       !window.confirm("Ai modificări nesalvate. Continui fără să le salvezi?")
-    )
+    ) {
       return;
+    }
     setOpen(false);
     setEditor(null);
     router.push(`/admin/products?grp=${editor.id}`);
+  }
+
+  async function addType() {
+    const name = newTypeName.trim();
+    if (!name) return;
+    setTypeMessage(null);
+    const res = await fetch("/api/admin/group-types", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, showOnSite: false, hasDiscount: false }),
+    }).catch(() => null);
+    if (!res?.ok) {
+      setTypeMessage(
+        "Nu am putut adăuga tipul. Numele are voie până la 40 de caractere.",
+      );
+      return;
+    }
+    setNewTypeName("");
+    await refreshTypes();
+  }
+
+  async function typesChanged() {
+    setTypeMessage(null);
+    await Promise.all([refreshTypes(), refreshGroups()]);
+    window.dispatchEvent(new Event(GROUPS_CHANGED_EVENT));
+    router.refresh();
   }
 
   if (!open) return null;
@@ -398,20 +553,24 @@ export default function GroupsWindow() {
                 + Grup nou ▾
               </button>
               {kindMenu && (
-                <div className="absolute right-0 top-full z-40 mt-1 w-60 overflow-hidden rounded-xl border border-cream-300 bg-white text-sm text-taupe-800 shadow-lg">
-                  <p className="bg-cream-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-taupe-500">
-                    Ce fel de grup?
+                <div className="absolute top-full right-0 z-40 mt-1 w-64 overflow-hidden rounded-xl border border-cream-300 bg-white text-sm text-taupe-800 shadow-lg">
+                  <p className="bg-cream-50 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-taupe-500 uppercase">
+                    Ce tip de grup?
                   </p>
-                  {(["recommended", "promo"] as GroupKind[]).map((k) => (
+                  {types.map((t) => (
                     <button
-                      key={k}
+                      key={t.id}
                       type="button"
-                      onClick={() => newGroup(k)}
+                      onClick={() => newGroup(t.id)}
                       className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-cream-50"
                     >
-                      <b>{KIND_LABEL[k]}</b>
+                      <b>{t.name}</b>
                       <span className="text-xs text-taupe-500">
-                        {KIND_NOTE[k]}
+                        {t.showOnSite
+                          ? "apare pe site"
+                          : t.hasDiscount
+                            ? "cu discount"
+                            : "intern"}
                       </span>
                     </button>
                   ))}
@@ -429,7 +588,7 @@ export default function GroupsWindow() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
-          <div className="flex shrink-0 flex-col gap-2 overflow-y-auto border-b border-cream-200 bg-cream-50 p-3 md:w-64 md:border-b-0 md:border-r">
+          <div className="flex shrink-0 flex-col gap-2 overflow-y-auto border-b border-cream-200 bg-cream-50 p-3 md:w-64 md:border-r md:border-b-0">
             {groups.length === 0 && (
               <p className="p-2 text-sm text-taupe-500">
                 Încă niciun grup. Apasă „+ Grup nou”.
@@ -446,8 +605,9 @@ export default function GroupsWindow() {
                     !window.confirm(
                       "Ai modificări nesalvate. Treci la alt grup fără să salvezi?",
                     )
-                  )
+                  ) {
                     return;
+                  }
                   openGroup(g.id);
                 }}
                 className={`rounded-xl border bg-white px-3 py-2 text-left text-sm transition-colors ${
@@ -457,16 +617,81 @@ export default function GroupsWindow() {
                 }`}
               >
                 <b className="block text-taupe-800">{g.name}</b>
-                <span className="mt-1 flex items-center gap-2 text-xs text-taupe-500">
-                  <KindBadge kind={g.kind} /> {g.count}{" "}
+                <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-taupe-500">
+                  <TypeBadge type={g.type} />
+                  {g.discountPercent ? `−${g.discountPercent}%` : ""} {g.count}{" "}
                   {g.count === 1 ? "produs" : "produse"}
                 </span>
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                if (
+                  dirty &&
+                  !window.confirm(
+                    "Ai modificări nesalvate. Continui fără să le salvezi?",
+                  )
+                ) {
+                  return;
+                }
+                setEditor(null);
+                setManagingTypes((v) => !v);
+              }}
+              className="mt-2 rounded-xl border border-dashed border-cream-300 px-3 py-2 text-left text-sm font-medium text-salamander-600 hover:bg-white"
+            >
+              Tipuri de grup…
+            </button>
           </div>
 
           <div className="min-w-0 flex-1 overflow-y-auto p-5">
-            {!editor ? (
+            {managingTypes ? (
+              <div className="flex flex-col gap-4">
+                <div>
+                  <h3 className="text-base font-semibold text-taupe-800">
+                    Tipuri de grup
+                  </h3>
+                  <p className="mt-1 text-sm text-taupe-500">
+                    Poți redenumi, adăuga sau șterge tipuri (un tip se șterge doar
+                    dacă nu are grupuri). „Apare pe site” înseamnă că produsele
+                    grupului se văd clienților ca „Merge bine cu”. „Are discount
+                    %” adaugă câmpul de discount la grupurile acelui tip.
+                  </p>
+                </div>
+                <ul className="flex flex-col gap-2">
+                  {types.map((t) => (
+                    <TypeRow
+                      key={`${t.id}-${t.name}-${t.showOnSite}-${t.hasDiscount}`}
+                      type={t}
+                      onSaved={typesChanged}
+                      onError={setTypeMessage}
+                    />
+                  ))}
+                </ul>
+                <div className="flex flex-wrap items-center gap-2 border-t border-cream-200 pt-4">
+                  <input
+                    value={newTypeName}
+                    onChange={(e) => setNewTypeName(e.target.value)}
+                    maxLength={40}
+                    placeholder="Tip nou (ex. Promoție de Crăciun)"
+                    className={controlClass(false, "w-72")}
+                  />
+                  <button
+                    type="button"
+                    onClick={addType}
+                    disabled={!newTypeName.trim()}
+                    className={btnMain}
+                  >
+                    + Adaugă tip
+                  </button>
+                </div>
+                {typeMessage && (
+                  <p role="status" className="text-sm font-medium text-red-600">
+                    {typeMessage}
+                  </p>
+                )}
+              </div>
+            ) : !editor ? (
               <p className="text-sm text-taupe-500">
                 Alege un grup din stânga sau creează unul nou.
               </p>
@@ -483,20 +708,20 @@ export default function GroupsWindow() {
                     />
                   </label>
                   <div className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
-                    Fel de grup
-                    <div className="inline-flex overflow-hidden rounded-full border border-taupe-400">
-                      {(["recommended", "promo"] as GroupKind[]).map((k) => (
+                    Tip de grup
+                    <div className="inline-flex flex-wrap overflow-hidden rounded-2xl border border-taupe-400">
+                      {types.map((t) => (
                         <button
-                          key={k}
+                          key={t.id}
                           type="button"
-                          onClick={() => update({ kind: k })}
+                          onClick={() => update({ typeId: t.id })}
                           className={`px-4 py-2 text-sm ${
-                            editor.kind === k
+                            editor.typeId === t.id
                               ? "bg-choc font-semibold text-white"
                               : "text-taupe-700 hover:bg-cream-100"
                           }`}
                         >
-                          {KIND_LABEL[k]}
+                          {t.name}
                         </button>
                       ))}
                     </div>
@@ -507,9 +732,7 @@ export default function GroupsWindow() {
                       value={editor.maxItems}
                       onChange={(e) =>
                         update({
-                          maxItems: e.target.value
-                            .replace(/\D/g, "")
-                            .slice(0, 4),
+                          maxItems: e.target.value.replace(/\D/g, "").slice(0, 4),
                         })
                       }
                       inputMode="numeric"
@@ -518,6 +741,57 @@ export default function GroupsWindow() {
                     />
                   </label>
                 </div>
+
+                {currentType?.hasDiscount && (
+                  <div className="flex flex-col gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <span className="text-sm font-semibold text-taupe-800">
+                      Discount pentru produsele din grup
+                    </span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          aria-pressed={discountNumber === n}
+                          onClick={() =>
+                            update({
+                              discount: discountNumber === n ? "" : String(n),
+                            })
+                          }
+                          className={`rounded-full border px-3 py-1 text-sm font-semibold transition-colors ${
+                            discountNumber === n
+                              ? "border-choc bg-choc text-white"
+                              : "border-cream-300 bg-white text-taupe-700 hover:bg-cream-100"
+                          }`}
+                        >
+                          {n}%
+                        </button>
+                      ))}
+                      <label className="ml-2 flex items-center gap-2 text-sm text-taupe-700">
+                        sau scrie
+                        <input
+                          value={editor.discount}
+                          onChange={(e) =>
+                            update({
+                              discount: e.target.value
+                                .replace(/\D/g, "")
+                                .slice(0, 3),
+                            })
+                          }
+                          inputMode="numeric"
+                          placeholder="ex. 15"
+                          aria-label="Discount în procente"
+                          className={controlClass(false, "w-20")}
+                        />
+                        %
+                      </label>
+                    </div>
+                    <p className="text-xs text-taupe-500">
+                      Deocamdată discountul doar se salvează la grup; nu schimbă
+                      încă prețurile din magazin.
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <input
@@ -671,7 +945,7 @@ export default function GroupsWindow() {
                             {compared.map((p) => (
                               <td
                                 key={p.id}
-                                className="whitespace-pre-line text-xs leading-snug"
+                                className="text-xs leading-snug whitespace-pre-line"
                               >
                                 {p.longDescription || "—"}
                               </td>
@@ -704,8 +978,7 @@ export default function GroupsWindow() {
 
                 <div>
                   <h3 className="mb-2 text-sm font-semibold text-taupe-700">
-                    Produsele din grup, în ordine alfabetică (
-                    {editor.items.length}
+                    Produsele din grup, în ordine alfabetică ({editor.items.length}
                     {maxItems ? ` din ${maxItems}` : ""})
                   </h3>
                   {editor.items.length === 0 ? (
@@ -789,13 +1062,10 @@ export default function GroupsWindow() {
                               : "border-cream-300"
                           }`}
                         >
-                          <span className="absolute left-1.5 top-1.5 z-10 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-choc text-[10px] text-white">
+                          <span className="absolute top-1.5 left-1.5 z-10 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-choc text-[10px] text-white">
                             {index + 1}
                           </span>
-                          <Thumb
-                            url={p.imageUrl}
-                            className="mb-1 h-12 w-full"
-                          />
+                          <Thumb url={p.imageUrl} className="mb-1 h-12 w-full" />
                           {p.name}
                         </li>
                       ))}
@@ -806,7 +1076,9 @@ export default function GroupsWindow() {
                 {message && (
                   <p
                     role="status"
-                    className={`text-sm font-medium ${message.ok ? "text-green-700" : "text-red-600"}`}
+                    className={`text-sm font-medium ${
+                      message.ok ? "text-green-700" : "text-red-600"
+                    }`}
                   >
                     {message.text}
                   </p>

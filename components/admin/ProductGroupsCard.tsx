@@ -7,12 +7,13 @@ import {
   GROUPS_CHANGED_EVENT,
   openGroups,
 } from "@/components/admin/groups-events";
-import type { GroupKind } from "@/lib/admin/groups";
+import TypeBadge from "@/components/admin/TypeBadge";
+import type { GroupTypeInfo } from "@/lib/admin/group-types";
 
 type GroupChoice = {
   id: string;
   name: string;
-  kind: GroupKind;
+  type: GroupTypeInfo;
   maxItems: number | null;
   count: number;
   member: boolean;
@@ -21,20 +22,8 @@ type GroupChoice = {
 // A choice made on the "new product" page: the product does not exist yet, so
 // it is applied right after the product is created.
 export type PendingGroup =
-  | { key: string; groupId: string; label: string; kind: GroupKind }
-  | { key: string; newName: string; label: string; kind: GroupKind };
-
-const KIND_LABEL: Record<GroupKind, string> = {
-  recommended: "Merge bine cu",
-  promo: "Promoțional",
-};
-
-const kindBadge = (kind: GroupKind) =>
-  `rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-    kind === "recommended"
-      ? "bg-green-100 text-green-800"
-      : "bg-amber-100 text-amber-800"
-  }`;
+  | { key: string; groupId: string; label: string; type: GroupTypeInfo }
+  | { key: string; newName: string; label: string; type: GroupTypeInfo };
 
 // "Grupuri" card of a product: the groups it is in, add it to an existing group or
 // start a new one. On the edit page it works at once; on the "new product" page
@@ -52,7 +41,8 @@ export default function ProductGroupsCard({
   const [menu, setMenu] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newKind, setNewKind] = useState<GroupKind>("recommended");
+  const [types, setTypes] = useState<GroupTypeInfo[]>([]);
+  const [newTypeId, setNewTypeId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -70,6 +60,16 @@ export default function ProductGroupsCard({
         member: g.member ?? false,
       })),
     );
+    const typesRes = await fetch("/api/admin/group-types").catch(() => null);
+    if (typesRes?.ok) {
+      const list: GroupTypeInfo[] = (await typesRes.json()).types;
+      setTypes(list);
+      setNewTypeId((current) =>
+        list.some((t) => t.id === current)
+          ? current
+          : (list.find((t) => t.showOnSite) ?? list[0])?.id ?? "",
+      );
+    }
   }, [productId]);
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function ProductGroupsCard({
     if (!productId) {
       onPendingChange?.([
         ...pending,
-        { key: g.id, groupId: g.id, label: g.name, kind: g.kind },
+        { key: g.id, groupId: g.id, label: g.name, type: g.type },
       ]);
       setMenu(false);
       return;
@@ -162,13 +162,18 @@ export default function ProductGroupsCard({
     if (!productId) {
       onPendingChange?.([
         ...pending,
-        { key: `new-${Date.now()}`, newName: name, label: name, kind: newKind },
+        {
+          key: `new-${Date.now()}`,
+          newName: name,
+          label: name,
+          type: types.find((t) => t.id === newTypeId) ?? types[0],
+        },
       ]);
     } else {
       setBusy(true);
       const { ok } = await post("/api/admin/groups", {
         name,
-        kind: newKind,
+        typeId: newTypeId,
         productIds: [productId],
       });
       setBusy(false);
@@ -198,7 +203,7 @@ export default function ProductGroupsCard({
         {memberGroups.map((g) => (
           <span key={g.id} className={chip}>
             {g.name}{" "}
-            <span className={kindBadge(g.kind)}>{KIND_LABEL[g.kind]}</span>
+            <TypeBadge type={g.type} />
             <button
               type="button"
               onClick={() => removeFrom(g)}
@@ -215,7 +220,7 @@ export default function ProductGroupsCard({
           .map((p) => (
             <span key={p.key} className={chip}>
               {p.label}{" "}
-              <span className={kindBadge(p.kind)}>{KIND_LABEL[p.kind]}</span>
+              <TypeBadge type={p.type} />
               <span className="text-xs text-taupe-500">grup nou</span>
               <button
                 type="button"
@@ -273,12 +278,15 @@ export default function ProductGroupsCard({
                 />
                 <div className="flex items-center gap-2">
                   <select
-                    value={newKind}
-                    onChange={(e) => setNewKind(e.target.value as GroupKind)}
+                    value={newTypeId}
+                    onChange={(e) => setNewTypeId(e.target.value)}
                     className={controlClass(false, "bg-white")}
                   >
-                    <option value="recommended">Merge bine cu</option>
-                    <option value="promo">Promoțional</option>
+                    {types.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
                   </select>
                   <button
                     type="button"
@@ -312,9 +320,7 @@ export default function ProductGroupsCard({
                       ✓ în grup
                     </span>
                   ) : (
-                    <span className={kindBadge(g.kind)}>
-                      {KIND_LABEL[g.kind]}
-                    </span>
+                    <TypeBadge type={g.type} />
                   )}
                 </button>
               ))}

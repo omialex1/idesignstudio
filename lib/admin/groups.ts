@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/db/client";
 import { getCurrentAdmin } from "@/lib/admin/auth";
 import { matchesAllWords, queryWords } from "@/lib/search";
+import {
+  asDiscount,
+  ensureGroupTypes,
+  type GroupTypeInfo,
+} from "@/lib/admin/group-types";
 
 // Groups of products ("Merge bine cu" and promotional). Shared by the API routes
 // of the Groups window and by the product form.
-
-export const GROUP_KINDS = ["recommended", "promo"] as const;
-export type GroupKind = (typeof GROUP_KINDS)[number];
 
 export const MAX_GROUP_NAME = 80;
 
@@ -27,7 +29,8 @@ export type GroupProduct = {
 export type GroupSummary = {
   id: string;
   name: string;
-  kind: GroupKind;
+  type: GroupTypeInfo;
+  discountPercent: number | null;
   maxItems: number | null;
   count: number;
   photos: string[];
@@ -39,9 +42,34 @@ export async function groupsAdmin() {
   return admin && admin.twoFactorEnabled ? admin : null;
 }
 
-export function asKind(value: unknown): GroupKind {
-  return value === "promo" ? "promo" : "recommended";
+// The kind picked for a group (falls back to the first kind) and the discount
+// that goes with it: only kinds with a discount keep one.
+export async function resolveType(
+  typeId: unknown,
+  discount: unknown,
+): Promise<{ type: GroupTypeInfo; discountPercent: number | null }> {
+  await ensureGroupTypes();
+  const types = await prisma.productGroupType.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  });
+  const type = types.find((t) => t.id === typeId) ?? types[0];
+  return {
+    type: {
+      id: type.id,
+      name: type.name,
+      showOnSite: type.showOnSite,
+      hasDiscount: type.hasDiscount,
+    },
+    discountPercent: type.hasDiscount ? asDiscount(discount) : null,
+  };
 }
+
+const typeInfo = (
+  t: { id: string; name: string; showOnSite: boolean; hasDiscount: boolean } | null,
+): GroupTypeInfo =>
+  t
+    ? { id: t.id, name: t.name, showOnSite: t.showOnSite, hasDiscount: t.hasDiscount }
+    : { id: "", name: "—", showOnSite: false, hasDiscount: false };
 
 export function asMax(value: unknown): number | null {
   const n = typeof value === "string" ? Number(value) : value;
@@ -86,9 +114,11 @@ function toGroupProduct(p: ProductRow): GroupProduct {
 }
 
 export async function listGroups(): Promise<GroupSummary[]> {
+  await ensureGroupTypes();
   const groups = await prisma.productGroup.findMany({
     orderBy: { name: "asc" },
     include: {
+      type: true,
       items: {
         orderBy: { sortOrder: "asc" },
         select: {
@@ -102,7 +132,8 @@ export async function listGroups(): Promise<GroupSummary[]> {
   return groups.map((g) => ({
     id: g.id,
     name: g.name,
-    kind: asKind(g.kind),
+    type: typeInfo(g.type),
+    discountPercent: g.discountPercent,
     maxItems: g.maxItems,
     count: g.items.length,
     photos: g.items
@@ -113,9 +144,10 @@ export async function listGroups(): Promise<GroupSummary[]> {
 }
 
 export async function getGroup(id: string) {
+  await ensureGroupTypes();
   const group = await prisma.productGroup.findUnique({
     where: { id },
-    include: { items: { orderBy: { sortOrder: "asc" } } },
+    include: { type: true, items: { orderBy: { sortOrder: "asc" } } },
   });
   if (!group) return null;
   const rows = await loadProducts({ id: { in: group.items.map((i) => i.productId) } });
@@ -123,7 +155,8 @@ export async function getGroup(id: string) {
   return {
     id: group.id,
     name: group.name,
-    kind: asKind(group.kind),
+    type: typeInfo(group.type),
+    discountPercent: group.discountPercent,
     maxItems: group.maxItems,
     items: group.items
       .map((i) => byId.get(i.productId))

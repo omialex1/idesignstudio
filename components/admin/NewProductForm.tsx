@@ -57,7 +57,7 @@ export default function NewProductForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: group.newName,
-            kind: group.kind,
+            typeId: group.type.id,
             productIds: [result.id],
           }),
         }).catch(() => null);

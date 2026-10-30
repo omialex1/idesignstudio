@@ -173,16 +173,33 @@ model ProductTranslation {
 
 // A set of products chosen together. "recommended" groups feed the "Merge bine cu"
 // row on the product page; "promo" groups are internal (for promotions later).
+// The kinds of group ("Merge bine cu", "Promoțional", ...): the name can be edited
+// and new kinds added. Two switches tell what a kind does.
+model ProductGroupType {
+  id          String         @id @default(cuid())
+  name        String
+  // groups of this kind are shown to customers as "Merge bine cu" on product pages
+  showOnSite  Boolean        @default(false)
+  // groups of this kind carry a discount in percent
+  hasDiscount Boolean        @default(false)
+  sortOrder   Int            @default(0)
+  groups      ProductGroup[]
+}
+
 model ProductGroup {
-  id        String             @id @default(cuid())
-  name      String
-  // "recommended" or "promo"
-  kind      String             @default("recommended")
+  id              String             @id @default(cuid())
+  name            String
+  // old way of telling the kind (kept; the kind is now `type`)
+  kind            String             @default("recommended")
+  typeId          String?
+  type            ProductGroupType?  @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  // discount in percent (for kinds with a discount); null: none
+  discountPercent Int?
   // optional cap on the number of products (null: no limit)
-  maxItems  Int?
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  items     ProductGroupItem[]
+  maxItems        Int?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  items           ProductGroupItem[]
 }
 
 model ProductGroupItem {

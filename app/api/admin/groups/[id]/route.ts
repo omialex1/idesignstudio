@@ -4,10 +4,10 @@ import { prisma } from "@/lib/db/client";
 import { logAdminAction } from "@/lib/admin/log";
 import {
   MAX_GROUP_NAME,
-  asKind,
   asMax,
   getGroup,
   groupsAdmin,
+  resolveType,
   setGroupItems,
 } from "@/lib/admin/groups";
 
@@ -49,9 +49,19 @@ export async function PUT(request: Request, { params }: Ctx) {
   });
   if (!exists) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
+  const { type, discountPercent } = await resolveType(
+    body?.typeId,
+    body?.discountPercent,
+  );
   await prisma.productGroup.update({
     where: { id },
-    data: { name, kind: asKind(body?.kind), maxItems },
+    data: {
+      name,
+      typeId: type.id,
+      kind: type.showOnSite ? "recommended" : "promo",
+      discountPercent,
+      maxItems,
+    },
   });
   const count = await setGroupItems(id, ids as string[]);
   await logAdminAction(admin, "Grup modificat", `${name} (${count} produse)`);

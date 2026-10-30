@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/client";
 import { logAdminAction } from "@/lib/admin/log";
-import { asKind, groupsAdmin } from "@/lib/admin/groups";
+import { groupsAdmin } from "@/lib/admin/groups";
+import { ensureGroupTypes } from "@/lib/admin/group-types";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -12,12 +13,13 @@ export async function GET(_request: Request, { params }: Ctx) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const { id } = await params;
+  await ensureGroupTypes();
   const groups = await prisma.productGroup.findMany({
     orderBy: { name: "asc" },
     select: {
       id: true,
       name: true,
-      kind: true,
+      type: { select: { id: true, name: true, showOnSite: true, hasDiscount: true } },
       maxItems: true,
       _count: { select: { items: true } },
       items: { where: { productId: id }, select: { id: true } },
@@ -27,7 +29,7 @@ export async function GET(_request: Request, { params }: Ctx) {
     groups: groups.map((g) => ({
       id: g.id,
       name: g.name,
-      kind: asKind(g.kind),
+      type: g.type ?? { id: "", name: "—", showOnSite: false, hasDiscount: false },
       maxItems: g.maxItems,
       count: g._count.items,
       member: g.items.length > 0,

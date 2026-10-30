@@ -3,10 +3,10 @@ import { prisma } from "@/lib/db/client";
 import { logAdminAction } from "@/lib/admin/log";
 import {
   MAX_GROUP_NAME,
-  asKind,
   asMax,
   groupsAdmin,
   listGroups,
+  resolveType,
   setGroupItems,
 } from "@/lib/admin/groups";
 
@@ -36,8 +36,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "max" }, { status: 400 });
   }
 
+  const { type, discountPercent } = await resolveType(
+    body?.typeId,
+    body?.discountPercent,
+  );
   const group = await prisma.productGroup.create({
-    data: { name, kind: asKind(body?.kind), maxItems },
+    data: {
+      name,
+      typeId: type.id,
+      // the old column is kept in step, for code that still reads it
+      kind: type.showOnSite ? "recommended" : "promo",
+      discountPercent,
+      maxItems,
+    },
   });
   const count = await setGroupItems(group.id, ids as string[]);
   await logAdminAction(admin, "Grup creat", `${name} (${count} produse)`);

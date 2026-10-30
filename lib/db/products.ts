@@ -254,7 +254,11 @@ export async function getRecommendedProducts(
   locale: string,
 ): Promise<RecommendedProduct[]> {
   const groups = await prisma.productGroup.findMany({
-    where: { kind: "recommended", items: { some: { productId } } },
+    where: {
+      // groups of a kind shown to customers (before kinds existed: "recommended")
+      OR: [{ type: { showOnSite: true } }, { typeId: null, kind: "recommended" }],
+      items: { some: { productId } },
+    },
     orderBy: { createdAt: "asc" },
     include: {
       items: {
