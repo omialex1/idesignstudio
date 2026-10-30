@@ -19,6 +19,9 @@ export default function PhotoPicker({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // drag to reorder: the photo being dragged and the one it is over
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -60,6 +63,18 @@ export default function PhotoPicker({
     onChange([chosen, ...photos.filter((p) => p.id !== id)]);
   }
 
+  function drop(targetId: string) {
+    const from = photos.findIndex((p) => p.id === dragId);
+    const to = photos.findIndex((p) => p.id === targetId);
+    setDragId(null);
+    setOverId(null);
+    if (from < 0 || to < 0 || from === to) return;
+    const next = [...photos];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
+  }
+
   return (
     <AdminCard title="Fotografii" bodyClassName="flex flex-col gap-4 p-6">
       <div>
@@ -67,6 +82,8 @@ export default function PhotoPicker({
           Până la {MAX_IMAGES_PER_PRODUCT} fotografii (JPG, PNG sau WebP). Se
           redimensionează automat și se încarcă după ce salvezi produsul. Prima
           fotografie apare pe cardul produsului.
+          {photos.length > 1 &&
+            " Trage o fotografie peste alta ca să schimbi ordinea."}
         </p>
       </div>
 
@@ -75,12 +92,40 @@ export default function PhotoPicker({
           {photos.map((photo, index) => (
             <li
               key={photo.id}
-              className="flex flex-col gap-2 rounded-xl border border-cream-200 p-2"
+              draggable={photos.length > 1}
+              onDragStart={(e) => {
+                setDragId(photo.id);
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", photo.id);
+              }}
+              onDragOver={(e) => {
+                if (!dragId) return;
+                e.preventDefault();
+                setOverId(photo.id);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                drop(photo.id);
+              }}
+              onDragEnd={() => {
+                setDragId(null);
+                setOverId(null);
+              }}
+              className={`flex flex-col gap-2 rounded-xl border p-2 transition-colors ${
+                photos.length > 1 ? "cursor-grab active:cursor-grabbing" : ""
+              } ${
+                dragId === photo.id
+                  ? "border-salamander-400 opacity-50"
+                  : overId === photo.id && dragId
+                    ? "border-salamander-500 bg-salamander-50"
+                    : "border-cream-200"
+              }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.previewUrl}
                 alt=""
+                draggable={false}
                 className="aspect-square w-full rounded-lg object-cover"
               />
               <div className="flex items-center justify-between text-xs">

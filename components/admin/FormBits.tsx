@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Border / background for an input, red when it has an error.
 export function controlClass(invalid?: boolean, extra = "") {
@@ -74,14 +74,126 @@ const ERROR_MESSAGES: Record<string, string> = {
   unauthorized: "Sesiunea a expirat. Conectează-te din nou.",
 };
 
+type TextControl = HTMLInputElement | HTMLTextAreaElement;
+
+const AUTO_DELAY_MS = 1500;
+
 // Fills the English fields from the Romanian ones (or the reverse) with Claude.
-// Nothing is saved: the person reads the result and saves the form as usual.
+// While the person types, the other language follows by itself (only into a
+// field that is empty or was filled by the translation, never over text written
+// by hand). Nothing is saved: the person reads the result and saves as usual.
 export function TranslateBar({ pairs }: { pairs: Pair[] }) {
   const anchor = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState<"ro" | "en" | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(
     null,
   );
+  const [autoOn, setAutoOn] = useState(true);
+  const [auto, setAuto] = useState<{ ok: boolean; text: string } | null>(null);
+  // fields whose current text came from a translation
+  const filledByTranslation = useRef(new Set<string>());
+  const pairsRef = useRef(pairs);
+  useEffect(() => {
+    pairsRef.current = pairs;
+  });
+
+  useEffect(() => {
+    const form = anchor.current?.closest("form");
+    if (!form || !autoOn) return;
+
+    const timers = new Map<string, ReturnType<typeof setTimeout>>();
+    let pending = 0;
+
+    const control = (name: string) =>
+      form.elements.namedItem(name) as TextControl | null;
+
+    async function translateField(sourceName: string) {
+      const found = pairsRef.current.find(
+        ([ro, en]) => ro === sourceName || en === sourceName,
+      );
+      if (!found) return;
+      const from = found[0] === sourceName ? "ro" : "en";
+      const targetName = from === "ro" ? found[1] : found[0];
+      const source = control(sourceName);
+      const target = control(targetName);
+      if (!source || !target) return;
+
+      const text = source.value.trim();
+      // text written by hand in the other language is left alone
+      const targetIsMine =
+        target.value.trim() === "" || filledByTranslation.current.has(targetName);
+      if (!targetIsMine) return;
+      if (text === "") {
+        if (target.value !== "") {
+          target.value = "";
+          target.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        filledByTranslation.current.delete(targetName);
+        return;
+      }
+
+      pending++;
+      setMessage(null);
+      setAuto({ ok: true, text: "Se traduce..." });
+      try {
+        const res = await fetch("/api/admin/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ from, texts: [text] }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !Array.isArray(data?.translations)) {
+          setAuto({
+            ok: false,
+            text:
+              ERROR_MESSAGES[data?.error as string] ??
+              "Traducerea automată nu a reușit acum.",
+          });
+          return;
+        }
+        // the person kept typing, or wrote the other side by hand: drop the result
+        const stillMine =
+          target.value.trim() === "" || filledByTranslation.current.has(targetName);
+        if (source.value.trim() !== text || !stillMine) return;
+        target.value = data.translations[0];
+        filledByTranslation.current.add(targetName);
+        target.dispatchEvent(new Event("input", { bubbles: true }));
+        setAuto({ ok: true, text: "Tradus automat. Verifică textul înainte să salvezi." });
+      } catch {
+        setAuto({ ok: false, text: "Nu am putut contacta serviciul de traducere." });
+      } finally {
+        pending--;
+        if (pending === 0) {
+          setAuto((current) =>
+            current?.text === "Se traduce..." ? null : current,
+          );
+        }
+      }
+    }
+
+    function onInput(e: Event) {
+      // only what the person types; the values this code sets are ignored
+      if (!e.isTrusted) return;
+      const el = e.target as TextControl | null;
+      const name = el?.name;
+      if (!name) return;
+      const found = pairsRef.current.find(([ro, en]) => ro === name || en === name);
+      if (!found) return;
+      // typing into a translated field makes it the person's own text
+      filledByTranslation.current.delete(name);
+      clearTimeout(timers.get(name));
+      timers.set(
+        name,
+        setTimeout(() => translateField(name), AUTO_DELAY_MS),
+      );
+    }
+
+    form.addEventListener("input", onInput);
+    return () => {
+      form.removeEventListener("input", onInput);
+      timers.forEach((t) => clearTimeout(t));
+    };
+  }, [autoOn]);
 
   async function run(from: "ro" | "en") {
     const form = anchor.current?.closest("form");
@@ -150,6 +262,7 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
         if (!el) return;
         // Uncontrolled input: set the value and let the form see an "input".
         el.value = data.translations[i];
+        filledByTranslation.current.add(job.target);
         el.dispatchEvent(new Event("input", { bubbles: true }));
       });
       setMessage({
@@ -195,6 +308,28 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
           {busy === "en" ? "Se traduce..." : "Engleză → Română"}
         </button>
       </div>
+      <label className="flex items-center gap-2 text-xs text-taupe-600">
+        <input
+          type="checkbox"
+          checked={autoOn}
+          onChange={(e) => {
+            setAutoOn(e.target.checked);
+            setAuto(null);
+          }}
+          className="h-4 w-4 accent-salamander-500"
+        />
+        Traduce automat în timp ce scrii (nu înlocuiește textul scris de tine)
+      </label>
+      {auto && !message && (
+        <p
+          role="status"
+          className={`text-xs font-medium ${
+            auto.ok ? "text-green-700" : "text-red-600"
+          }`}
+        >
+          {auto.text}
+        </p>
+      )}
       {message && (
         <p
           role="status"

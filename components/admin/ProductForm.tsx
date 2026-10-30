@@ -460,7 +460,7 @@ export default function ProductForm({
                 onClick={() => setLang(code)}
                 className={`rounded-full px-5 py-1.5 transition-colors ${
                   lang === code
-                    ? "bg-gold-400 text-choc"
+                    ? "bg-gold-400 text-choc hover:bg-gold-300"
                     : "text-cream-100 hover:bg-white/10"
                 }`}
               >
