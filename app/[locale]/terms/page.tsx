@@ -25,6 +25,7 @@ export default async function TermsPage() {
           heading={t("termsProductsHeading")}
           body={t("termsProductsBody")}
         />
+        <Section heading={t("termsPromoHeading")} body={t("termsPromoBody")} />
         <Section
           heading={t("termsContractHeading")}
           body={t("termsContractBody")}
