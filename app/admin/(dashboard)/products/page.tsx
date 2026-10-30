@@ -173,7 +173,7 @@ export default async function AdminProductsPage({
           <thead className="border-b border-cream-200 text-taupe-500">
             <tr>
               <th className="px-4 py-3 font-medium">Produs</th>
-              <th className="px-4 py-3 font-medium">Categorie</th>
+              <th className="px-4 py-3 font-medium">Subcategorie</th>
               <th className="px-4 py-3 font-medium">Preț</th>
               <th className="px-4 py-3 font-medium">Stoc</th>
               <th className="px-4 py-3 font-medium">Activ</th>

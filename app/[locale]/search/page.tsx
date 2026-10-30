@@ -56,7 +56,7 @@ export default async function SearchPage({
               hasVariants: r.hasVariants,
               inStock: r.inStock,
               createdAt: r.createdAt,
-              colors: [],
+              category: { slug: r.categorySlug, name: r.categoryName },
               placeholderClass: categoryColorClass(r.mainColorKey),
             }),
           )}

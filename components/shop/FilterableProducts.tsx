@@ -6,19 +6,13 @@ import ProductTile, { shortName } from "@/components/product/ProductTile";
 import { formatPrice } from "@/lib/format";
 import {
   NO_FILTERS,
+  PRICE_RANGES,
   applyShopFilters,
   hasActiveFilters,
   type ShopFilters,
   type ShopProduct,
   type SortKey,
 } from "@/lib/shop-filters";
-
-export type PaletteChoice = {
-  id: string;
-  name: string;
-  hex: string;
-  swatchUrl: string | null;
-};
 
 const fieldClass =
   "rounded-full border border-cream-300 bg-white px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400";
@@ -44,16 +38,31 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-// A product list with sorting and filters (price, in stock, colour). The first
-// order is the one the page gives; everything else happens in the browser.
+// A group of options in the filters panel, one under another.
+function FilterGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <fieldset className="flex flex-col gap-1 border-t border-cream-200 pt-3 first:border-t-0 first:pt-0">
+      <legend className="mb-1 text-sm font-semibold text-taupe-800">
+        {title}
+      </legend>
+      {children}
+    </fieldset>
+  );
+}
+
+// A product list with sorting and filters. The first order is the one the page
+// gives; everything else happens in the browser.
 export default function FilterableProducts({
   products,
-  palette = [],
   relevanceFirst = false,
 }: {
   products: ShopProduct[];
-  // colours to filter by (only for categories that use colours)
-  palette?: PaletteChoice[];
   // search results: the default order is "best match", not "recommended"
   relevanceFirst?: boolean;
 }) {
@@ -84,15 +93,37 @@ export default function FilterableProducts({
     setFilters((current) => ({ ...current, [key]: value }));
 
   const shown = applyShopFilters(products, filters, locale);
-  // only colours that at least one product here offers
-  const offered = new Set(products.flatMap((p) => p.colors));
-  const colours = palette.filter((c) => offered.has(c.id));
   const showFilters = products.length > 1;
 
+  // price ranges that at least one product falls in, with how many
+  const ranges = PRICE_RANGES.map((r) => ({
+    ...r,
+    count: products.filter(
+      (p) => p.priceCents >= r.from && (r.to === null || p.priceCents < r.to),
+    ).length,
+  })).filter((r) => r.count > 0);
+  const rangeLabel = (from: number, to: number | null) =>
+    from === 0
+      ? t("priceUnder", { n: (to ?? 0) / 100 })
+      : to === null
+        ? t("priceOver", { n: from / 100 })
+        : t("priceBetween", { a: from / 100, b: to / 100 });
+
+  // subcategories (when the list mixes several, like the search results)
+  const categories = new Map<string, { name: string; count: number }>();
+  for (const p of products) {
+    if (!p.category) continue;
+    const entry = categories.get(p.category.slug);
+    if (entry) entry.count++;
+    else categories.set(p.category.slug, { name: p.category.name, count: 1 });
+  }
+  const categoryList = [...categories.entries()].sort((a, b) =>
+    a[1].name.localeCompare(b[1].name, locale),
+  );
+  const hasPrice = filters.min.trim() !== "" || filters.max.trim() !== "";
   const filterCount =
-    (filters.min.trim() !== "" || filters.max.trim() !== "" ? 1 : 0) +
-    (filters.inStockOnly ? 1 : 0) +
-    (filters.color !== "" ? 1 : 0);
+    (hasPrice ? 1 : 0) + (filters.categories.length > 0 ? 1 : 0);
+
   const sortOptions: [SortKey, string][] = [
     ["default", relevanceFirst ? t("sortRelevance") : t("sortDefault")],
     ["price-asc", t("sortPriceAsc")],
@@ -109,6 +140,8 @@ export default function FilterableProducts({
     }`;
   const panelClass =
     "absolute left-0 top-full z-20 mt-2 w-[min(20rem,calc(100vw-3rem))] rounded-2xl border border-cream-300 bg-white p-4 shadow-lg";
+  const optionClass =
+    "flex cursor-pointer items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm text-taupe-700 hover:bg-cream-100";
 
   return (
     <div className="flex flex-col gap-6">
@@ -172,81 +205,91 @@ export default function FilterableProducts({
               <Chevron open={open === "filters"} />
             </button>
             {open === "filters" && (
-              <div className={`${panelClass} flex flex-col gap-4`}>
-                <div className="flex items-end gap-2">
-                  <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
-                    {t("priceFrom")}
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      min="0"
-                      step="1"
-                      value={filters.min}
-                      onChange={(e) => set("min", e.target.value)}
-                      placeholder="0"
-                      className={`${fieldClass} w-24`}
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
-                    {t("priceTo")}
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      min="0"
-                      step="1"
-                      value={filters.max}
-                      onChange={(e) => set("max", e.target.value)}
-                      placeholder="∞"
-                      className={`${fieldClass} w-24`}
-                    />
-                  </label>
-                  <span className="pb-2 text-xs text-taupe-500">RON</span>
-                </div>
-
-                <label className="flex items-center gap-2 text-sm text-taupe-700">
-                  <input
-                    type="checkbox"
-                    checked={filters.inStockOnly}
-                    onChange={(e) => set("inStockOnly", e.target.checked)}
-                    className="h-4 w-4 accent-salamander-500"
-                  />
-                  {t("inStockOnly")}
-                </label>
-
-                {colours.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-xs font-medium text-taupe-500">
-                      {t("colourFilter")}
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {colours.map((c) => {
-                        const active = filters.color === c.id;
-                        return (
-                          <button
-                            key={c.id}
-                            type="button"
-                            aria-pressed={active}
-                            aria-label={c.name}
-                            title={c.name}
-                            onClick={() => set("color", active ? "" : c.id)}
-                            className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                              active
-                                ? "border-salamander-500 ring-2 ring-salamander-300"
-                                : "border-white shadow-[0_0_0_1px_rgba(60,40,25,0.25)]"
-                            }`}
-                            style={
-                              c.swatchUrl
-                                ? {
-                                    backgroundImage: `url(${c.swatchUrl})`,
-                                    backgroundSize: "cover",
-                                  }
-                                : { backgroundColor: c.hex }
+              <div
+                className={`${panelClass} flex max-h-[70vh] flex-col gap-3 overflow-y-auto`}
+              >
+                <FilterGroup title={t("priceFilter")}>
+                  {ranges.map((r) => {
+                    const min = r.from === 0 ? "" : String(r.from / 100);
+                    const max = r.to === null ? "" : String((r.to - 1) / 100);
+                    const selected = filters.min === min && filters.max === max;
+                    return (
+                      <label key={r.from} className={optionClass}>
+                        <span className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="price-range"
+                            checked={selected}
+                            onChange={() =>
+                              setFilters((c) => ({ ...c, min, max }))
                             }
+                            className="h-4 w-4 accent-salamander-500"
                           />
-                        );
-                      })}
-                    </div>
+                          {rangeLabel(r.from, r.to)}
+                        </span>
+                        <span className="text-xs text-taupe-400">
+                          ({r.count})
+                        </span>
+                      </label>
+                    );
+                  })}
+                  <div className="mt-1 flex items-end gap-2">
+                    <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
+                      {t("priceFrom")}
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        value={filters.min}
+                        onChange={(e) => set("min", e.target.value)}
+                        placeholder="0"
+                        className={`${fieldClass} w-24`}
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
+                      {t("priceTo")}
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        value={filters.max}
+                        onChange={(e) => set("max", e.target.value)}
+                        placeholder="∞"
+                        className={`${fieldClass} w-24`}
+                      />
+                    </label>
+                    <span className="pb-2 text-xs text-taupe-500">RON</span>
                   </div>
+                </FilterGroup>
+
+                {categoryList.length > 1 && (
+                  <FilterGroup title={t("subcategoryFilter")}>
+                    {categoryList.map(([slug, c]) => (
+                      <label key={slug} className={optionClass}>
+                        <span className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={filters.categories.includes(slug)}
+                            onChange={(e) =>
+                              set(
+                                "categories",
+                                e.target.checked
+                                  ? [...filters.categories, slug]
+                                  : filters.categories.filter((s) => s !== slug),
+                              )
+                            }
+                            className="h-4 w-4 accent-salamander-500"
+                          />
+                          {c.name}
+                        </span>
+                        <span className="text-xs text-taupe-400">
+                          ({c.count})
+                        </span>
+                      </label>
+                    ))}
+                  </FilterGroup>
                 )}
               </div>
             )}

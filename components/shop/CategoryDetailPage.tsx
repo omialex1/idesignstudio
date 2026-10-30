@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductsByCategorySlug } from "@/lib/db/products";
 import FilterableProducts from "@/components/shop/FilterableProducts";
-import { getPaletteColors } from "@/lib/db/colors";
 import { categoryColorClass } from "@/lib/category-colors";
 import type { ShopProduct } from "@/lib/shop-filters";
 import type { MainCategory } from "@/lib/main-categories";
@@ -22,14 +21,6 @@ export default async function CategoryDetailPage({
 
   const t = await getTranslations("Shop");
 
-  // Colours to filter by, in the language of the page (categories with colours only).
-  const palette = main.usesColors ? await getPaletteColors(main.id) : [];
-  const paletteChoices = palette.map((c) => ({
-    id: c.id,
-    name: locale === "en" ? c.en : c.ro,
-    hex: c.hex,
-    swatchUrl: c.swatchUrl,
-  }));
   const products: ShopProduct[] = category.products.map((p) => ({
     id: p.id,
     href: `/${main.slug}/${category.slug}/${p.slug}`,
@@ -40,9 +31,6 @@ export default async function CategoryDetailPage({
     hasVariants: p.hasVariants,
     inStock: p.quantityOnHand > 0,
     createdAt: p.createdAt,
-    colors: p.hasColorOptions
-      ? palette.map((c) => c.id).filter((id) => !p.excludedColors.includes(id))
-      : [],
     placeholderClass: categoryColorClass(main.colorKey),
   }));
 
@@ -66,7 +54,7 @@ export default async function CategoryDetailPage({
 
         <div className="mt-10">
           {category.products.length > 0 ? (
-            <FilterableProducts products={products} palette={paletteChoices} />
+            <FilterableProducts products={products} />
           ) : (
             <p className="text-taupe-500">{t("noProducts")}</p>
           )}

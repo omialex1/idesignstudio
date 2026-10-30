@@ -13,8 +13,8 @@ export type ShopProduct = {
   inStock: boolean;
   // ISO date, for "newest first"
   createdAt: string;
-  // slugs of the colours the customer can pick for this product (empty: none)
-  colors: string[];
+  // the subcategory, for lists that mix several (search results)
+  category?: { slug: string; name: string };
   // background class of the photo placeholder (by main category)
   placeholderClass: string;
 };
@@ -23,29 +23,34 @@ export type SortKey = "default" | "price-asc" | "price-desc" | "new" | "name";
 
 export type ShopFilters = {
   sort: SortKey;
-  inStockOnly: boolean;
   // prices as typed, in RON ("" when empty)
   min: string;
   max: string;
-  // a colour slug, or "" for any
-  color: string;
+  // subcategory slugs (none chosen: all)
+  categories: string[];
 };
+
+// The price groups of the filters panel, in cents: from (included) to (excluded).
+export const PRICE_RANGES: { from: number; to: number | null }[] = [
+  { from: 0, to: 5000 },
+  { from: 5000, to: 10000 },
+  { from: 10000, to: 20000 },
+  { from: 20000, to: null },
+];
 
 export const NO_FILTERS: ShopFilters = {
   sort: "default",
-  inStockOnly: false,
   min: "",
   max: "",
-  color: "",
+  categories: [],
 };
 
 export function hasActiveFilters(f: ShopFilters): boolean {
   return (
     f.sort !== "default" ||
-    f.inStockOnly ||
     f.min.trim() !== "" ||
     f.max.trim() !== "" ||
-    f.color !== ""
+    f.categories.length > 0
   );
 }
 
@@ -65,10 +70,14 @@ export function applyShopFilters(
   const max = ronToCents(f.max);
 
   const kept = products.filter((p) => {
-    if (f.inStockOnly && !p.inStock) return false;
     if (min !== null && p.priceCents < min) return false;
     if (max !== null && p.priceCents > max) return false;
-    if (f.color && !p.colors.includes(f.color)) return false;
+    if (
+      f.categories.length > 0 &&
+      !(p.category && f.categories.includes(p.category.slug))
+    ) {
+      return false;
+    }
     return true;
   });
 

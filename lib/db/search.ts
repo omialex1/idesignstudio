@@ -13,6 +13,7 @@ export type SearchResult = {
   mainSlug: string;
   mainColorKey: string;
   categorySlug: string;
+  categoryName: string;
   name: string;
   priceCents: number;
   currency: string;
@@ -74,6 +75,11 @@ export async function searchProducts(
         mainSlug: p.category.mainCategory.slug,
         mainColorKey: p.category.mainCategory.color,
         categorySlug: p.category.slug,
+        categoryName:
+          (
+            p.category.translations.find((t) => t.locale === locale) ??
+            p.category.translations.find((t) => t.locale === "ro")
+          )?.name ?? p.category.slug,
         name: shown?.name ?? p.slug,
         priceCents: p.priceCents,
         currency: p.currency,

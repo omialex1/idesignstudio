@@ -19,7 +19,7 @@ export const ADMIN_PRODUCT_SORTS: [AdminProductSort, string][] = [
   ["pret-desc", "Preț descrescător"],
   ["stoc-asc", "Stoc: de la cel mai mic"],
   ["stoc-desc", "Stoc: de la cel mai mare"],
-  ["categorie", "Categorie"],
+  ["categorie", "Subcategorie"],
 ];
 
 export type AdminProductFilter = {
