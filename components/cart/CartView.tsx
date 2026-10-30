@@ -84,7 +84,22 @@ export default function CartView() {
                     </span>
                   )}
                   <span className="text-sm text-taupe-600">
+                    {item.fullPriceCents && item.fullPriceCents > item.priceCents && (
+                      <span className="mr-1.5 text-taupe-400 line-through">
+                        {formatPrice(item.fullPriceCents, item.currency, locale)}
+                      </span>
+                    )}
                     {formatPrice(item.priceCents, item.currency, locale)}
+                    {item.discountPercent ? (
+                      <span className="ml-2 rounded-full bg-salamander-500 px-2 py-0.5 text-xs font-semibold text-cream-50">
+                        −{item.discountPercent}%
+                      </span>
+                    ) : null}
+                    {item.discountLabel ? (
+                      <span className="ml-1.5 text-xs font-semibold text-salamander-700 uppercase">
+                        {item.discountLabel}
+                      </span>
+                    ) : null}
                     {item.tierRange && (
                       <span className="text-taupe-500">
                         {" · "}

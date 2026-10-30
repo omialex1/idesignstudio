@@ -25,6 +25,10 @@ export type CartItem = {
   colorKey: string;
   nameSnapshot: string;
   priceCents: number;
+  // with a discount: the prior price (struck through) and the percentage against it
+  fullPriceCents?: number | null;
+  discountPercent?: number | null;
+  discountLabel?: string | null;
   currency: string;
   quantity: number;
   imageUrl?: string | null;

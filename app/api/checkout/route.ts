@@ -4,6 +4,8 @@ import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { startNetopiaPayment } from "@/lib/netopia";
 import { sendOrderEmails } from "@/lib/orders/emails";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
+import { activeDiscounts } from "@/lib/discounts";
+import { discountedCents } from "@/lib/discount-math";
 import { finalPriceCents, variantPricing } from "@/lib/pricing";
 import { validateAddress } from "@/lib/address/validate";
 import { verifyCaptcha } from "@/lib/security/turnstile";
@@ -287,6 +289,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // discounts of the groups that are switched on (never for tiered products): the
+  // price charged is always worked out here, never taken from the browser
+  const discounts = await activeDiscounts(products.map((p) => p.id));
+
   const lines: {
     productId: string;
     name: string;
@@ -425,13 +431,17 @@ export async function POST(request: NextRequest) {
           : null,
       colorChoices: orderChoices,
       colorNote: line.colorNote,
-      unitPriceCents: tiered
-        ? tierFor(tiersOf(product), quantities.get(product.id)!)!.priceCents
-        : variant
-          ? variantPricing(product.variants)[
-              product.variants.findIndex((v) => v.id === variant.id)
-            ].finalCents
-          : product.priceCents,
+      unitPriceCents: (() => {
+        const regular = tiered
+          ? tierFor(tiersOf(product), quantities.get(product.id)!)!.priceCents
+          : variant
+            ? variantPricing(product.variants)[
+                product.variants.findIndex((v) => v.id === variant.id)
+              ].finalCents
+            : product.priceCents;
+        const discount = tiered ? undefined : discounts.get(product.id);
+        return discount ? discountedCents(regular, discount.percent) : regular;
+      })(),
       quantity: line.quantity,
     });
   }

@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/db/client";
 import { priorPriceCents } from "@/lib/price-history";
+import {
+  priceView,
+  type ProductPromo,
+} from "@/lib/discount-math";
 
 // The discounts of the groups, as they apply on the site. A discount is applied
 // only when its group (or the product inside the group) was switched on and the
@@ -17,12 +21,6 @@ export type ProductDiscount = {
   // the moment the reduction started (the prior price is the lowest of the 30 days before)
   referenceAt: Date;
 };
-
-// A price after a discount, in whole bani.
-export function discountedCents(cents: number, percent: number): number {
-  if (!percent) return cents;
-  return Math.max(0, Math.round((cents * (100 - percent)) / 100));
-}
 
 type Candidate = {
   percent: number;
@@ -126,29 +124,6 @@ export async function activeDiscounts(
   return result;
 }
 
-// What a customer sees for one price: the price he pays, the prior price struck
-// through (the lowest of the 30 days before the reduction) and the percentage
-// counted against that prior price.
-export type PriceView = {
-  finalCents: number;
-  priorCents: number;
-  // 0 when there is nothing to show as a reduction
-  shownPercent: number;
-};
-
-export function priceView(
-  regularCents: number,
-  discount: ProductDiscount,
-  priorCents: number,
-): PriceView {
-  const finalCents = discountedCents(regularCents, discount.percent);
-  // never above what the reduction is counted from: the lowest price of the 30 days
-  const prior = priorCents;
-  const shownPercent =
-    prior > finalCents ? Math.round(((prior - finalCents) / prior) * 100) : 0;
-  return { finalCents, priorCents: prior, shownPercent };
-}
-
 // The prior prices of a product for every price point (key -1: the "from" price,
 // 0..n: the variants), from the history.
 export async function priorPrices(
@@ -166,4 +141,60 @@ export async function priorPrices(
       priorPriceCents(rows, p.variantKey, p.priceCents, reference),
     ]),
   );
+}
+
+// The promo of one product for its page: the percentage, the label and the prior
+// price of every price point.
+export async function promoForProduct(
+  productId: string,
+  points: { variantKey: number; priceCents: number }[],
+): Promise<ProductPromo | null> {
+  const discount = (await activeDiscounts([productId])).get(productId);
+  if (!discount) return null;
+  const priorByKey = await priorPrices(productId, points, discount.referenceAt);
+  return {
+    percent: discount.percent,
+    label: discount.label,
+    endsAt: discount.endsAt ? discount.endsAt.toISOString() : null,
+    priorByKey,
+  };
+}
+
+// What a list card shows for a product: the price after the discount, the prior
+// price struck through and the percentage off (counted against the prior price).
+export type PromoPrice = {
+  finalCents: number;
+  oldCents: number | null;
+  percentOff: number;
+  label: string | null;
+};
+
+export async function promoPrices(
+  products: { id: string; priceCents: number }[],
+): Promise<Map<string, PromoPrice>> {
+  const result = new Map<string, PromoPrice>();
+  const discounts = await activeDiscounts(products.map((p) => p.id));
+  if (discounts.size === 0) return result;
+  const rows = await prisma.productPriceHistory.findMany({
+    where: { productId: { in: [...discounts.keys()] }, variantKey: -1 },
+    select: { productId: true, variantKey: true, priceCents: true, startedAt: true },
+  });
+  for (const product of products) {
+    const discount = discounts.get(product.id);
+    if (!discount) continue;
+    const prior = priorPriceCents(
+      rows.filter((r) => r.productId === product.id),
+      -1,
+      product.priceCents,
+      discount.referenceAt,
+    );
+    const view = priceView(product.priceCents, discount.percent, prior);
+    result.set(product.id, {
+      finalCents: view.finalCents,
+      oldCents: view.priorCents,
+      percentOff: view.shownPercent,
+      label: discount.label,
+    });
+  }
+  return result;
 }

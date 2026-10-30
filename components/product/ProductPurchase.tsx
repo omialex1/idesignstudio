@@ -8,6 +8,7 @@ import {
   type CartAddedDetail,
 } from "@/components/cart/CartToast";
 import { formatPrice } from "@/lib/format";
+import { priceView, type ProductPromo } from "@/lib/discount-math";
 import {
   ALL_COMPONENTS_ID,
   DEFAULT_COMPONENT_ID,
@@ -80,6 +81,7 @@ export default function ProductPurchase({
   colors,
   tiers,
   availableQuantity,
+  promo = null,
 }: {
   productId: string;
   slug: string;
@@ -99,6 +101,8 @@ export default function ProductPurchase({
   // price tiers by quantity (invitations); empty for ordinary products
   tiers: PriceTier[];
   availableQuantity: number;
+  // a discount switched on for this product (never for tiered products)
+  promo?: ProductPromo | null;
 }) {
   const t = useTranslations("Shop");
   const tCart = useTranslations("Cart");
@@ -165,7 +169,16 @@ export default function ProductPurchase({
       )
     : undefined;
 
-  const unitPrice = activeTier?.priceCents ?? variant?.priceCents ?? priceCents;
+  const regularPrice =
+    activeTier?.priceCents ?? variant?.priceCents ?? priceCents;
+  // with a group discount: the price paid, the prior price (lowest of the 30 days
+  // before the reduction) struck through and the percentage against that
+  const promoOn = promo !== null && !tiered;
+  const viewOf = (price: number, key: number) =>
+    promoOn ? priceView(price, promo.percent, promo.priorByKey[key] ?? price) : null;
+  const variantKey = variant ? variants.findIndex((v) => v.id === variant.id) : -1;
+  const view = viewOf(regularPrice, variantKey);
+  const unitPrice = view ? view.finalCents : regularPrice;
 
   const wholeSetPicked =
     setTarget !== null &&
@@ -237,6 +250,9 @@ export default function ProductPurchase({
         colorKey,
         nameSnapshot: name,
         priceCents: unitPrice,
+        fullPriceCents: view?.priorCents ?? null,
+        discountPercent: view && view.priorCents ? view.shownPercent : null,
+        discountLabel: promo?.label ?? null,
         currency,
         imageUrl,
         ...(tiered ? { tiers, tierRange: activeRange } : {}),
@@ -258,12 +274,36 @@ export default function ProductPurchase({
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="font-display text-2xl text-taupe-800">
-        {formatPrice(unitPrice, currency, locale)}
-        {tiered && (
-          <span className="ml-1 text-base text-taupe-500">{t("perPiece")}</span>
+      <div className="flex flex-col gap-1">
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-display text-2xl text-taupe-800">
+          <span>{formatPrice(unitPrice, currency, locale)}</span>
+          {view?.priorCents && (
+            <span className="text-lg text-taupe-400 line-through">
+              {formatPrice(view.priorCents, currency, locale)}
+            </span>
+          )}
+          {view?.priorCents && (
+            <span className="rounded-full bg-salamander-500 px-2.5 py-0.5 font-sans text-sm font-semibold text-cream-50">
+              −{view.shownPercent}%
+            </span>
+          )}
+          {promo?.label && (
+            <span className="rounded-full border border-salamander-400 px-2.5 py-0.5 font-sans text-xs font-semibold tracking-wide text-salamander-700 uppercase">
+              {promo.label}
+            </span>
+          )}
+          {tiered && (
+            <span className="ml-1 text-base text-taupe-500">{t("perPiece")}</span>
+          )}
+        </p>
+        {view?.priorCents && (
+          <p className="text-xs text-taupe-500">
+            {t("previousPrice", {
+              price: formatPrice(view.priorCents, currency, locale),
+            })}
+          </p>
         )}
-      </p>
+      </div>
 
       {tiered && (
         <div className="flex flex-col gap-2">
@@ -352,15 +392,38 @@ export default function ProductPurchase({
                 }`}
               >
                 {v.name}
-                {v.discountPercent > 0 && (
-                  <span className="ml-2 text-taupe-400 line-through">
-                    {formatPrice(v.fullPriceCents, currency, locale)}
-                  </span>
-                )}
-                <span className="ml-2 text-taupe-500">
-                  {formatPrice(v.priceCents, currency, locale)}
-                </span>
-                {v.discountPercent > 0 && (
+                {promoOn
+                  ? (() => {
+                      const vv = viewOf(
+                        v.priceCents,
+                        variants.findIndex((x) => x.id === v.id),
+                      );
+                      return (
+                        <>
+                          {vv?.priorCents && (
+                            <span className="ml-2 text-taupe-400 line-through">
+                              {formatPrice(vv.priorCents, currency, locale)}
+                            </span>
+                          )}
+                          <span className="ml-2 text-taupe-500">
+                            {formatPrice(vv?.finalCents ?? v.priceCents, currency, locale)}
+                          </span>
+                        </>
+                      );
+                    })()
+                  : (
+                    <>
+                      {v.discountPercent > 0 && (
+                        <span className="ml-2 text-taupe-400 line-through">
+                          {formatPrice(v.fullPriceCents, currency, locale)}
+                        </span>
+                      )}
+                      <span className="ml-2 text-taupe-500">
+                        {formatPrice(v.priceCents, currency, locale)}
+                      </span>
+                    </>
+                  )}
+                {!promoOn && v.discountPercent > 0 && (
                   <span className="ml-2 rounded-full bg-salamander-500 px-2 py-0.5 text-xs font-semibold text-cream-50">
                     −{v.discountPercent}%
                   </span>

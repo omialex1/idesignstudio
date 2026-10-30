@@ -184,6 +184,7 @@ export default async function ProductDetailPage({
             components={product.components}
             tiers={product.tiers}
             availableQuantity={product.availableQuantity}
+            promo={product.promo}
           />
         </div>
       </div>

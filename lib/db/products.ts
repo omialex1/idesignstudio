@@ -1,6 +1,9 @@
 import { sortTiers, type PriceTier } from "@/lib/tiers";
 import { prisma } from "@/lib/db/client";
 import { variantPricing } from "@/lib/pricing";
+import { promoForProduct, promoPrices } from "@/lib/discounts";
+import { pricePointsOf } from "@/lib/price-history";
+import type { ProductPromo } from "@/lib/discount-math";
 
 export type ProductWithTranslation = {
   id: string;
@@ -143,8 +146,15 @@ export async function getProductDetail(productSlug: string, locale: string) {
       )
     : [];
 
+  // the discount of the product's groups, when one is switched on (never for
+  // products priced by quantity)
+  const promo: ProductPromo | null = product.tieredPricing
+    ? null
+    : await promoForProduct(product.id, pricePointsOf(product)).catch(() => null);
+
   return {
     ...translateProduct(product, locale),
+    promo,
     images: product.images,
     hasColorOptions: product.hasColorOptions,
     excludedColors: product.excludedColors,
