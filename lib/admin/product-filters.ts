@@ -13,8 +13,8 @@ export type AdminProductSort =
   | "categorie";
 
 export const ADMIN_PRODUCT_SORTS: [AdminProductSort, string][] = [
-  ["nou", "Cele mai noi"],
   ["nume", "Nume A–Z"],
+  ["nou", "Cele mai noi"],
   ["pret-asc", "Preț crescător"],
   ["pret-desc", "Preț descrescător"],
   ["stoc-asc", "Stoc: de la cel mai mic"],
@@ -57,7 +57,7 @@ export function parseAdminProductFilter(params: {
   stoc?: string;
 }): AdminProductFilter {
   const sort =
-    ADMIN_PRODUCT_SORTS.find(([key]) => key === params.sort)?.[0] ?? "nou";
+    ADMIN_PRODUCT_SORTS.find(([key]) => key === params.sort)?.[0] ?? "nume";
   return {
     q: (params.q ?? "").trim().slice(0, MAX_QUERY_LENGTH),
     sort,

@@ -48,8 +48,9 @@ export async function getProductForEdit(id: string) {
 }
 
 // Subcategories with their main category and product count.
+// Main categories keep their order; the subcategories in each are alphabetical.
 export async function getSubcategoriesForAdmin() {
-  return prisma.category.findMany({
+  const rows = await prisma.category.findMany({
     include: {
       translations: true,
       mainCategory: { include: { translations: true } },
@@ -57,6 +58,19 @@ export async function getSubcategoriesForAdmin() {
     },
     orderBy: [{ mainCategory: { sortOrder: "asc" } }, { sortOrder: "asc" }],
   });
+  const name = (c: (typeof rows)[number]) =>
+    c.translations.find((t) => t.locale === "ro")?.name ?? c.slug;
+  return rows
+    .map((row, position) => ({ row, position }))
+    .sort(
+      (a, b) =>
+        // keeps the order of the main categories (the query's order)
+        (a.row.mainCategoryId === b.row.mainCategoryId
+          ? 0
+          : a.position - b.position) ||
+        name(a.row).localeCompare(name(b.row), "ro"),
+    )
+    .map(({ row }) => row);
 }
 
 export async function getSubcategoryForEdit(id: string) {
@@ -73,11 +87,13 @@ export async function getCategoryOptions() {
     include: { translations: true },
     orderBy: [{ mainCategory: { sortOrder: "asc" } }, { sortOrder: "asc" }],
   });
-  return categories.map((c) => ({
-    id: c.id,
-    mainCategoryId: c.mainCategoryId!,
-    name: c.translations.find((t) => t.locale === "ro")?.name ?? c.slug,
-  }));
+  return categories
+    .map((c) => ({
+      id: c.id,
+      mainCategoryId: c.mainCategoryId!,
+      name: c.translations.find((t) => t.locale === "ro")?.name ?? c.slug,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "ro"));
 }
 
 // The main categories (Evenimente, Handmade, ...) with how many subcategories they hold.

@@ -157,7 +157,7 @@ export default async function AdminProductsPage({
           >
             Aplică
           </button>
-          {(filtered || filter.sort !== "nou") && (
+          {(filtered || filter.sort !== "nume") && (
             <Link
               href="/admin/products"
               className="py-2 text-sm font-medium text-salamander-600 hover:underline"
