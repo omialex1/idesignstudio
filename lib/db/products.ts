@@ -93,7 +93,10 @@ export async function getProductsByCategorySlug(
     slug: category.slug,
     name: categoryTranslation?.name ?? category.slug,
     description: categoryTranslation?.description ?? null,
-    products: category.products.map((p) => translateProduct(p, locale)),
+    // alphabetical by the name shown, so the list is the same on every visit
+    products: category.products
+      .map((p) => translateProduct(p, locale))
+      .sort((a, b) => a.name.localeCompare(b.name, locale)),
   };
 }
 

@@ -10,7 +10,7 @@ export type CategoryWithTranslation = {
   description: string | null;
 };
 
-// Subcategories of one main category, in the order set in the admin.
+// Subcategories of one main category, alphabetical by the name shown.
 export async function getCategoriesByMain(
   mainCategoryId: string,
   locale: string,
@@ -33,7 +33,7 @@ export async function getCategoriesByMain(
     }
   }
 
-  return categories.map((category) => {
+  const list = categories.map((category) => {
     const translation =
       category.translations.find((t) => t.locale === locale) ??
       category.translations.find((t) => t.locale === "ro");
@@ -47,4 +47,5 @@ export async function getCategoriesByMain(
       description: translation?.description ?? null,
     };
   });
+  return list.sort((a, b) => a.name.localeCompare(b.name, locale));
 }

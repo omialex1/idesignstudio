@@ -125,11 +125,12 @@ export default function FilterableProducts({
     (hasPrice ? 1 : 0) + (filters.categories.length > 0 ? 1 : 0);
 
   const sortOptions: [SortKey, string][] = [
-    ["default", relevanceFirst ? t("sortRelevance") : t("sortDefault")],
+    ["default", relevanceFirst ? t("sortRelevance") : t("sortName")],
     ["price-asc", t("sortPriceAsc")],
     ["price-desc", t("sortPriceDesc")],
     ["new", t("sortNew")],
-    ["name", t("sortName")],
+    // search results start by relevance, so A–Z is a choice there
+    ...(relevanceFirst ? ([["name", t("sortName")]] as [SortKey, string][]) : []),
   ];
 
   const buttonClass = (isOpen: boolean, active: boolean) =>
