@@ -245,6 +245,8 @@ export type RecommendedProduct = {
   hasVariants: boolean;
   inStock: boolean;
   mainColorKey: string;
+  // comes from a group set to a random order (mixed in the browser)
+  shuffled: boolean;
 };
 
 // The products of the "Merge bine cu" groups this product is in, in the order set
@@ -252,7 +254,7 @@ export type RecommendedProduct = {
 export async function getRecommendedProducts(
   productId: string,
   locale: string,
-): Promise<{ items: RecommendedProduct[]; shuffle: boolean }> {
+): Promise<RecommendedProduct[]> {
   const groups = await prisma.productGroup.findMany({
     where: {
       // groups of a kind shown to customers (before kinds existed: "recommended")
@@ -282,16 +284,23 @@ export async function getRecommendedProducts(
 
   const seen = new Set<string>([productId]);
   const result: RecommendedProduct[] = [];
-  let shuffle = false;
+  const byId = new Map<string, RecommendedProduct>();
   for (const group of groups) {
-    if (group.shuffle) shuffle = true;
     for (const { product: p } of group.items) {
-      if (seen.has(p.id) || !p.isActive || !p.category.mainCategory) continue;
+      if (!p.isActive || !p.category.mainCategory) continue;
+      // in a fixed-order group as well: it keeps its place there
+      if (seen.has(p.id)) {
+        if (!group.shuffle) {
+          const known = byId.get(p.id);
+          if (known) known.shuffled = false;
+        }
+        continue;
+      }
       seen.add(p.id);
       const translation =
         p.translations.find((t) => t.locale === locale) ??
         p.translations.find((t) => t.locale === "ro");
-      result.push({
+      const item: RecommendedProduct = {
         id: p.id,
         href: `/${p.category.mainCategory.slug}/${p.category.slug}/${p.slug}`,
         name: translation?.name ?? p.slug,
@@ -301,8 +310,12 @@ export async function getRecommendedProducts(
         hasVariants: p.variants.length > 0,
         inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
         mainColorKey: p.category.mainCategory.color,
-      });
+        shuffled: group.shuffle,
+      };
+      byId.set(p.id, item);
+      result.push(item);
     }
   }
-  return { items: result, shuffle };
+  // fixed-order products first, in their order; the mixed ones after them
+  return [...result.filter((r) => !r.shuffled), ...result.filter((r) => r.shuffled)];
 }

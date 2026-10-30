@@ -12,6 +12,8 @@ export type StripItem = {
   placeholderClass: string;
   // shown on the photo when the product is out of stock
   note?: string;
+  // mixed into a new random order at every visit (the others keep their place)
+  shuffle?: boolean;
 };
 
 // "Merge bine cu…": a row of small photos joined together, swiped (or moved with
@@ -19,14 +21,11 @@ export type StripItem = {
 export default function RecommendedStrip({
   title,
   items: given,
-  shuffle = false,
   prevLabel,
   nextLabel,
 }: {
   title: string;
   items: StripItem[];
-  // a new random order at every visit
-  shuffle?: boolean;
   prevLabel: string;
   nextLabel: string;
 }) {
@@ -35,15 +34,17 @@ export default function RecommendedStrip({
   // browser once the page is shown; until then the saved order is used
   const [items, setItems] = useState(given);
   useEffect(() => {
-    if (!shuffle) return;
-    const mixed = [...given];
+    // only the products from a random-order group are mixed; the rest stay first
+    const fixed = given.filter((i) => !i.shuffle);
+    const mixed = given.filter((i) => i.shuffle);
+    if (mixed.length < 2) return;
     for (let i = mixed.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [mixed[i], mixed[j]] = [mixed[j], mixed[i]];
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setItems(mixed);
-  }, [given, shuffle]);
+    setItems([...fixed, ...mixed]);
+  }, [given]);
 
   function move(direction: 1 | -1) {
     const el = track.current;

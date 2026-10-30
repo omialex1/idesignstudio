@@ -124,8 +124,7 @@ export default async function ProductDetailPage({
           },
   };
 
-  const { items: recommended, shuffle: shuffleRecommended } =
-    await getRecommendedProducts(product.id, locale);
+  const recommended = await getRecommendedProducts(product.id, locale);
 
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
@@ -192,7 +191,6 @@ export default async function ProductDetailPage({
         <div className="mx-auto mt-8 w-full max-w-4xl">
           <RecommendedStrip
             title={t("goesWith")}
-            shuffle={shuffleRecommended}
             prevLabel={t("previous")}
             nextLabel={t("next")}
             items={recommended.map((p) => ({
@@ -202,6 +200,7 @@ export default async function ProductDetailPage({
               imageUrl: p.imageUrl,
               placeholderClass: categoryColorClass(p.mainColorKey),
               note: p.inStock ? undefined : t("outOfStock"),
+              shuffle: p.shuffled,
             }))}
           />
         </div>
