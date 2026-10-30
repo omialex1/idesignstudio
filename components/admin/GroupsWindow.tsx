@@ -81,15 +81,28 @@ function Info({ product }: { product: GroupProduct }) {
 
 // A product name that opens the product: the name goes to its page in the admin,
 // the arrow to its page on the site (both in a new tab, so nothing typed here is lost).
-function ProductName({ product }: { product: GroupProduct }) {
+function ProductName({
+  product,
+  stacked = false,
+}: {
+  product: GroupProduct;
+  // the site button under the name instead of beside it
+  stacked?: boolean;
+}) {
   return (
-    <span className="inline-flex max-w-full items-baseline gap-1.5">
+    <span
+      className={
+        stacked
+          ? "flex max-w-full flex-col items-start gap-1"
+          : "inline-flex max-w-full items-center gap-2"
+      }
+    >
       <a
         href={`/admin/products/${product.id}/edit`}
         target="_blank"
         rel="noopener noreferrer"
         title="Deschide produsul în admin (fereastră nouă)"
-        className="truncate hover:text-salamander-600 hover:underline"
+        className={`hover:text-salamander-600 hover:underline ${stacked ? "" : "truncate"}`}
       >
         {product.name}
       </a>
@@ -99,11 +112,27 @@ function ProductName({ product }: { product: GroupProduct }) {
         rel="noopener noreferrer"
         title="Vezi produsul pe site (fereastră nouă)"
         aria-label={`Vezi ${product.name} pe site`}
-        className="shrink-0 text-xs text-taupe-500 hover:text-salamander-600"
+        className="inline-flex shrink-0 items-center gap-1 rounded-full border border-salamander-300 bg-salamander-50 px-3 py-1 text-xs font-semibold whitespace-nowrap text-salamander-700 transition-colors hover:bg-salamander-100"
       >
-        ↗
+        Vezi pe site ↗
       </a>
     </span>
+  );
+}
+
+// The product photo as a link: opens the product in the admin (new tab).
+function ProductPhoto({ product }: { product: GroupProduct }) {
+  return (
+    <a
+      href={`/admin/products/${product.id}/edit`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Deschide produsul în admin (fereastră nouă)"
+      aria-label={`Deschide ${product.name}`}
+      className="block w-fit transition-opacity hover:opacity-80"
+    >
+      <Thumb url={product.imageUrl} className="h-16 w-16" />
+    </a>
   );
 }
 
@@ -1058,10 +1087,10 @@ export default function GroupsWindow() {
                               {index + 1}
                             </td>
                             <td className="px-1 py-1.5">
-                              <Thumb url={p.imageUrl} />
+                              <ProductPhoto product={p} />
                             </td>
                             <td className="px-3 py-1.5">
-                              <ProductName product={p} />
+                              <ProductName product={p} stacked />
                             </td>
                             <td className="px-3 py-1.5">{p.stock}</td>
                             <td className="px-1 py-1.5">
