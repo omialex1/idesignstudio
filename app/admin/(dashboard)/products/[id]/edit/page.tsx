@@ -9,6 +9,7 @@ import {
 import { updateProduct, deleteProduct } from "@/lib/admin/product-actions";
 import ProductForm from "@/components/admin/ProductForm";
 import ProductImageManager from "@/components/admin/ProductImageManager";
+import ProductGroupsCard from "@/components/admin/ProductGroupsCard";
 
 export default async function EditProductPage({
   params,
@@ -106,6 +107,8 @@ export default async function EditProductPage({
       />
 
       <ProductImageManager productId={product.id} images={product.images} />
+
+      <ProductGroupsCard productId={product.id} />
 
       <form action={deleteProduct} className="w-fit">
         <input type="hidden" name="productId" value={product.id} />

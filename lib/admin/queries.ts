@@ -29,6 +29,7 @@ export async function getProductsForAdmin() {
       translations: true,
       inventory: true,
       category: { include: { translations: true } },
+      groupItems: { select: { groupId: true } },
     },
     orderBy: { createdAt: "desc" },
   });

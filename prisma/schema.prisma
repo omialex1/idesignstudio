@@ -121,6 +121,7 @@ model Product {
   images          ProductImage[]
   inventory       Inventory?
   orderItems      OrderItem[]
+  groupItems      ProductGroupItem[]
 }
 
 model ProductVariant {
@@ -168,6 +169,33 @@ model ProductTranslation {
 
   @@unique([productId, locale])
   @@index([locale])
+}
+
+// A set of products chosen together. "recommended" groups feed the "Merge bine cu"
+// row on the product page; "promo" groups are internal (for promotions later).
+model ProductGroup {
+  id        String             @id @default(cuid())
+  name      String
+  // "recommended" or "promo"
+  kind      String             @default("recommended")
+  // optional cap on the number of products (null: no limit)
+  maxItems  Int?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  items     ProductGroupItem[]
+}
+
+model ProductGroupItem {
+  id        String       @id @default(cuid())
+  groupId   String
+  group     ProductGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // the order the products were chosen in (and are shown in)
+  sortOrder Int          @default(0)
+
+  @@unique([groupId, productId])
+  @@index([productId])
 }
 
 model ProductImage {

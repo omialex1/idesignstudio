@@ -234,3 +234,69 @@ export async function getMainImageUrl(mainCategoryId: string) {
   });
   return image?.url ?? null;
 }
+
+export type RecommendedProduct = {
+  id: string;
+  href: string;
+  name: string;
+  priceCents: number;
+  currency: string;
+  imageUrl: string | null;
+  hasVariants: boolean;
+  inStock: boolean;
+  mainColorKey: string;
+};
+
+// The products of the "Merge bine cu" groups this product is in, in the order set
+// in the groups (a product in several groups: no repeats). Only active products.
+export async function getRecommendedProducts(
+  productId: string,
+  locale: string,
+): Promise<RecommendedProduct[]> {
+  const groups = await prisma.productGroup.findMany({
+    where: { kind: "recommended", items: { some: { productId } } },
+    orderBy: { createdAt: "asc" },
+    include: {
+      items: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          product: {
+            include: {
+              translations: true,
+              inventory: { select: { quantityOnHand: true } },
+              images: { orderBy: { sortOrder: "asc" }, take: 1 },
+              variants: { select: { id: true } },
+              category: {
+                include: { mainCategory: { select: { slug: true, color: true } } },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const seen = new Set<string>([productId]);
+  const result: RecommendedProduct[] = [];
+  for (const group of groups) {
+    for (const { product: p } of group.items) {
+      if (seen.has(p.id) || !p.isActive || !p.category.mainCategory) continue;
+      seen.add(p.id);
+      const translation =
+        p.translations.find((t) => t.locale === locale) ??
+        p.translations.find((t) => t.locale === "ro");
+      result.push({
+        id: p.id,
+        href: `/${p.category.mainCategory.slug}/${p.category.slug}/${p.slug}`,
+        name: translation?.name ?? p.slug,
+        priceCents: p.priceCents,
+        currency: p.currency,
+        imageUrl: p.images[0]?.url ?? null,
+        hasVariants: p.variants.length > 0,
+        inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
+        mainColorKey: p.category.mainCategory.color,
+      });
+    }
+  }
+  return result;
+}

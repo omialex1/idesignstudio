@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { getProductDetail } from "@/lib/db/products";
+import { getProductDetail, getRecommendedProducts } from "@/lib/db/products";
+import ProductTile, { shortName } from "@/components/product/ProductTile";
+import { formatPrice } from "@/lib/format";
 import { getPaletteColors } from "@/lib/db/colors";
 import { categoryColorClass } from "@/lib/category-colors";
 import ProductPurchase from "@/components/product/ProductPurchase";
@@ -122,6 +124,8 @@ export default async function ProductDetailPage({
           },
   };
 
+  const recommended = await getRecommendedProducts(product.id, locale);
+
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
       <script
@@ -189,6 +193,27 @@ export default async function ProductDetailPage({
             {renderRichText(product.longDescription)}
           </p>
         </Reveal>
+      )}
+      {recommended.length > 0 && (
+        <section className="mx-auto mt-12 w-full max-w-4xl border-t border-cream-200 pt-10">
+          <h2 className="font-display text-2xl text-taupe-800">{t("goesWith")}</h2>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3">
+            {recommended.map((p) => {
+              const price = formatPrice(p.priceCents, p.currency, locale);
+              return (
+                <ProductTile
+                  key={p.id}
+                  href={p.href}
+                  name={shortName(p.name)}
+                  imageUrl={p.imageUrl}
+                  placeholderClass={categoryColorClass(p.mainColorKey)}
+                  priceLabel={p.hasVariants ? t("fromPrice", { price }) : price}
+                  note={p.inStock ? undefined : t("outOfStock")}
+                />
+              );
+            })}
+          </div>
+        </section>
       )}
     </div>
   );

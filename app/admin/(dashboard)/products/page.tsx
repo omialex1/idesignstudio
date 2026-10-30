@@ -12,6 +12,8 @@ import {
 } from "@/lib/admin/product-filters";
 import { formatPrice } from "@/lib/format";
 import StockBadge from "@/components/admin/StockBadge";
+import CategorySelect from "@/components/admin/CategorySelect";
+import { prisma } from "@/lib/db/client";
 
 const selectClass =
   "rounded-lg border border-cream-300 bg-white px-3 py-2 text-sm text-taupe-800 outline-none focus:border-salamander-400";
@@ -26,9 +28,16 @@ export default async function AdminProductsPage({
     sub?: string;
     vis?: string;
     stoc?: string;
+    grp?: string;
   }>;
 }) {
   const filter = parseAdminProductFilter(await searchParams);
+  const group = filter.grp
+    ? await prisma.productGroup.findUnique({
+        where: { id: filter.grp },
+        select: { name: true },
+      })
+    : null;
   const [everything, mains, subs] = await Promise.all([
     getProductsForAdmin(),
     getMainCategoryOptions(),
@@ -36,7 +45,12 @@ export default async function AdminProductsPage({
   ]);
   const products = filterAndSortAdminProducts(everything, filter);
   const filtered = Boolean(
-    filter.q || filter.main || filter.sub || filter.vis || filter.stoc,
+    filter.q ||
+      filter.main ||
+      filter.sub ||
+      filter.vis ||
+      filter.stoc ||
+      filter.grp,
   );
 
   return (
@@ -92,18 +106,11 @@ export default async function AdminProductsPage({
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
             Categorie
-            <select
-              name="cat"
+            <CategorySelect
+              mains={mains}
               defaultValue={filter.main}
               className={selectClass}
-            >
-              <option value="">Toate</option>
-              {mains.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
+            />
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
             Subcategorie
@@ -157,6 +164,21 @@ export default async function AdminProductsPage({
           >
             Aplică
           </button>
+          {filter.grp && (
+            <>
+              <input type="hidden" name="grp" value={filter.grp} />
+              <span className="inline-flex items-center gap-2 rounded-full border border-cream-300 bg-cream-100 py-1.5 pl-3 pr-2 text-sm text-taupe-800">
+                Grup: <b>{group?.name ?? "șters"}</b>
+                <Link
+                  href="/admin/products"
+                  aria-label="Scoate filtrul de grup"
+                  className="rounded-full px-1.5 text-red-700 hover:bg-red-50"
+                >
+                  ✕
+                </Link>
+              </span>
+            </>
+          )}
           {(filtered || filter.sort !== "nume") && (
             <Link
               href="/admin/products"

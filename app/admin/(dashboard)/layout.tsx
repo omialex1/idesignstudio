@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import GroupsWindow from "@/components/admin/GroupsWindow";
 import { getCurrentAdmin } from "@/lib/admin/auth";
 
 export default async function AdminDashboardLayout({
@@ -18,6 +19,7 @@ export default async function AdminDashboardLayout({
     <div className="flex min-h-screen">
       <AdminSidebar username={admin.username} />
       <main className="flex-1 bg-[#e6d9c2] p-8">{children}</main>
+      <GroupsWindow />
     </div>
   );
 }

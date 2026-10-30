@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { createProduct } from "@/lib/admin/product-actions";
 import ProductForm from "@/components/admin/ProductForm";
 import PhotoPicker, { type PickedPhoto } from "@/components/admin/PhotoPicker";
+import ProductGroupsCard, {
+  type PendingGroup,
+} from "@/components/admin/ProductGroupsCard";
 import type { PaletteOption } from "@/lib/admin/queries";
 type CategoryOption = { id: string; name: string; mainCategoryId: string };
 
@@ -21,6 +24,7 @@ export default function NewProductForm({
 }) {
   const router = useRouter();
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
+  const [groups, setGroups] = useState<PendingGroup[]>([]);
 
   async function handleCreate(formData: FormData) {
     const result = await createProduct(formData);
@@ -39,6 +43,27 @@ export default function NewProductForm({
       if (!res?.ok) failed += 1;
     }
 
+    // and the groups chosen for it
+    for (const group of groups) {
+      if ("groupId" in group) {
+        await fetch(`/api/admin/products/${result.id}/groups`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ groupId: group.groupId }),
+        }).catch(() => null);
+      } else {
+        await fetch("/api/admin/groups", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: group.newName,
+            kind: group.kind,
+            productIds: [result.id],
+          }),
+        }).catch(() => null);
+      }
+    }
+
     const query = failed > 0 ? `created=1&photoError=${failed}` : "created=1";
     router.push(`/admin/products/${result.id}/edit?${query}`);
   }
@@ -52,7 +77,16 @@ export default function NewProductForm({
       palettes={palettes}
       submitLabel="Creează produs"
       draftKey="new"
-      extra={<PhotoPicker photos={photos} onChange={setPhotos} />}
+      extra={
+        <>
+          <ProductGroupsCard
+            productId={null}
+            pending={groups}
+            onPendingChange={setGroups}
+          />
+          <PhotoPicker photos={photos} onChange={setPhotos} />
+        </>
+      }
     />
   );
 }

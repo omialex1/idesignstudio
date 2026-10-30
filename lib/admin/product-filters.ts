@@ -32,6 +32,8 @@ export type AdminProductFilter = {
   vis: "" | "da" | "nu";
   // "epuizat" (0), "redus" (at or under the threshold), "ok", "" any
   stoc: "" | "epuizat" | "redus" | "ok";
+  // id of a group: only its products ("" any)
+  grp: string;
 };
 
 type FilterableProduct = {
@@ -41,6 +43,7 @@ type FilterableProduct = {
   createdAt: Date;
   translations: { locale: string; name: string }[];
   inventory: { quantityOnHand: number; lowStockThreshold: number } | null;
+  groupItems: { groupId: string }[];
   category: {
     id: string;
     mainCategoryId: string | null;
@@ -55,6 +58,7 @@ export function parseAdminProductFilter(params: {
   sub?: string;
   vis?: string;
   stoc?: string;
+  grp?: string;
 }): AdminProductFilter {
   const sort =
     ADMIN_PRODUCT_SORTS.find(([key]) => key === params.sort)?.[0] ?? "nume";
@@ -70,6 +74,7 @@ export function parseAdminProductFilter(params: {
       params.stoc === "ok"
         ? params.stoc
         : "",
+    grp: params.grp ?? "",
   };
 }
 
@@ -108,6 +113,7 @@ export function filterAndSortAdminProducts<T extends FilterableProduct>(
     if (f.vis === "da" && !p.isActive) return false;
     if (f.vis === "nu" && p.isActive) return false;
     if (f.stoc && stockState(p) !== f.stoc) return false;
+    if (f.grp && !p.groupItems.some((g) => g.groupId === f.grp)) return false;
     return true;
   });
 

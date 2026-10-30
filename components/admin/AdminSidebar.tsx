@@ -1,7 +1,9 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { openGroups } from "@/components/admin/groups-events";
 
 const navLinks = [
   { href: "/admin", label: "Dashboard", exact: true },
@@ -43,24 +45,36 @@ export default function AdminSidebar({ username }: { username: string }) {
             ? pathname === link.href
             : pathname.startsWith(link.href);
           return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-salamander-50 text-salamander-600"
-                  : "text-taupe-600 hover:bg-cream-100"
-              }`}
-            >
-              {link.label}
-            </Link>
+            <Fragment key={link.href}>
+              <Link
+                href={link.href}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-salamander-50 text-salamander-600"
+                    : "text-taupe-600 hover:bg-cream-100"
+                }`}
+              >
+                {link.label}
+              </Link>
+              {/* opens the Groups window over the current page */}
+              {link.href === "/admin/products" && (
+                <button
+                  type="button"
+                  onClick={() => openGroups()}
+                  className="rounded-lg px-3 py-2 text-left text-sm font-medium text-taupe-600 transition-colors hover:bg-cream-100"
+                >
+                  Grupuri
+                </button>
+              )}
+            </Fragment>
           );
         })}
       </nav>
 
       <div className="shrink-0 border-t border-cream-200 p-3">
         <p className="px-3 pb-2 text-xs text-taupe-400">
-          Conectat ca <span className="font-semibold text-taupe-600">{username}</span>
+          Conectat ca{" "}
+          <span className="font-semibold text-taupe-600">{username}</span>
         </p>
         <button
           type="button"

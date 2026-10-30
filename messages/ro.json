@@ -71,6 +71,7 @@
     "resetFilters": "Resetează filtrele",
     "resultsCount": "{count, plural, one {# produs} few {# produse} other {# de produse}}",
     "noMatches": "Niciun produs pentru filtrele alese. Schimbă sau resetează filtrele.",
+    "goesWith": "Merge bine cu…",
     "fromPrice": "de la {price}",
     "colorsFor": "Culori pentru {name}",
     "colorsHintOne": "Alege o culoare.",
