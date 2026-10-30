@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       name,
       showOnSite: body?.showOnSite === true,
       hasDiscount: body?.hasDiscount === true,
+      showLabel: body?.showLabel === true,
       sortOrder: (last._max.sortOrder ?? -1) + 1,
     },
   });

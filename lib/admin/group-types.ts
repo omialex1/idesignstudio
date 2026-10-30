@@ -11,6 +11,8 @@ export type GroupTypeInfo = {
   showOnSite: boolean;
   // these groups carry a discount in percent
   hasDiscount: boolean;
+  // the name of the kind is shown by the price while its discount is live
+  showLabel: boolean;
 };
 
 export type GroupTypeRow = GroupTypeInfo & { groupCount: number };
@@ -53,6 +55,7 @@ export async function listGroupTypes(): Promise<GroupTypeRow[]> {
     name: t.name,
     showOnSite: t.showOnSite,
     hasDiscount: t.hasDiscount,
+    showLabel: t.showLabel,
     groupCount: t._count.groups,
   }));
 }

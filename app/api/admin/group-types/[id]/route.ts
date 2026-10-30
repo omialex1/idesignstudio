@@ -22,10 +22,11 @@ export async function PUT(request: Request, { params }: Ctx) {
 
   const showOnSite = body?.showOnSite === true;
   const hasDiscount = body?.hasDiscount === true;
+  const showLabel = hasDiscount && body?.showLabel === true;
   await prisma.$transaction([
     prisma.productGroupType.update({
       where: { id },
-      data: { name, showOnSite, hasDiscount },
+      data: { name, showOnSite, hasDiscount, showLabel },
     }),
     // a kind without a discount: its groups lose the discount they had
     ...(hasDiscount
@@ -33,7 +34,7 @@ export async function PUT(request: Request, { params }: Ctx) {
       : [
           prisma.productGroup.updateMany({
             where: { typeId: id },
-            data: { discountPercent: null },
+            data: { discountPercent: null, discountLive: false, liveSince: null },
           }),
         ]),
     // keeps the old column in step for the groups of this kind

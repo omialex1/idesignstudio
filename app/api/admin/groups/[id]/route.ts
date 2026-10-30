@@ -7,6 +7,8 @@ import {
   asMax,
   getGroup,
   groupsAdmin,
+  readDiscountSettings,
+  saveDiscountChoices,
   resolveType,
   setGroupItems,
 } from "@/lib/admin/groups";
@@ -45,7 +47,7 @@ export async function PUT(request: Request, { params }: Ctx) {
 
   const exists = await prisma.productGroup.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, discountLive: true },
   });
   if (!exists) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
@@ -53,6 +55,14 @@ export async function PUT(request: Request, { params }: Ctx) {
     body?.typeId,
     body?.discountPercent,
   );
+  const settings = readDiscountSettings(
+    body,
+    type.hasDiscount && discountPercent !== null,
+    exists.discountLive,
+  );
+  if ("error" in settings) {
+    return NextResponse.json({ error: settings.error }, { status: 400 });
+  }
   await prisma.productGroup.update({
     where: { id },
     data: {
@@ -62,9 +72,11 @@ export async function PUT(request: Request, { params }: Ctx) {
       discountPercent,
       shuffle: body?.shuffle === true,
       maxItems,
+      ...settings.data,
     },
   });
-  const count = await setGroupItems(id, ids as string[]);
+  const count = await setGroupItems(id, ids as string[], settings.itemLive);
+  await saveDiscountChoices(body?.choices, id);
   await logAdminAction(admin, "Grup modificat", `${name} (${count} produse)`);
   revalidatePath("/", "layout");
   return NextResponse.json({ ok: true });

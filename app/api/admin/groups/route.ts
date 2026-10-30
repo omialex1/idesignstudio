@@ -5,6 +5,8 @@ import {
   MAX_GROUP_NAME,
   asMax,
   groupsAdmin,
+  readDiscountSettings,
+  saveDiscountChoices,
   listGroups,
   resolveType,
   setGroupItems,
@@ -40,6 +42,10 @@ export async function POST(request: Request) {
     body?.typeId,
     body?.discountPercent,
   );
+  const settings = readDiscountSettings(body, type.hasDiscount && discountPercent !== null, null);
+  if ("error" in settings) {
+    return NextResponse.json({ error: settings.error }, { status: 400 });
+  }
   const group = await prisma.productGroup.create({
     data: {
       name,
@@ -49,9 +55,11 @@ export async function POST(request: Request) {
       discountPercent,
       shuffle: body?.shuffle === true,
       maxItems,
+      ...settings.data,
     },
   });
-  const count = await setGroupItems(group.id, ids as string[]);
+  const count = await setGroupItems(group.id, ids as string[], settings.itemLive);
+  await saveDiscountChoices(body?.choices, group.id);
   await logAdminAction(admin, "Grup creat", `${name} (${count} produse)`);
   return NextResponse.json({ id: group.id });
 }

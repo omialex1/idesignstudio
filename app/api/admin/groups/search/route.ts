@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  discountConflicts,
   groupsAdmin,
   productsOfCategory,
   searchForGroup,
@@ -12,6 +13,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const params = new URL(request.url).searchParams;
+  // ?conflicts=id1,id2&exclude=groupId: discount groups these products are already in
+  const conflicts = params.get("conflicts");
+  if (conflicts) {
+    const ids = conflicts.split(",").filter(Boolean).slice(0, 300);
+    return NextResponse.json(
+      await discountConflicts(ids, params.get("exclude") || null),
+    );
+  }
   const main = params.get("main");
   const sub = params.get("sub");
   if (main) {
