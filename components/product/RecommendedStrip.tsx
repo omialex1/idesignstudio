@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 
 export type StripItem = {
@@ -18,16 +18,32 @@ export type StripItem = {
 // the arrows) left and right; a click opens the product.
 export default function RecommendedStrip({
   title,
-  items,
+  items: given,
+  shuffle = false,
   prevLabel,
   nextLabel,
 }: {
   title: string;
   items: StripItem[];
+  // a new random order at every visit
+  shuffle?: boolean;
   prevLabel: string;
   nextLabel: string;
 }) {
   const track = useRef<HTMLUListElement>(null);
+  // the page is the same for everyone (cached), so the mixing happens in the
+  // browser once the page is shown; until then the saved order is used
+  const [items, setItems] = useState(given);
+  useEffect(() => {
+    if (!shuffle) return;
+    const mixed = [...given];
+    for (let i = mixed.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [mixed[i], mixed[j]] = [mixed[j], mixed[i]];
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setItems(mixed);
+  }, [given, shuffle]);
 
   function move(direction: 1 | -1) {
     const el = track.current;

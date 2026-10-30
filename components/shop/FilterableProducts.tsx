@@ -332,7 +332,18 @@ export default function FilterableProducts({
           })}
         </div>
       ) : (
-        <p className="text-taupe-500">{t("noMatches")}</p>
+        <div className="flex flex-col items-start gap-3">
+          <p className="text-taupe-500">{t("noMatches")}</p>
+          {hasActiveFilters(filters) && (
+            <button
+              type="button"
+              onClick={() => setFilters(NO_FILTERS)}
+              className="rounded-full bg-salamander-500 px-5 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600"
+            >
+              {t("resetFilters")}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

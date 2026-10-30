@@ -195,6 +195,8 @@ model ProductGroup {
   type            ProductGroupType?  @relation(fields: [typeId], references: [id], onDelete: Restrict)
   // discount in percent (for kinds with a discount); null: none
   discountPercent Int?
+  // show the products in a random order on the site (new order at every visit)
+  shuffle         Boolean            @default(false)
   // optional cap on the number of products (null: no limit)
   maxItems        Int?
   createdAt       DateTime           @default(now())

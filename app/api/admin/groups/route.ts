@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       // the old column is kept in step, for code that still reads it
       kind: type.showOnSite ? "recommended" : "promo",
       discountPercent,
+      shuffle: body?.shuffle === true,
       maxItems,
     },
   });

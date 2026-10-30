@@ -25,6 +25,8 @@ type Editor = {
   typeId: string;
   // 1..100 as typed ("" for none)
   discount: string;
+  // a new random order on the site at every visit
+  shuffle: boolean;
   maxItems: string;
   // in the order they were chosen
   items: GroupProduct[];
@@ -73,6 +75,34 @@ function Info({ product }: { product: GroupProduct }) {
         <b className="block">{product.name}</b>
         {product.description || "Fără descriere."}
       </span>
+    </span>
+  );
+}
+
+// A product name that opens the product: the name goes to its page in the admin,
+// the arrow to its page on the site (both in a new tab, so nothing typed here is lost).
+function ProductName({ product }: { product: GroupProduct }) {
+  return (
+    <span className="inline-flex max-w-full items-baseline gap-1.5">
+      <a
+        href={`/admin/products/${product.id}/edit`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Deschide produsul în admin (fereastră nouă)"
+        className="truncate hover:text-salamander-600 hover:underline"
+      >
+        {product.name}
+      </a>
+      <a
+        href={product.siteHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Vezi produsul pe site (fereastră nouă)"
+        aria-label={`Vezi ${product.name} pe site`}
+        className="shrink-0 text-xs text-taupe-500 hover:text-salamander-600"
+      >
+        ↗
+      </a>
     </span>
   );
 }
@@ -213,6 +243,7 @@ export default function GroupsWindow() {
           e.name,
           e.typeId,
           e.discount,
+          e.shuffle,
           e.maxItems,
           e.items.map((i) => i.id),
         ])
@@ -255,6 +286,7 @@ export default function GroupsWindow() {
       name: group.name,
       typeId: group.type.id,
       discount: group.discountPercent ? String(group.discountPercent) : "",
+      shuffle: group.shuffle === true,
       maxItems: group.maxItems ? String(group.maxItems) : "",
       items: group.items,
     });
@@ -266,6 +298,7 @@ export default function GroupsWindow() {
       name: "",
       typeId,
       discount: "",
+      shuffle: false,
       maxItems: "",
       items: withProduct ? [withProduct] : [],
     });
@@ -413,6 +446,7 @@ export default function GroupsWindow() {
       name: editor.name,
       typeId: editor.typeId,
       discountPercent: currentType?.hasDiscount ? discountNumber : null,
+      shuffle: editor.shuffle,
       maxItems: maxItems,
       productIds: editor.items.map((i) => i.id),
     });
@@ -793,6 +827,24 @@ export default function GroupsWindow() {
                   </div>
                 )}
 
+                {currentType?.showOnSite && (
+                  <label className="flex items-start gap-2 text-sm text-taupe-700">
+                    <input
+                      type="checkbox"
+                      checked={editor.shuffle}
+                      onChange={(e) => update({ shuffle: e.target.checked })}
+                      className="mt-0.5 h-4 w-4 accent-salamander-500"
+                    />
+                    <span>
+                      <b>Ordine aleatorie pe site</b>
+                      <span className="block text-xs text-taupe-500">
+                        Produsele din grup apar într-o altă ordine la fiecare
+                        vizită. Fără bifă, apar în ordinea de mai jos.
+                      </span>
+                    </span>
+                  </label>
+                )}
+
                 <div>
                   <input
                     value={query}
@@ -855,7 +907,9 @@ export default function GroupsWindow() {
                           />
                           <Thumb url={p.imageUrl} />
                           <div className="min-w-0 flex-1 text-sm">
-                            <b className="block truncate">{p.name}</b>
+                            <b className="block truncate">
+                              <ProductName product={p} />
+                            </b>
                             <span className="text-xs text-taupe-500">
                               Stoc: {p.stock} · {money(p.priceCents)}
                               {!p.isActive && " · ascuns pe site"}
@@ -908,7 +962,7 @@ export default function GroupsWindow() {
                                 key={p.id}
                                 className="min-w-44 px-3 py-2 font-semibold text-taupe-800"
                               >
-                                {p.name}
+                                <ProductName product={p} />
                               </th>
                             ))}
                           </tr>
@@ -1006,7 +1060,9 @@ export default function GroupsWindow() {
                             <td className="px-1 py-1.5">
                               <Thumb url={p.imageUrl} />
                             </td>
-                            <td className="px-3 py-1.5">{p.name}</td>
+                            <td className="px-3 py-1.5">
+                              <ProductName product={p} />
+                            </td>
                             <td className="px-3 py-1.5">{p.stock}</td>
                             <td className="px-1 py-1.5">
                               <Info product={p} />

@@ -24,6 +24,8 @@ export type GroupProduct = {
   description: string;
   longDescription: string;
   isActive: boolean;
+  // the product page on the site
+  siteHref: string;
 };
 
 export type GroupSummary = {
@@ -87,7 +89,12 @@ function loadProducts(where?: { id?: { in: string[] } }) {
       translations: true,
       inventory: { select: { quantityOnHand: true } },
       images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
-      category: { include: { translations: true } },
+      category: {
+        include: {
+          translations: true,
+          mainCategory: { select: { slug: true } },
+        },
+      },
     },
   });
 }
@@ -110,6 +117,7 @@ function toGroupProduct(p: ProductRow): GroupProduct {
     description: plain(ro?.description).slice(0, 220),
     longDescription: plain(ro?.longDescription ?? ro?.description),
     isActive: p.isActive,
+    siteHref: `/ro/${p.category.mainCategory?.slug ?? ""}/${p.category.slug}/${p.slug}`,
   };
 }
 
@@ -157,6 +165,7 @@ export async function getGroup(id: string) {
     name: group.name,
     type: typeInfo(group.type),
     discountPercent: group.discountPercent,
+    shuffle: group.shuffle,
     maxItems: group.maxItems,
     items: group.items
       .map((i) => byId.get(i.productId))
@@ -228,7 +237,12 @@ export async function productsOfCategory(kind: "main" | "sub", id: string) {
       translations: true,
       inventory: { select: { quantityOnHand: true } },
       images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
-      category: { include: { translations: true } },
+      category: {
+        include: {
+          translations: true,
+          mainCategory: { select: { slug: true } },
+        },
+      },
     },
   });
   return rows

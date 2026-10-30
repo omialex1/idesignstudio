@@ -60,6 +60,7 @@ export async function PUT(request: Request, { params }: Ctx) {
       typeId: type.id,
       kind: type.showOnSite ? "recommended" : "promo",
       discountPercent,
+      shuffle: body?.shuffle === true,
       maxItems,
     },
   });

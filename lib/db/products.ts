@@ -252,7 +252,7 @@ export type RecommendedProduct = {
 export async function getRecommendedProducts(
   productId: string,
   locale: string,
-): Promise<RecommendedProduct[]> {
+): Promise<{ items: RecommendedProduct[]; shuffle: boolean }> {
   const groups = await prisma.productGroup.findMany({
     where: {
       // groups of a kind shown to customers (before kinds existed: "recommended")
@@ -282,7 +282,9 @@ export async function getRecommendedProducts(
 
   const seen = new Set<string>([productId]);
   const result: RecommendedProduct[] = [];
+  let shuffle = false;
   for (const group of groups) {
+    if (group.shuffle) shuffle = true;
     for (const { product: p } of group.items) {
       if (seen.has(p.id) || !p.isActive || !p.category.mainCategory) continue;
       seen.add(p.id);
@@ -302,5 +304,5 @@ export async function getRecommendedProducts(
       });
     }
   }
-  return result;
+  return { items: result, shuffle };
 }
