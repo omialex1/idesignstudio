@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getProductDetail, getRecommendedProducts } from "@/lib/db/products";
-import ProductTile, { shortName } from "@/components/product/ProductTile";
-import { formatPrice } from "@/lib/format";
+import { shortName } from "@/components/product/ProductTile";
+import RecommendedStrip from "@/components/product/RecommendedStrip";
 import { getPaletteColors } from "@/lib/db/colors";
 import { categoryColorClass } from "@/lib/category-colors";
 import ProductPurchase from "@/components/product/ProductPurchase";
@@ -187,33 +187,29 @@ export default async function ProductDetailPage({
           />
         </div>
       </div>
+      {recommended.length > 0 && (
+        <div className="mx-auto mt-8 w-full max-w-4xl">
+          <RecommendedStrip
+            title={t("goesWith")}
+            prevLabel={t("previous")}
+            nextLabel={t("next")}
+            items={recommended.map((p) => ({
+              id: p.id,
+              href: p.href,
+              name: shortName(p.name),
+              imageUrl: p.imageUrl,
+              placeholderClass: categoryColorClass(p.mainColorKey),
+              note: p.inStock ? undefined : t("outOfStock"),
+            }))}
+          />
+        </div>
+      )}
       {product.longDescription && (
         <Reveal className="mx-auto mt-12 w-full max-w-4xl border-t border-cream-200 pt-10">
           <p className="max-w-2xl leading-relaxed whitespace-pre-line text-taupe-600">
             {renderRichText(product.longDescription)}
           </p>
         </Reveal>
-      )}
-      {recommended.length > 0 && (
-        <section className="mx-auto mt-12 w-full max-w-4xl border-t border-cream-200 pt-10">
-          <h2 className="font-display text-2xl text-taupe-800">{t("goesWith")}</h2>
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3">
-            {recommended.map((p) => {
-              const price = formatPrice(p.priceCents, p.currency, locale);
-              return (
-                <ProductTile
-                  key={p.id}
-                  href={p.href}
-                  name={shortName(p.name)}
-                  imageUrl={p.imageUrl}
-                  placeholderClass={categoryColorClass(p.mainColorKey)}
-                  priceLabel={p.hasVariants ? t("fromPrice", { price }) : price}
-                  note={p.inStock ? undefined : t("outOfStock")}
-                />
-              );
-            })}
-          </div>
-        </section>
       )}
     </div>
   );

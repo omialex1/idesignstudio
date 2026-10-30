@@ -42,6 +42,9 @@ export default function Header({
   useEffect(() => {
     const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)");
     if (!autoHide || !hasMouse.matches) return;
+    // while the search box or the menu is open the bar must stay: it would
+    // otherwise slide away under the person who is typing
+    if (searchOpen || menuOpen) return;
 
     let timer: ReturnType<typeof setTimeout>;
     const hideSoon = (ms: number) => {
@@ -72,7 +75,7 @@ export default function Header({
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener(CART_ADDED_EVENT, onAdded);
     };
-  }, [autoHide, pathname]);
+  }, [autoHide, pathname, searchOpen, menuOpen]);
 
   // The open mobile menu closes when the page is scrolled or swiped, when
   // something outside it is tapped, and on Escape.
@@ -118,8 +121,16 @@ export default function Header({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSearchOpen(false);
     };
+    // a click outside the bar closes the search, so it cannot stay open forever
+    const onPointerDown = (e: PointerEvent) => {
+      if (!headerEl.current?.contains(e.target as Node)) setSearchOpen(false);
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onPointerDown);
+    };
   }, [searchOpen]);
 
   const navLinks = categories.map((c) => ({

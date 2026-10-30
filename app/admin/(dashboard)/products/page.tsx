@@ -12,7 +12,6 @@ import {
 } from "@/lib/admin/product-filters";
 import { formatPrice } from "@/lib/format";
 import StockBadge from "@/components/admin/StockBadge";
-import CategorySelect from "@/components/admin/CategorySelect";
 import { prisma } from "@/lib/db/client";
 
 const selectClass =
@@ -106,11 +105,18 @@ export default async function AdminProductsPage({
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
             Categorie
-            <CategorySelect
-              mains={mains}
+            <select
+              name="cat"
               defaultValue={filter.main}
               className={selectClass}
-            />
+            >
+              <option value="">Toate</option>
+              {mains.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
             Subcategorie
