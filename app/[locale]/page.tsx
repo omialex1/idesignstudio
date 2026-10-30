@@ -146,14 +146,33 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           {/* gradient frame: champagne gold fading to terracotta */}
           <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_6px_18px_rgba(60,40,25,0.14)]">
             <div className="relative aspect-[16/9] overflow-hidden rounded-[calc(1.75rem-3px)] [container-type:inline-size]">
-              <Image
-                src="/images/hero-triptych.jpg"
-                alt={t("heroPhotoAlt")}
-                fill
-                priority
-                sizes="(min-width: 1024px) 620px, 92vw"
-                className="hero-zoom object-cover object-center"
-              />
+              {/* photo and bars zoom together, so the bars stay on the joins */}
+              <div className="hero-zoom absolute inset-0">
+                <Image
+                  src="/images/hero-triptych.jpg"
+                  alt={t("heroPhotoAlt")}
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 620px, 92vw"
+                  className="object-cover object-center"
+                />
+                {/* the photo is three pictures side by side; a bar in the colour and
+                    style of the frame (gold to terracotta, with a soft highlight and
+                    shadow, like the frame catching the light) sits on each join */}
+                {["31.25%", "68.2%"].map((left) => (
+                  <span
+                    key={left}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 -translate-x-1/2 shadow-[0_0_8px_rgba(60,40,25,0.22)]"
+                    style={{
+                      left,
+                      width: "clamp(2px, 0.55cqw, 6px)",
+                      background:
+                        "linear-gradient(to right, rgba(255,255,255,0.42), rgba(255,255,255,0) 45%, rgba(60,40,25,0.12)), linear-gradient(to bottom, var(--color-gold-300), var(--color-gold-400) 50%, var(--color-salamander-400))",
+                    }}
+                  />
+                ))}
+              </div>
               {/* the three captions are real text over the photo, so they follow the
                   language and stay sharp at any size (about 2.5% of the photo width) */}
               {[
