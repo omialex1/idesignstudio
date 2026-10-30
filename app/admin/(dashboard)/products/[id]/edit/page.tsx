@@ -57,6 +57,7 @@ export default async function EditProductPage({
         colorMainIds={colorMainIds}
         palettes={palettes}
         submitLabel="Salvează modificările"
+        draftKey={product.id}
         defaultValues={{
           categoryId: product.categoryId,
           slug: product.slug,

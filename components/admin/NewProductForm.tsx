@@ -51,6 +51,7 @@ export default function NewProductForm({
       colorMainIds={colorMainIds}
       palettes={palettes}
       submitLabel="Creează produs"
+      draftKey="new"
       extra={<PhotoPicker photos={photos} onChange={setPhotos} />}
     />
   );

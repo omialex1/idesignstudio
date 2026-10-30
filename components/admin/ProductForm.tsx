@@ -4,7 +4,16 @@ import { isRedirectError } from "@/lib/admin/redirect-error";
 import AdminCard from "@/components/admin/AdminCard";
 import type { PaletteOption } from "@/lib/admin/queries";
 import { swatchStyle } from "@/lib/colors-shared";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  apply as applyDraft,
+  clearDraft,
+  loadDraft,
+  sameContent,
+  snapshot,
+  storeDraft,
+  type DraftState,
+} from "@/components/admin/product-draft";
 import {
   INITIAL_PIECE_ROWS,
   INITIAL_VARIANT_ROWS,
@@ -97,6 +106,7 @@ export default function ProductForm({
   defaultValues,
   submitLabel,
   extra,
+  draftKey,
   createSubcategoryAction = createSubcategory,
 }: {
   // Resolves to { errors } when the server rejects the data (nothing on success).
@@ -111,6 +121,8 @@ export default function ProductForm({
   submitLabel: string;
   // Extra sections shown just above the submit button (e.g. photos).
   extra?: React.ReactNode;
+  // where the unsaved draft of this form is kept ("new", or the product's id)
+  draftKey: string;
   createSubcategoryAction?: typeof createSubcategory;
 }) {
   const d: ProductFormDefaults = defaultValues ?? {
@@ -196,6 +208,128 @@ export default function ProductForm({
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
+  // ---- draft: what is typed and not yet saved survives a reload or a wrong Back ----
+  const formRef = useRef<HTMLFormElement>(null);
+  const draftState: DraftState = {
+    tiered,
+    variantRows,
+    pieceRows,
+    variantPieceRows,
+    line,
+    subcategoryId,
+    colorsOn,
+    offered,
+    variantNames,
+  };
+  const latest = useRef({ draftState, allCategories });
+  useEffect(() => {
+    latest.current = { draftState, allCategories };
+  });
+  const baseline = useRef<ReturnType<typeof snapshot> | null>(null);
+  const toApply = useRef<ReturnType<typeof loadDraft>>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // false once the form is saved or the draft is thrown away: nothing is kept then
+  const keeping = useRef(true);
+  const [restoredAt, setRestoredAt] = useState<number | null>(null);
+
+  function currentContent() {
+    const form = formRef.current;
+    return form ? snapshot(form, latest.current.draftState) : null;
+  }
+
+  function saveNow() {
+    clearTimeout(saveTimer.current);
+    if (!keeping.current || !baseline.current) return;
+    const content = currentContent();
+    if (!content) return;
+    if (sameContent(content, baseline.current)) clearDraft(draftKey);
+    else storeDraft(draftKey, content);
+  }
+
+  function scheduleSave() {
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(saveNow, 500);
+  }
+
+  // on opening: remember how the form starts, and bring back an unsaved draft
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+    baseline.current = snapshot(form, latest.current.draftState);
+    const draft = loadDraft(draftKey);
+    if (!draft) return;
+    /* The draft lives in the browser (an outside system), so it is read after
+       the first render; hence the state updates in this effect. */
+    /* eslint-disable react-hooks/set-state-in-effect */
+    const s = draft.state;
+    const known = new Set(latest.current.allCategories.map((c) => c.id));
+    setTiered(s.tiered);
+    setVariantRows(s.variantRows);
+    setPieceRows(s.pieceRows);
+    setVariantPieceRows(s.variantPieceRows);
+    setLine(s.line);
+    setSubcategoryId(known.has(s.subcategoryId) ? s.subcategoryId : "");
+    setColorsOn(s.colorsOn);
+    setOffered((current) => ({ ...current, ...s.offered }));
+    setVariantNames(s.variantNames);
+    toApply.current = draft;
+    setRestoredAt(draft.savedAt);
+    /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // once the restored rows are on screen, put the typed texts back into them
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form || !toApply.current) return;
+    applyDraft(form, toApply.current);
+    toApply.current = null;
+  }, [restoredAt]);
+
+  // choices that live in the form's state are saved too
+  useEffect(() => {
+    scheduleSave();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    tiered,
+    variantRows,
+    pieceRows,
+    variantPieceRows,
+    line,
+    subcategoryId,
+    colorsOn,
+    offered,
+    variantNames,
+  ]);
+
+  // closing the tab or going back: keep the draft, and warn when something is unsaved
+  useEffect(() => {
+    const onHide = () => saveNow();
+    const onLeave = (e: BeforeUnloadEvent) => {
+      if (!keeping.current || !baseline.current) return;
+      const content = currentContent();
+      if (content && !sameContent(content, baseline.current)) {
+        saveNow();
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("pagehide", onHide);
+    window.addEventListener("beforeunload", onLeave);
+    return () => {
+      window.removeEventListener("pagehide", onHide);
+      window.removeEventListener("beforeunload", onLeave);
+      clearTimeout(saveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function discardDraft() {
+    keeping.current = false;
+    clearTimeout(saveTimer.current);
+    clearDraft(draftKey);
+    window.location.reload();
+  }
+
   async function addSubcategory() {
     if (!line) return;
     setCreating(true);
@@ -265,11 +399,17 @@ export default function ProductForm({
         { errors?: FormErrors } | undefined;
       if (result?.errors && hasErrors(result.errors)) {
         showErrors(result.errors, form);
+      } else {
+        // saved: the draft is no longer needed
+        keeping.current = false;
+        clearDraft(draftKey);
       }
     } catch (err) {
       if (isRedirectError(err)) {
         // saved: the page is moving on (the button stays disabled until it does)
         leaving = true;
+        keeping.current = false;
+        clearDraft(draftKey);
       } else {
         showErrors(
           { _form: "Nu am putut salva produsul. Încearcă din nou." },
@@ -283,6 +423,7 @@ export default function ProductForm({
 
   // Typing in a field clears its error message.
   function clearError(e: React.FormEvent<HTMLFormElement>) {
+    scheduleSave();
     const name = (e.target as HTMLInputElement).name;
     const variantName = /^variantNameRo(\d+)$/.exec(name ?? "");
     if (variantName) {
@@ -303,11 +444,38 @@ export default function ProductForm({
 
   return (
     <form
+      ref={formRef}
       onSubmit={handleSubmit}
       onInput={clearError}
+      onChange={scheduleSave}
       noValidate
       className="flex max-w-2xl flex-col gap-8"
     >
+      {restoredAt && (
+        <div
+          role="status"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gold-400 bg-gold-300/30 px-4 py-3 text-sm text-taupe-800"
+        >
+          <span>
+            Am păstrat ce nu apucaseși să salvezi (
+            {new Date(restoredAt).toLocaleString("ro-RO", {
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            ). Verifică și apasă Salvează.
+          </span>
+          <button
+            type="button"
+            onClick={discardDraft}
+            className="font-semibold text-salamander-600 hover:underline"
+          >
+            Renunță la ciornă
+          </button>
+        </div>
+      )}
+
       <AdminCard title="General" bodyClassName="flex flex-col gap-4 p-6">
 
         <Field label="Categorie principală" required>
