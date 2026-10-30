@@ -17,6 +17,8 @@ export default function ProductTile({
   imageUrl,
   placeholderClass,
   priceLabel,
+  oldPriceLabel,
+  badge,
   note,
   eyebrow,
   description,
@@ -28,6 +30,9 @@ export default function ProductTile({
   imageUrl: string | null;
   placeholderClass: string;
   priceLabel?: string;
+  // with a discount: the prior price (struck through) and e.g. "−30% · Black Friday"
+  oldPriceLabel?: string;
+  badge?: string;
   note?: string;
   eyebrow?: string;
   description?: string | null;
@@ -84,7 +89,17 @@ export default function ProductTile({
         )}
         {priceLabel && (
           <span className="text-xs font-semibold text-salamander-600 sm:text-sm">
+            {oldPriceLabel && (
+              <span className="mr-1.5 font-normal text-taupe-400 line-through">
+                {oldPriceLabel}
+              </span>
+            )}
             {priceLabel}
+          </span>
+        )}
+        {badge && (
+          <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[11px] font-semibold text-cream-50">
+            {badge}
           </span>
         )}
         {cta && (

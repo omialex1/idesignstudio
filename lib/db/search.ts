@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { promoPrices, type PromoPrice } from "@/lib/discounts";
 import {
   MAX_QUERY_LENGTH,
   matchesAllWords,
@@ -21,6 +22,7 @@ export type SearchResult = {
   hasVariants: boolean;
   inStock: boolean;
   createdAt: string;
+  promo: PromoPrice | null;
 };
 
 const MAX_RESULTS = 60;
@@ -87,14 +89,17 @@ export async function searchProducts(
         hasVariants: p.variants.length > 0,
         inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
         createdAt: p.createdAt.toISOString(),
+        promo: null,
       },
     });
   }
 
-  return scored
+  const top = scored
     .sort((a, b) => b.score - a.score)
     .slice(0, MAX_RESULTS)
     .map((s) => s.result);
+  const promos = await promoPrices(top).catch(() => new Map<string, PromoPrice>());
+  return top.map((r) => ({ ...r, promo: promos.get(r.id) ?? null }));
 }
 
 // ---- suggestions while typing ----

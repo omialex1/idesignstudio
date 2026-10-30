@@ -9,6 +9,11 @@ export type ShopProduct = {
   priceCents: number;
   currency: string;
   imageUrl: string | null;
+  // with a group discount: the prior price, the percentage off and the kind's name
+  // (priceCents is then the price after the discount)
+  oldPriceCents?: number | null;
+  percentOff?: number;
+  promoLabel?: string | null;
   hasVariants: boolean;
   inStock: boolean;
   // ISO date, for "newest first"

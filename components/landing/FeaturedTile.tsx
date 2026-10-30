@@ -15,7 +15,12 @@ export default function FeaturedTile({
   locale: string;
 }) {
   const t = useTranslations("Shop");
-  const price = formatPrice(product.priceCents, product.currency, locale);
+  const promo = product.promo;
+  const price = formatPrice(
+    promo?.finalCents ?? product.priceCents,
+    product.currency,
+    locale,
+  );
 
   return (
     <ProductTile
@@ -24,6 +29,16 @@ export default function FeaturedTile({
       imageUrl={product.imageUrl}
       placeholderClass={categoryColorClass(main.colorKey)}
       priceLabel={product.hasVariants ? t("fromPrice", { price }) : price}
+      oldPriceLabel={
+        promo?.oldCents
+          ? formatPrice(promo.oldCents, product.currency, locale)
+          : undefined
+      }
+      badge={
+        promo?.oldCents && promo.percentOff
+          ? `−${promo.percentOff}%${promo.label ? ` · ${promo.label}` : ""}`
+          : (promo?.label ?? undefined)
+      }
     />
   );
 }

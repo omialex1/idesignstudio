@@ -326,6 +326,16 @@ export default function FilterableProducts({
                 imageUrl={p.imageUrl}
                 placeholderClass={p.placeholderClass}
                 priceLabel={p.hasVariants ? t("fromPrice", { price }) : price}
+                oldPriceLabel={
+                  p.oldPriceCents
+                    ? formatPrice(p.oldPriceCents, p.currency, locale)
+                    : undefined
+                }
+                badge={
+                  p.oldPriceCents && p.percentOff
+                    ? `−${p.percentOff}%${p.promoLabel ? ` · ${p.promoLabel}` : ""}`
+                    : (p.promoLabel ?? undefined)
+                }
                 note={p.inStock ? undefined : t("outOfStock")}
               />
             );

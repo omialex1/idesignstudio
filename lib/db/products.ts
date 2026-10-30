@@ -1,7 +1,7 @@
 import { sortTiers, type PriceTier } from "@/lib/tiers";
 import { prisma } from "@/lib/db/client";
 import { variantPricing } from "@/lib/pricing";
-import { promoForProduct, promoPrices } from "@/lib/discounts";
+import { promoForProduct, promoPrices, type PromoPrice } from "@/lib/discounts";
 import { pricePointsOf } from "@/lib/price-history";
 import type { ProductPromo } from "@/lib/discount-math";
 
@@ -20,6 +20,8 @@ export type ProductWithTranslation = {
   createdAt: string;
   hasColorOptions: boolean;
   excludedColors: string[];
+  // a group discount that is switched on (see lib/discounts.ts)
+  promo?: PromoPrice | null;
 };
 
 function translateProduct(
@@ -64,6 +66,16 @@ function translateProduct(
   };
 }
 
+// Adds the discount of the groups (when switched on) to a list of products.
+async function withPromos<T extends { id: string; priceCents: number }>(
+  products: T[],
+): Promise<(T & { promo: PromoPrice | null })[]> {
+  const promos = await promoPrices(products).catch(
+    () => new Map<string, PromoPrice>(),
+  );
+  return products.map((p) => ({ ...p, promo: promos.get(p.id) ?? null }));
+}
+
 export async function getProductsByCategorySlug(
   mainCategoryId: string,
   categorySlug: string,
@@ -97,9 +109,11 @@ export async function getProductsByCategorySlug(
     name: categoryTranslation?.name ?? category.slug,
     description: categoryTranslation?.description ?? null,
     // alphabetical by the name shown, so the list is the same on every visit
-    products: category.products
-      .map((p) => translateProduct(p, locale))
-      .sort((a, b) => a.name.localeCompare(b.name, locale)),
+    products: await withPromos(
+      category.products
+        .map((p) => translateProduct(p, locale))
+        .sort((a, b) => a.name.localeCompare(b.name, locale)),
+    ),
   };
 }
 
@@ -198,6 +212,7 @@ export type FeaturedProduct = {
   currency: string;
   imageUrl: string | null;
   hasVariants: boolean;
+  promo: PromoPrice | null;
 };
 
 // Newest active products of a main category, for the homepage sections.
@@ -218,6 +233,9 @@ export async function getFeaturedProductsByMain(
     },
   });
 
+  const promos = await promoPrices(products).catch(
+    () => new Map<string, PromoPrice>(),
+  );
   return products.map((p) => {
     const translation =
       p.translations.find((t) => t.locale === locale) ??
@@ -226,6 +244,7 @@ export async function getFeaturedProductsByMain(
       id: p.id,
       slug: p.slug,
       categorySlug: p.category.slug,
+      promo: promos.get(p.id) ?? null,
       name: translation?.name ?? p.slug,
       priceCents: p.priceCents,
       currency: p.currency,
