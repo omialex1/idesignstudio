@@ -17,7 +17,7 @@ export default async function AdminDashboardLayout({
   return (
     <div className="flex min-h-screen">
       <AdminSidebar username={admin.username} />
-      <main className="flex-1 bg-[#e6d9c2] p-8">{children}</main>
+      <main className="min-w-0 flex-1 bg-[#e6d9c2] p-8">{children}</main>
     </div>
   );
 }

@@ -254,8 +254,9 @@ export default async function AdminGroupsPage({
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="flex -space-x-2">
+                    {/* photos side by side (never overlapping), the count under them */}
+                    <div className="flex flex-col items-start gap-2">
+                      <span className="flex gap-1.5">
                         {g.items.slice(0, 4).map((item) => {
                           const url = item.product.images[0]?.url;
                           return url ? (
@@ -264,12 +265,12 @@ export default async function AdminGroupsPage({
                               key={item.productId}
                               src={url}
                               alt=""
-                              className="h-9 w-9 rounded-full border-2 border-white object-cover"
+                              className="h-10 w-10 shrink-0 rounded-lg border border-cream-200 object-cover"
                             />
                           ) : (
                             <span
                               key={item.productId}
-                              className="h-9 w-9 rounded-full border-2 border-white bg-cream-200"
+                              className="h-10 w-10 shrink-0 rounded-lg border border-cream-200 bg-cream-200"
                             />
                           );
                         })}

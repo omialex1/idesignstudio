@@ -11,7 +11,7 @@ export default function TypeBadge({
       ? "bg-amber-100 text-amber-800"
       : "bg-cream-200 text-taupe-700";
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${colour}`}>
+    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold whitespace-nowrap ${colour}`}>
       {type.name}
     </span>
   );
