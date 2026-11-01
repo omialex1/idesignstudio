@@ -274,7 +274,7 @@ export default async function AdminGroupsPage({
                           );
                         })}
                       </span>
-                      <span className="text-taupe-600">
+                      <span className="rounded-full bg-cream-200 px-3 py-1 text-sm font-semibold whitespace-nowrap text-taupe-800">
                         {g.items.length} {g.items.length === 1 ? "produs" : "produse"}
                       </span>
                     </div>
