@@ -90,6 +90,10 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
   );
   const [autoOn, setAutoOn] = useState(true);
   const [auto, setAuto] = useState<{ ok: boolean; text: string } | null>(null);
+  // fields whose other language was NOT updated because that text was written or
+  // corrected by hand: source field name -> its language
+  const [skipped, setSkipped] = useState<Record<string, "ro" | "en">>({});
+  const [updatingSkipped, setUpdatingSkipped] = useState(false);
   // fields whose current text came from a translation
   const filledByTranslation = useRef(new Set<string>());
   const pairsRef = useRef(pairs);
@@ -122,7 +126,16 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
       // text written by hand in the other language is left alone
       const targetIsMine =
         target.value.trim() === "" || filledByTranslation.current.has(targetName);
-      if (!targetIsMine) return;
+      if (!targetIsMine) {
+        // left alone, but remembered: the person can update it with one click
+        setSkipped((prev) => {
+          const next = { ...prev };
+          if (text === "") delete next[sourceName];
+          else next[sourceName] = from;
+          return next;
+        });
+        return;
+      }
       if (text === "") {
         if (target.value !== "") {
           target.value = "";
@@ -157,6 +170,11 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
         if (source.value.trim() !== text || !stillMine) return;
         target.value = data.translations[0];
         filledByTranslation.current.add(targetName);
+        setSkipped((prev) => {
+          const next = { ...prev };
+          delete next[sourceName];
+          return next;
+        });
         target.dispatchEvent(new Event("input", { bubbles: true }));
         setAuto({ ok: true, text: "Tradus automat. Verifică textul înainte să salvezi." });
       } catch {
@@ -181,6 +199,13 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
       if (!found) return;
       // typing into a translated field makes it the person's own text
       filledByTranslation.current.delete(name);
+      const counterpart = found[0] === name ? found[1] : found[0];
+      setSkipped((prev) => {
+        if (!(counterpart in prev)) return prev;
+        const next = { ...prev };
+        delete next[counterpart];
+        return next;
+      });
       clearTimeout(timers.get(name));
       timers.set(
         name,
@@ -194,6 +219,66 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
       timers.forEach((t) => clearTimeout(t));
     };
   }, [autoOn]);
+
+  // Translates the fields that were skipped, replacing the other language's text.
+  async function updateSkipped() {
+    const form = anchor.current?.closest("form");
+    if (!form) return;
+    const entries = Object.entries(skipped);
+    if (entries.length === 0) return;
+    if (
+      !window.confirm(
+        `${entries.length} ${entries.length === 1 ? "câmp are" : "câmpuri au"} în cealaltă limbă text scris sau corectat de tine. Îl înlocuiesc cu traducerea textului nou?`,
+      )
+    ) {
+      return;
+    }
+    setUpdatingSkipped(true);
+    setAuto({ ok: true, text: "Se traduce..." });
+    try {
+      for (const lang of ["ro", "en"] as const) {
+        const jobs = entries
+          .filter(([, from]) => from === lang)
+          .map(([sourceName]) => {
+            const pair = pairsRef.current.find(([a, b]) => a === sourceName || b === sourceName);
+            if (!pair) return null;
+            const targetName = pair[0] === sourceName ? pair[1] : pair[0];
+            const source = form.elements.namedItem(sourceName) as TextControl | null;
+            const target = form.elements.namedItem(targetName) as TextControl | null;
+            const text = source?.value.trim() ?? "";
+            return source && target && text ? { sourceName, target, targetName, text } : null;
+          })
+          .filter((job): job is NonNullable<typeof job> => job !== null);
+        if (jobs.length === 0) continue;
+        const res = await fetch("/api/admin/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ from: lang, texts: jobs.map((j) => j.text) }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !Array.isArray(data?.translations)) {
+          setAuto({
+            ok: false,
+            text:
+              ERROR_MESSAGES[data?.error as string] ??
+              "Traducerea nu a reușit acum. Încearcă din nou.",
+          });
+          return;
+        }
+        jobs.forEach((job, i) => {
+          job.target.value = data.translations[i];
+          filledByTranslation.current.add(job.targetName);
+          job.target.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      }
+      setSkipped({});
+      setAuto({ ok: true, text: "Traducerile au fost actualizate. Verifică textul înainte să salvezi." });
+    } catch {
+      setAuto({ ok: false, text: "Nu am putut contacta serviciul de traducere." });
+    } finally {
+      setUpdatingSkipped(false);
+    }
+  }
 
   async function run(from: "ro" | "en") {
     const form = anchor.current?.closest("form");
@@ -320,6 +405,25 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
         />
         Traduce automat în timp ce scrii (nu înlocuiește textul scris de tine)
       </label>
+      {Object.keys(skipped).length > 0 && (
+        <div className="flex flex-col items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
+          <p className="text-xs font-medium text-amber-900">
+            {Object.keys(skipped).length === 1
+              ? "Un câmp nu s-a tradus automat"
+              : `${Object.keys(skipped).length} câmpuri nu s-au tradus automat`}
+            : în cealaltă limbă există text scris sau corectat de tine, iar
+            programul nu-l înlocuiește fără să-ți ceară.
+          </p>
+          <button
+            type="button"
+            onClick={updateSkipped}
+            disabled={updatingSkipped || busy !== null}
+            className="rounded-full border border-amber-400 bg-white px-4 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-60"
+          >
+            {updatingSkipped ? "Se traduce..." : "Actualizează traducerea (înlocuiește textul)"}
+          </button>
+        </div>
+      )}
       {auto && !message && (
         <p
           role="status"
