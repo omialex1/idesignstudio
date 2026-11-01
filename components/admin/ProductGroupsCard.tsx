@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AdminCard from "@/components/admin/AdminCard";
 import { controlClass } from "@/components/admin/FormBits";
-import {
-  GROUPS_CHANGED_EVENT,
-  openGroups,
-} from "@/components/admin/groups-events";
+import Link from "next/link";
 import TypeBadge from "@/components/admin/TypeBadge";
 import type { GroupTypeInfo } from "@/lib/admin/group-types";
 
@@ -90,7 +87,7 @@ export default function ProductGroupsCard({
       setNewTypeId((current) =>
         list.some((t) => t.id === current)
           ? current
-          : (list.find((t) => t.showOnSite) ?? list[0])?.id ?? "",
+          : ((list.find((t) => t.showOnSite) ?? list[0])?.id ?? ""),
       );
     }
   }, [productId]);
@@ -99,8 +96,6 @@ export default function ProductGroupsCard({
     // the list of groups lives on the server: read it once the card is shown
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
-    window.addEventListener(GROUPS_CHANGED_EVENT, load);
-    return () => window.removeEventListener(GROUPS_CHANGED_EVENT, load);
   }, [load]);
 
   useEffect(() => {
@@ -254,7 +249,17 @@ export default function ProductGroupsCard({
       <div className="flex flex-wrap items-center gap-2">
         {memberGroups.map((g) => (
           <span key={g.id} className={chip}>
-            {g.name}{" "}
+            {productId ? (
+              <Link
+                href={`/admin/groups/${g.id}`}
+                title="Deschide grupul"
+                className="hover:text-salamander-600 hover:underline"
+              >
+                {g.name}
+              </Link>
+            ) : (
+              g.name
+            )}{" "}
             <TypeBadge type={g.type} />
             <button
               type="button"
@@ -271,8 +276,7 @@ export default function ProductGroupsCard({
           .filter((p) => "newName" in p)
           .map((p) => (
             <span key={p.key} className={chip}>
-              {p.label}{" "}
-              <TypeBadge type={p.type} />
+              {p.label} <TypeBadge type={p.type} />
               <span className="text-xs text-taupe-500">grup nou</span>
               <button
                 type="button"
@@ -298,7 +302,8 @@ export default function ProductGroupsCard({
           <h3 className="text-sm font-semibold text-taupe-800">Discounturi</h3>
           {discount.tiered ? (
             <p className="text-xs text-taupe-600">
-              Produsul are preț pe cantități (invitații): nu primește discount din grup.
+              Produsul are preț pe cantități (invitații): nu primește discount
+              din grup.
             </p>
           ) : (
             <>
@@ -324,7 +329,13 @@ export default function ProductGroupsCard({
                       grupul e {g.discountLive ? "pornit" : "oprit"}
                     </span>
                     <select
-                      value={g.live === null || g.live === undefined ? "group" : g.live ? "on" : "off"}
+                      value={
+                        g.live === null || g.live === undefined
+                          ? "group"
+                          : g.live
+                            ? "on"
+                            : "off"
+                      }
                       onChange={(e) => setLive(g, e.target.value)}
                       disabled={busy}
                       aria-label={`Discountul „${g.name}” la acest produs`}
@@ -339,11 +350,13 @@ export default function ProductGroupsCard({
               </ul>
               {discountGroups.length > 1 && (
                 <label className="flex flex-col gap-1 text-xs font-medium text-taupe-700">
-                  ⚠ Produsul e în {discountGroups.length} grupuri cu discount. Se
-                  aplică un singur discount:
+                  ⚠ Produsul e în {discountGroups.length} grupuri cu discount.
+                  Se aplică un singur discount:
                   <select
                     value={
-                      discountGroups.some((g) => g.id === discount.chosenGroupId)
+                      discountGroups.some(
+                        (g) => g.id === discount.chosenGroupId,
+                      )
                         ? (discount.chosenGroupId as string)
                         : "auto"
                     }
@@ -373,13 +386,12 @@ export default function ProductGroupsCard({
         >
           Adaugă la grup ▾
         </button>
-        <button
-          type="button"
-          onClick={() => openGroups()}
+        <Link
+          href="/admin/groups"
           className="text-sm font-medium text-salamander-600 hover:underline"
         >
-          Deschide fereastra Grupuri
-        </button>
+          Deschide pagina Grupuri
+        </Link>
 
         {/* in the flow (not floating): the card clips anything that sticks out */}
         {menu && (

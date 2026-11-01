@@ -63,7 +63,7 @@ export default function RecommendedStrip({
       <div className="relative">
         <ul
           ref={track}
-          className="flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-xl bg-cream-100 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item) => (
             <li key={item.id} className="shrink-0 snap-start">
@@ -71,7 +71,7 @@ export default function RecommendedStrip({
                 href={item.href}
                 title={item.name}
                 aria-label={item.name}
-                className="group relative block h-24 w-24 overflow-hidden sm:h-28 sm:w-28"
+                className="group relative block h-24 w-24 overflow-hidden rounded-xl sm:h-28 sm:w-28"
               >
                 {item.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element

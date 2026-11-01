@@ -427,3 +427,10 @@ export async function discountConflicts(productIds: string[], excludeGroupId: st
     chosen: Object.fromEntries(products.map((p) => [p.id, p.discountGroupId])),
   };
 }
+
+// Products by id, as the group pages show them.
+export async function productsByIds(ids: string[]): Promise<GroupProduct[]> {
+  if (ids.length === 0) return [];
+  const rows = await loadProducts({ id: { in: ids } });
+  return rows.map(toGroupProduct);
+}

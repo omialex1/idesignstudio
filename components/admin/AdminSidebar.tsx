@@ -1,13 +1,12 @@
 "use client";
 
-import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { openGroups } from "@/components/admin/groups-events";
 
 const navLinks = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/products", label: "Produse", exact: false },
+  { href: "/admin/groups", label: "Grupuri", exact: false },
   { href: "/admin/categories", label: "Categorii", exact: false },
   { href: "/admin/subcategories", label: "Subcategorii", exact: false },
   { href: "/admin/colors", label: "Culori", exact: false },
@@ -45,28 +44,17 @@ export default function AdminSidebar({ username }: { username: string }) {
             ? pathname === link.href
             : pathname.startsWith(link.href);
           return (
-            <Fragment key={link.href}>
-              <Link
-                href={link.href}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-salamander-50 text-salamander-600"
-                    : "text-taupe-600 hover:bg-cream-100"
-                }`}
-              >
-                {link.label}
-              </Link>
-              {/* opens the Groups window over the current page */}
-              {link.href === "/admin/products" && (
-                <button
-                  type="button"
-                  onClick={() => openGroups()}
-                  className="rounded-lg px-3 py-2 text-left text-sm font-medium text-taupe-600 transition-colors hover:bg-cream-100"
-                >
-                  Grupuri
-                </button>
-              )}
-            </Fragment>
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-salamander-50 text-salamander-600"
+                  : "text-taupe-600 hover:bg-cream-100"
+              }`}
+            >
+              {link.label}
+            </Link>
           );
         })}
       </nav>
