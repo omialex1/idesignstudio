@@ -114,35 +114,36 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           }),
         }}
       />
-      <section className="relative -mt-[68px] overflow-hidden bg-cream-50">
+      <section className="relative -mt-[68px] overflow-hidden border-b-2 border-cream-50 bg-cream-50">
         {/* soft blurred copy of the photo as the backdrop, fading into the page */}
-        <Image
-          src="/images/hero-triptych.jpg"
-          alt=""
-          fill
-          sizes="96px"
-          className="scale-125 object-cover blur-2xl brightness-[1.04] saturate-110"
-          aria-hidden="true"
-        />
+        {/* it stops a little above the bottom edge (where the fade is already the page
+            colour), so no blurred layer ever ends exactly on the edge of the section */}
+        <div className="absolute inset-x-0 top-0 bottom-8 overflow-hidden" aria-hidden="true">
+          <Image
+            src="/images/hero-triptych.jpg"
+            alt=""
+            fill
+            sizes="96px"
+            className="scale-125 object-cover blur-2xl brightness-[1.04] saturate-110"
+            aria-hidden="true"
+          />
+        </div>
         <div
           className="absolute inset-0 bg-cream-50/25"
           aria-hidden="true"
         />
+        {/* the photo's blurred copy melts into the page: one long, eased fade (an
+            S-curve, so there is no visible start or end) down to the page colour */}
         <div
-          className="absolute inset-x-0 -bottom-0.5 h-[114px] [background:linear-gradient(to_bottom,rgba(251,245,233,0)_0%,rgba(251,245,233,0.03)_14%,rgba(251,245,233,0.1)_28%,rgba(251,245,233,0.24)_44%,rgba(251,245,233,0.46)_60%,rgba(251,245,233,0.72)_78%,rgba(251,245,233,0.92)_92%,#fbf5e9_100%)]"
-          aria-hidden="true"
-        />
-        {/* progressively stronger blur towards the bottom edge */}
-        <div
-          className="absolute inset-x-0 -bottom-10 h-[152px] backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_100%)]"
+          className="absolute inset-x-0 bottom-0 h-[280px] [background:linear-gradient(to_bottom,rgba(251,245,233,0)_0%,rgba(251,245,233,0.028)_10%,rgba(251,245,233,0.104)_20%,rgba(251,245,233,0.216)_30%,rgba(251,245,233,0.352)_40%,rgba(251,245,233,0.5)_50%,rgba(251,245,233,0.648)_60%,rgba(251,245,233,0.784)_70%,rgba(251,245,233,0.896)_80%,rgba(251,245,233,0.972)_85%,#fbf5e9_89%)]"
           aria-hidden="true"
         />
         <div
-          className="absolute inset-x-0 -bottom-10 h-24 backdrop-blur-md [mask-image:linear-gradient(to_bottom,transparent_0%,black_100%)]"
+          className="absolute inset-x-0 -bottom-px h-1.5 bg-cream-50"
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-28 sm:px-6 sm:pt-24 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-32 sm:px-6 sm:pt-24 sm:pb-36 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
           {/* gradient frame: champagne gold fading to terracotta */}
           <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_6px_18px_rgba(60,40,25,0.14)]">
             <div className="relative aspect-[16/9] overflow-hidden rounded-[calc(1.75rem-3px)] [container-type:inline-size]">
