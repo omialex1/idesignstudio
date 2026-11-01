@@ -94,6 +94,8 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
   // corrected by hand: source field name -> its language
   const [skipped, setSkipped] = useState<Record<string, "ro" | "en">>({});
   const [updatingSkipped, setUpdatingSkipped] = useState(false);
+  // the English text that the last automatic translation replaced (to go back to it)
+  const [replaced, setReplaced] = useState<{ targetName: string; previous: string } | null>(null);
   // fields whose current text came from a translation
   const filledByTranslation = useRef(new Set<string>());
   const pairsRef = useRef(pairs);
@@ -123,27 +125,32 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
       if (!source || !target) return;
 
       const text = source.value.trim();
-      // text written by hand in the other language is left alone
+      // Romanian is the source: the English always follows it, even over text that
+      // was written or corrected by hand (the last replaced text can be brought
+      // back). English never overwrites Romanian written by hand, or the two would
+      // keep replacing each other.
+      const followsRomanian = from === "ro";
       const targetIsMine =
         target.value.trim() === "" || filledByTranslation.current.has(targetName);
-      if (!targetIsMine) {
-        // left alone, but remembered: the person can update it with one click
+      if (text === "") {
+        if (targetIsMine && target.value !== "") {
+          target.value = "";
+          target.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        if (targetIsMine) filledByTranslation.current.delete(targetName);
         setSkipped((prev) => {
           const next = { ...prev };
-          if (text === "") delete next[sourceName];
-          else next[sourceName] = from;
+          delete next[sourceName];
           return next;
         });
         return;
       }
-      if (text === "") {
-        if (target.value !== "") {
-          target.value = "";
-          target.dispatchEvent(new Event("input", { bubbles: true }));
-        }
-        filledByTranslation.current.delete(targetName);
+      if (!targetIsMine && !followsRomanian) {
+        // left alone, but remembered: the person can update it with one click
+        setSkipped((prev) => ({ ...prev, [sourceName]: from }));
         return;
       }
+      const previousText = targetIsMine ? null : target.value;
 
       pending++;
       setMessage(null);
@@ -167,9 +174,16 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
         // the person kept typing, or wrote the other side by hand: drop the result
         const stillMine =
           target.value.trim() === "" || filledByTranslation.current.has(targetName);
-        if (source.value.trim() !== text || !stillMine) return;
+        if (source.value.trim() !== text || (!stillMine && !followsRomanian)) return;
+        // English text written by hand that this replaces: kept, to go back to
+        const replacedText = stillMine ? null : target.value;
         target.value = data.translations[0];
         filledByTranslation.current.add(targetName);
+        if (replacedText !== null && replacedText.trim() !== "") {
+          setReplaced({ targetName, previous: replacedText });
+        } else if (previousText === null) {
+          setReplaced((r) => (r?.targetName === targetName ? null : r));
+        }
         setSkipped((prev) => {
           const next = { ...prev };
           delete next[sourceName];
@@ -199,6 +213,7 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
       if (!found) return;
       // typing into a translated field makes it the person's own text
       filledByTranslation.current.delete(name);
+      setReplaced((r) => (r?.targetName === name ? null : r));
       const counterpart = found[0] === name ? found[1] : found[0];
       setSkipped((prev) => {
         if (!(counterpart in prev)) return prev;
@@ -219,6 +234,19 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
       timers.forEach((t) => clearTimeout(t));
     };
   }, [autoOn]);
+
+  function undoReplace() {
+    const form = anchor.current?.closest("form");
+    if (!form || !replaced) return;
+    const el = form.elements.namedItem(replaced.targetName) as TextControl | null;
+    if (el) {
+      el.value = replaced.previous;
+      // it is the person's own text again
+      filledByTranslation.current.delete(replaced.targetName);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    setReplaced(null);
+  }
 
   // Translates the fields that were skipped, replacing the other language's text.
   async function updateSkipped() {
@@ -403,7 +431,7 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
           }}
           className="h-4 w-4 accent-salamander-500"
         />
-        Traduce automat în timp ce scrii (nu înlocuiește textul scris de tine)
+        Traduce automat din română în engleză în timp ce scrii (înlocuiește engleza veche; poți reveni)
       </label>
       {Object.keys(skipped).length > 0 && (
         <div className="flex flex-col items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
@@ -421,6 +449,20 @@ export function TranslateBar({ pairs }: { pairs: Pair[] }) {
             className="rounded-full border border-amber-400 bg-white px-4 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-60"
           >
             {updatingSkipped ? "Se traduce..." : "Actualizează traducerea (înlocuiește textul)"}
+          </button>
+        </div>
+      )}
+      {replaced && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
+          <p className="text-xs font-medium text-amber-900">
+            Textul englez scris sau corectat de tine a fost înlocuit cu traducerea nouă.
+          </p>
+          <button
+            type="button"
+            onClick={undoReplace}
+            className="rounded-full border border-amber-400 bg-white px-4 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+          >
+            Revino la textul englez anterior
           </button>
         </div>
       )}
