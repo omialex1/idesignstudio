@@ -46,6 +46,43 @@ export default function RecommendedStrip({
     setItems([...fixed, ...mixed]);
   }, [given]);
 
+  // whether the row is wider than its space (then the arrows show, at every screen
+  // size), and whether it is at its start or its end (the arrow that cannot move
+  // is dimmed); it follows the window being resized
+  const [edges, setEdges] = useState({ overflow: false, atStart: true, atEnd: false });
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const measure = () => {
+      const next = {
+        overflow: el.scrollWidth > el.clientWidth + 1,
+        atStart: el.scrollLeft <= 1,
+        atEnd: el.scrollLeft + el.clientWidth >= el.scrollWidth - 1,
+      };
+      setEdges((prev) =>
+        prev.overflow === next.overflow &&
+        prev.atStart === next.atStart &&
+        prev.atEnd === next.atEnd
+          ? prev
+          : next,
+      );
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    el.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    window.addEventListener("load", measure);
+    // measured again once the page has settled (fonts and photos can move things)
+    const timers = [100, 600, 2000].map((ms) => setTimeout(measure, ms));
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener("load", measure);
+      observer.disconnect();
+      el.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, [items]);
+
   function move(direction: 1 | -1) {
     const el = track.current;
     if (!el) return;
@@ -53,7 +90,7 @@ export default function RecommendedStrip({
   }
 
   const arrow =
-    "absolute top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-cream-300 bg-white/95 text-taupe-800 shadow-md transition-colors hover:bg-cream-100 sm:flex";
+    "absolute top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-cream-300 bg-white/95 text-lg leading-none text-taupe-800 shadow-md transition-colors hover:bg-cream-100 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-white/95 sm:h-9 sm:w-9";
 
   return (
     <section aria-label={title} className="flex flex-col gap-2">
@@ -101,21 +138,23 @@ export default function RecommendedStrip({
             </li>
           ))}
         </ul>
-        {items.length > 4 && (
+        {edges.overflow && (
           <>
             <button
               type="button"
               aria-label={prevLabel}
+              disabled={edges.atStart}
               onClick={() => move(-1)}
-              className={`${arrow} left-2`}
+              className={`${arrow} left-1.5`}
             >
               ‹
             </button>
             <button
               type="button"
               aria-label={nextLabel}
+              disabled={edges.atEnd}
               onClick={() => move(1)}
-              className={`${arrow} right-2`}
+              className={`${arrow} right-1.5`}
             >
               ›
             </button>
