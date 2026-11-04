@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart/store";
 import { CART_ADDED_EVENT } from "@/components/cart/CartToast";
 import SearchForm from "@/components/layout/SearchForm";
+import BackButton from "@/components/layout/BackButton";
 
 export default function Header({
   categories,
@@ -40,7 +41,11 @@ export default function Header({
   const autoHide = pathname !== "/" && !pathname.startsWith("/account");
 
   useEffect(() => {
-    const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)");
+    // the bar slides away only on wide screens with a mouse; below 1280 px it stays
+    // in view (the Back button is in it)
+    const hasMouse = window.matchMedia(
+      "(hover: hover) and (pointer: fine) and (min-width: 1280px)",
+    );
     if (!autoHide || !hasMouse.matches) return;
     // while the search box or the menu is open the bar must stay: it would
     // otherwise slide away under the person who is typing
@@ -49,6 +54,11 @@ export default function Header({
     let timer: ReturnType<typeof setTimeout>;
     const hideSoon = (ms: number) => {
       clearTimeout(timer);
+      // the window may have been made narrower since: then the bar stays
+      if (!hasMouse.matches) {
+        setHiddenOn(null);
+        return;
+      }
       timer = setTimeout(() => setHiddenOn(pathname), ms);
     };
     const onMove = (e: MouseEvent) => {
@@ -148,9 +158,10 @@ export default function Header({
     >
       <div
         ref={bar}
-        className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/15 bg-choc/60 px-2.5 py-2 text-cream-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md sm:px-6 sm:py-2.5"
+        className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/15 bg-choc/60 px-2.5 max-[359px]:px-1.5 py-2 text-cream-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md sm:px-6 sm:py-2.5"
       >
-        <div className="flex items-center gap-1 sm:gap-3">
+        <div className="flex items-center gap-0.5 min-[360px]:gap-1 sm:gap-3">
+          <BackButton variant="header" />
           <button
             type="button"
             aria-label="Menu"
@@ -159,7 +170,7 @@ export default function Header({
               setSearchOpen(false);
               setMenuOpen((open) => !open);
             }}
-            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-cream-100 transition-colors hover:text-gold-400 lg:hidden"
+            className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full text-cream-100 transition-colors hover:text-gold-400 lg:hidden"
           >
             <svg
               viewBox="0 0 24 24"
@@ -178,7 +189,7 @@ export default function Header({
           </button>
           <Link
             href="/"
-            className="font-display text-lg tracking-wide text-cream-50 sm:text-2xl"
+            className="font-display text-sm tracking-wide whitespace-nowrap text-cream-50 min-[360px]:text-base min-[400px]:text-lg sm:text-2xl"
           >
             iDesignStudio
             <span className="text-gold-400">.ro</span>
@@ -197,14 +208,14 @@ export default function Header({
           ))}
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-4">
+        <div className="flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-4">
           <div className="flex items-center gap-1 rounded-full border border-white/20 p-1 text-xs font-semibold text-cream-100/80">
             {routing.locales.map((loc) => (
               <Link
                 key={loc}
                 href={pathname}
                 locale={loc}
-                className={`rounded-full px-1.5 py-1 transition-colors sm:px-2 ${
+                className={`rounded-full px-1.5 max-[359px]:px-1 py-1 transition-colors sm:px-2 ${
                   locale === loc
                     ? "bg-gold-400 text-choc"
                     : "hover:text-gold-400"
@@ -250,7 +261,7 @@ export default function Header({
             // login page, and the router would reuse it right after logging in
             prefetch={false}
             aria-label={tAccount("accountLabel")}
-            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
+            className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
           >
             <svg
               viewBox="0 0 24 24"
@@ -268,7 +279,7 @@ export default function Header({
           <Link
             href="/cart"
             aria-label={tCart("cartLabel")}
-            className="relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
+            className="relative flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
           >
             <svg
               viewBox="0 0 24 24"

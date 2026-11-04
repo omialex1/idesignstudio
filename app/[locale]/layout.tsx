@@ -77,10 +77,8 @@ export default async function LocaleLayout({
           <Header
             categories={mainCategories.map((c) => ({ slug: c.slug, name: c.name }))}
           />
-          <main className="relative flex-1 flex flex-col">
-            <BackButton />
-            {children}
-          </main>
+          <BackButton variant="floating" />
+          <main className="flex-1 flex flex-col">{children}</main>
           <Footer />
         </NextIntlClientProvider>
       </body>
