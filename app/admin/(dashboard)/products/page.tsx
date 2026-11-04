@@ -185,7 +185,7 @@ export default async function AdminProductsPage({
               </span>
             </>
           )}
-          {(filtered || filter.sort !== "nume") && (
+          {(filtered || filter.sort !== "nou") && (
             <Link
               href="/admin/products"
               className="py-2 text-sm font-medium text-salamander-600 hover:underline"

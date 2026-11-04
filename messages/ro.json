@@ -42,6 +42,7 @@
     "noProducts": "Nu exista inca produse in aceasta categorie.",
     "inStock": "In stoc",
     "outOfStock": "Stoc epuizat",
+    "back": "Înapoi",
     "backTo": "Înapoi la {name}",
     "chooseOption": "Alege varianta",
     "chooseColors": "Alege culorile",

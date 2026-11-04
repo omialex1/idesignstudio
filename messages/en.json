@@ -42,6 +42,7 @@
     "noProducts": "No products in this category yet.",
     "inStock": "In stock",
     "outOfStock": "Out of stock",
+    "back": "Back",
     "backTo": "Back to {name}",
     "chooseOption": "Choose an option",
     "chooseColors": "Choose your colours",
