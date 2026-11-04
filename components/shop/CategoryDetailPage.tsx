@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { getProductsByCategorySlug } from "@/lib/db/products";
 import FilterableProducts from "@/components/shop/FilterableProducts";
 import { categoryColorClass } from "@/lib/category-colors";
@@ -40,13 +39,7 @@ export default async function CategoryDetailPage({
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
       <div className="mx-auto w-full max-w-5xl">
-        <Link
-          href={`/${main.slug}`}
-          className="text-sm font-medium text-salamander-600 hover:underline"
-        >
-          {t("backTo", { name: main.name })}
-        </Link>
-        <h1 className="mt-4 font-display text-3xl text-taupe-800">
+        <h1 className="font-display text-3xl text-taupe-800">
           {category.name}
         </h1>
         {category.description && (
