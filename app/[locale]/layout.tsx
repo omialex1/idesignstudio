@@ -11,7 +11,6 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PendingOrderWatcher from "@/components/checkout/PendingOrderWatcher";
 import ScrollEffects from "@/components/layout/ScrollEffects";
-import BackButton from "@/components/layout/BackButton";
 import CartToast from "@/components/cart/CartToast";
 import "../globals.css";
 
@@ -77,7 +76,6 @@ export default async function LocaleLayout({
           <Header
             categories={mainCategories.map((c) => ({ slug: c.slug, name: c.name }))}
           />
-          <BackButton variant="floating" />
           <main className="flex-1 flex flex-col">{children}</main>
           <Footer />
         </NextIntlClientProvider>

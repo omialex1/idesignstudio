@@ -42,7 +42,7 @@ export default function Header({
 
   useEffect(() => {
     // the bar slides away only on wide screens with a mouse; below 1280 px it stays
-    // in view (the Back button is in it)
+    // in view
     const hasMouse = window.matchMedia(
       "(hover: hover) and (pointer: fine) and (min-width: 1280px)",
     );
@@ -161,7 +161,7 @@ export default function Header({
         className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/15 bg-choc/60 px-2.5 max-[359px]:px-1.5 py-2 text-cream-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md sm:px-6 sm:py-2.5"
       >
         <div className="flex items-center gap-0.5 min-[360px]:gap-1 sm:gap-3">
-          <BackButton variant="header" />
+          <BackButton />
           <button
             type="button"
             aria-label="Menu"
