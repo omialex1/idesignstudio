@@ -337,6 +337,7 @@ export default function FilterableProducts({
                     : (p.promoLabel ?? undefined)
                 }
                 note={p.inStock ? undefined : t("outOfStock")}
+                cta={t("viewProduct")}
               />
             );
           })}

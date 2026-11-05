@@ -67,47 +67,64 @@ export default function ProductTile({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center px-0.5 pt-3 pb-3.5 sm:px-1 sm:pt-5 sm:pb-5">
-        {eyebrow && (
-          <span className="mb-1 text-[11px] font-semibold tracking-[0.18em] text-salamander-600 uppercase">
-            {eyebrow}
-          </span>
-        )}
-        <h3 className="font-display text-base leading-tight text-taupe-800 sm:text-xl">
-          {name}
-        </h3>
-        {description && (
-          <p className="mt-1.5 line-clamp-2 text-xs text-taupe-600 sm:mt-2 sm:text-sm">
-            {description}
-          </p>
-        )}
-        {(priceLabel || cta) && (
-          <span
-            className="my-2.5 block h-px w-7 bg-gold-600"
-            aria-hidden="true"
-          />
-        )}
-        {priceLabel && (
-          <span className="text-xs font-semibold text-salamander-600 sm:text-sm">
-            {oldPriceLabel && (
-              <span className="mr-1.5 font-normal text-taupe-400 line-through">
-                {oldPriceLabel}
-              </span>
-            )}
-            {priceLabel}
-          </span>
-        )}
-        {badge && (
-          <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[11px] font-semibold text-cream-50">
-            {badge}
-          </span>
-        )}
+      <div className="flex flex-1 flex-col items-center px-0.5 pt-3 sm:px-1 sm:pt-5">
+        <div className="flex flex-1 flex-col items-center justify-center">
+          {eyebrow && (
+            <span className="mb-1 text-[11px] font-semibold tracking-[0.18em] text-salamander-600 uppercase">
+              {eyebrow}
+            </span>
+          )}
+          <h3 className="font-display text-base leading-tight text-taupe-800 sm:text-xl">
+            {name}
+          </h3>
+          {description && (
+            <p className="mt-1.5 line-clamp-2 text-xs text-taupe-600 sm:mt-2 sm:text-sm">
+              {description}
+            </p>
+          )}
+          {priceLabel && (
+            <span
+              className="my-2.5 block h-px w-7 bg-gold-600"
+              aria-hidden="true"
+            />
+          )}
+          {priceLabel && (
+            <span className="text-xs font-semibold text-salamander-600 sm:text-sm">
+              {oldPriceLabel && (
+                <span className="mr-1.5 font-normal text-taupe-400 line-through">
+                  {oldPriceLabel}
+                </span>
+              )}
+              {priceLabel}
+            </span>
+          )}
+          {badge && (
+            <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[11px] font-semibold text-cream-50">
+              {badge}
+            </span>
+          )}
+          {note && <span className="mt-1 text-xs text-red-600">{note}</span>}
+        </div>
         {cta && (
-          <span className="text-xs font-medium text-salamander-600 group-hover:underline sm:text-sm">
+          // looks like a button, in the style of the top bar; the whole card is the
+          // link (a real button inside a link would be invalid), so this is a span
+          <span className="mt-3 mb-3.5 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-choc px-3.5 py-1.5 text-xs font-semibold text-cream-50 shadow-sm transition-colors group-hover:bg-gold-400 group-hover:text-choc sm:mb-5 sm:px-5 sm:py-2 sm:text-sm">
             {cta}
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
           </span>
         )}
-        {note && <span className="mt-1 text-xs text-red-600">{note}</span>}
+        {!cta && <div className="pb-3.5 sm:pb-5" />}
       </div>
     </>
   );

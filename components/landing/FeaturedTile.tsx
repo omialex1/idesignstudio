@@ -34,6 +34,7 @@ export default function FeaturedTile({
           ? formatPrice(promo.oldCents, product.currency, locale)
           : undefined
       }
+      cta={t("viewProduct")}
       badge={
         promo?.oldCents && promo.percentOff
           ? `−${promo.percentOff}%${promo.label ? ` · ${promo.label}` : ""}`

@@ -250,6 +250,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 name={main.name}
                 imageUrl={imageUrl}
                 placeholderClass={categoryColorClass(main.colorKey)}
+                cta={t("viewCollection")}
                 textured
               />
             </Reveal>

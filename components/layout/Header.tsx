@@ -189,7 +189,7 @@ export default function Header({
           </button>
           <Link
             href="/"
-            className="font-display text-sm tracking-wide whitespace-nowrap text-cream-50 min-[360px]:text-base min-[400px]:text-lg sm:text-2xl"
+            className="font-display text-sm max-[339px]:text-xs tracking-wide whitespace-nowrap text-cream-50 min-[400px]:text-lg sm:text-2xl"
           >
             iDesignStudio
             <span className="text-gold-400">.ro</span>

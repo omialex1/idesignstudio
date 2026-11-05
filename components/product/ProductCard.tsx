@@ -28,6 +28,7 @@ export default async function ProductCard({
       placeholderClass={categoryColorClass(main.colorKey)}
       priceLabel={product.hasVariants ? t("fromPrice", { price }) : price}
       note={inStock ? undefined : t("outOfStock")}
+      cta={t("viewProduct")}
     />
   );
 }
