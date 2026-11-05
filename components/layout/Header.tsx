@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart/store";
-import { CART_ADDED_EVENT } from "@/components/cart/CartToast";
 import SearchForm from "@/components/layout/SearchForm";
 import BackButton from "@/components/layout/BackButton";
 
@@ -29,63 +28,8 @@ export default function Header({
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  // On every page except the homepage and the account pages the bar slides away and comes back when
-  // the mouse reaches the top edge. It is shown for a moment after each page
-  // load so people can see it exists, and it always stays on touch screens,
-  // where there is no mouse to bring it back.
-  const [hiddenOn, setHiddenOn] = useState<string | null>(null);
-  const visible = hiddenOn !== pathname;
-  const bar = useRef<HTMLDivElement>(null);
+  // The bar always stays in view (the Back button is in it).
   const headerEl = useRef<HTMLElement>(null);
-  // (the account pages keep it visible all the time)
-  const autoHide = pathname !== "/" && !pathname.startsWith("/account");
-
-  useEffect(() => {
-    // the bar slides away only on wide screens with a mouse; below 1280 px it stays
-    // in view
-    const hasMouse = window.matchMedia(
-      "(hover: hover) and (pointer: fine) and (min-width: 1280px)",
-    );
-    if (!autoHide || !hasMouse.matches) return;
-    // while the search box or the menu is open the bar must stay: it would
-    // otherwise slide away under the person who is typing
-    if (searchOpen || menuOpen) return;
-
-    let timer: ReturnType<typeof setTimeout>;
-    const hideSoon = (ms: number) => {
-      clearTimeout(timer);
-      // the window may have been made narrower since: then the bar stays
-      if (!hasMouse.matches) {
-        setHiddenOn(null);
-        return;
-      }
-      timer = setTimeout(() => setHiddenOn(pathname), ms);
-    };
-    const onMove = (e: MouseEvent) => {
-      const bottom = bar.current?.getBoundingClientRect().bottom ?? 0;
-      if (e.clientY <= Math.max(50, bottom)) {
-        clearTimeout(timer);
-        setHiddenOn(null);
-      } else {
-        hideSoon(500);
-      }
-    };
-
-    // after an add to cart, bring the bar back so the cart badge is seen
-    const onAdded = () => {
-      setHiddenOn(null);
-      hideSoon(6000);
-    };
-
-    hideSoon(2200);
-    window.addEventListener("mousemove", onMove, { passive: true });
-    window.addEventListener(CART_ADDED_EVENT, onAdded);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener(CART_ADDED_EVENT, onAdded);
-    };
-  }, [autoHide, pathname, searchOpen, menuOpen]);
 
   // The open mobile menu closes when the page is scrolled or swiped, when
   // something outside it is tapped, and on Escape.
@@ -151,13 +95,9 @@ export default function Header({
   return (
     <header
       ref={headerEl}
-      onFocusCapture={() => setHiddenOn(null)}
-      className={`sticky top-0 z-50 px-3 pt-3 transition-[transform,opacity] duration-500 ease-out motion-reduce:transition-none sm:px-6 ${
-        visible ? "" : "pointer-events-none -translate-y-[130%] opacity-0"
-      }`}
+      className="sticky top-0 z-50 px-3 pt-3 sm:px-6"
     >
       <div
-        ref={bar}
         className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/15 bg-choc/60 px-2.5 max-[359px]:px-1.5 py-2 text-cream-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md sm:px-6 sm:py-2.5"
       >
         <div className="flex items-center gap-0.5 min-[360px]:gap-1 sm:gap-3">
