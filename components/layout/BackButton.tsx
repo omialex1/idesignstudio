@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 // A "Back" button on every page except the homepage, part of the header bar at every
-// width (so it is never over the page's content). It is a solid light button, so it
-// stands out from the dark bar; from 640 px up it also says "Back".
+// width (so it is never over the page's content). It is the same outlined style as the
+// other buttons in the bar; from 640 px up it also says "Back".
 // Back goes to the page the person came from inside the site; on a page opened
 // directly (a link, a bookmark, a reload) there is nothing to go back to, so it goes
 // one level up instead (a product to its subcategory, a subcategory to its category,
@@ -59,7 +59,7 @@ export default function BackButton() {
       onClick={goBack}
       aria-label={t("back")}
       title={t("back")}
-      className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 shrink-0 items-center justify-center gap-1.5 rounded-full bg-cream-50 text-choc shadow-sm transition-colors hover:bg-gold-400 sm:h-9 sm:w-auto sm:px-4 sm:text-sm sm:font-semibold"
+      className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 shrink-0 items-center justify-center gap-1.5 rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400 sm:h-9 sm:w-auto sm:px-4 sm:text-sm sm:font-semibold"
     >
       {arrow}
       <span className="hidden sm:inline">{t("back")}</span>
