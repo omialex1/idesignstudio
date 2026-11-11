@@ -101,6 +101,7 @@
     "label": "Favorite",
     "title": "Favorite",
     "empty": "Nu ai încă produse favorite. Apasă inimioara de pe un produs ca să-l găsești aici.",
+    "remove": "Șterge",
     "browse": "Vezi produsele",
     "count": "{count, plural, one {# produs} other {# produse}}"
   },

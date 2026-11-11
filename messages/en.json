@@ -101,6 +101,7 @@
     "label": "Favorites",
     "title": "Favorites",
     "empty": "You have no favorites yet. Tap the heart on a product to find it here.",
+    "remove": "Remove",
     "browse": "Browse products",
     "count": "{count, plural, one {# product} other {# products}}"
   },

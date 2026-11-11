@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ProductTile from "@/components/product/ProductTile";
+import { Link } from "@/i18n/navigation";
 import ProductActions from "@/components/product/ProductActions";
 import type { CardProduct } from "@/lib/product-card";
 
@@ -98,7 +98,7 @@ export default function RecommendedStrip({
   }
 
   const arrow =
-    "absolute top-[28%] z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-cream-300 bg-white/95 text-lg leading-none text-taupe-800 shadow-md transition-colors hover:bg-cream-100 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-white/95 sm:h-9 sm:w-9";
+    "absolute top-[88px] z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-cream-300 bg-white/95 text-lg leading-none text-taupe-800 shadow-md transition-colors hover:bg-cream-100 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-white/95 sm:h-9 sm:w-9";
 
   return (
     <section aria-label={title} className="flex flex-col gap-2">
@@ -108,25 +108,75 @@ export default function RecommendedStrip({
       <div className="relative">
         <ul
           ref={track}
-          className="flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-1 pt-2 pb-9 -mb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory scroll-px-8 gap-3 overflow-x-auto overflow-y-hidden px-8 pt-9 pb-10 -mx-6 -mt-5 -mb-6 [mask-image:linear-gradient(to_right,transparent,black_28px,black_calc(100%-28px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item) => (
             <li
               key={item.id}
-              className="w-[172px] shrink-0 snap-start sm:w-[196px]"
+              className="w-[156px] shrink-0 snap-start sm:w-[176px]"
             >
-              <ProductTile
-                compact
-                href={item.href}
-                name={item.name}
-                imageUrl={item.imageUrl}
-                placeholderClass={item.placeholderClass}
-                priceLabel={item.price}
-                oldPriceLabel={item.oldPrice}
-                badge={item.badge}
-                note={item.note}
-                actions={<ProductActions product={item.card} compact />}
-              />
+              {/* the photo hangs above its card, on its own: no frame, a few pixels
+                  of air, and a soft glow so it does not look stuck to the page */}
+              <div className="group flex h-full flex-col items-center">
+                <Link
+                  href={item.href}
+                  aria-label={item.name}
+                  className="block shrink-0 rounded-full"
+                >
+                  <span className="block h-[108px] w-[108px] overflow-hidden rounded-full shadow-[0_8px_18px_-2px_rgba(60,40,25,0.28),0_0_18px_3px_rgba(210,168,104,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-[120px] sm:w-[120px]">
+                    {item.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.imageUrl}
+                        alt=""
+                        draggable={false}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span
+                        className={`flex h-full w-full items-center justify-center font-display text-3xl ${item.placeholderClass}`}
+                      >
+                        {item.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+
+                <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded border border-cream-200 bg-paper px-2 pt-2.5 pb-3 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
+                  <Link
+                    href={item.href}
+                    className="flex flex-1 flex-col items-center"
+                  >
+                    <h3 className="font-display text-sm leading-tight text-taupe-800 sm:text-[15px]">
+                      {item.name}
+                    </h3>
+                    {item.badge && (
+                      <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[10px] font-semibold text-cream-50">
+                        {item.badge}
+                      </span>
+                    )}
+                    {item.note && (
+                      <span className="mt-1 text-[11px] text-red-600">
+                        {item.note}
+                      </span>
+                    )}
+                  </Link>
+                  {item.price && (
+                    <span className="mt-2 text-xs font-semibold text-salamander-600 sm:text-sm">
+                      {item.oldPrice && (
+                        <span className="mr-1 font-normal text-taupe-400 line-through">
+                          {item.oldPrice}
+                        </span>
+                      )}
+                      {item.price}
+                    </span>
+                  )}
+                  <div className="mt-2 border-t border-cream-200 pt-2.5">
+                    <ProductActions product={item.card} compact />
+                  </div>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
@@ -137,7 +187,7 @@ export default function RecommendedStrip({
               aria-label={prevLabel}
               disabled={edges.atStart}
               onClick={() => move(-1)}
-              className={`${arrow} -left-2`}
+              className={`${arrow} -left-2 lg:-left-12`}
             >
               ‹
             </button>
@@ -146,7 +196,7 @@ export default function RecommendedStrip({
               aria-label={nextLabel}
               disabled={edges.atEnd}
               onClick={() => move(1)}
-              className={`${arrow} -right-2`}
+              className={`${arrow} -right-2 lg:-right-12`}
             >
               ›
             </button>
