@@ -201,6 +201,8 @@ model ProductGroupType {
   hasDiscount Boolean        @default(false)
   // when a discount of this kind is live, its name (e.g. "Black Friday") is shown by the price
   showLabel   Boolean        @default(false)
+  // the discount (percent) new groups of this kind start with; null: none
+  defaultDiscountPercent Int?
   sortOrder   Int            @default(0)
   groups      ProductGroup[]
 }

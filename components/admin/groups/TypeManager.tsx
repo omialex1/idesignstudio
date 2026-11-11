@@ -20,19 +20,51 @@ function TypeRow({
   const [showOnSite, setShowOnSite] = useState(type.showOnSite);
   const [hasDiscount, setHasDiscount] = useState(type.hasDiscount);
   const [showLabel, setShowLabel] = useState(type.showLabel);
+  const [percent, setPercent] = useState(
+    type.defaultDiscountPercent ? String(type.defaultDiscountPercent) : "",
+  );
+  const [applyToGroups, setApplyToGroups] = useState(false);
   const [busy, setBusy] = useState(false);
+  const percentNumber =
+    /^\d+$/.test(percent) && Number(percent) >= 1 && Number(percent) <= 100
+      ? Number(percent)
+      : null;
+  const percentChanged =
+    hasDiscount && percentNumber !== type.defaultDiscountPercent;
   const changed =
     name.trim() !== type.name ||
     showOnSite !== type.showOnSite ||
     hasDiscount !== type.hasDiscount ||
-    (hasDiscount && showLabel !== type.showLabel);
+    (hasDiscount && showLabel !== type.showLabel) ||
+    percentChanged;
+  // pushing the percent onto the groups that exist already
+  const applying = applyToGroups && percentNumber !== null && type.groupCount > 0;
 
   async function save() {
+    if (hasDiscount && percent && percentNumber === null) {
+      onError("Procentul implicit trebuie să fie între 1 și 100.");
+      return;
+    }
+    if (
+      applying &&
+      !window.confirm(
+        `Pui −${percentNumber}% la toate cele ${type.groupCount} ${type.groupCount === 1 ? "grup" : "grupuri"} de tip „${type.name}”? Dacă unele sunt pornite pe site, prețurile se schimbă imediat.`,
+      )
+    ) {
+      return;
+    }
     setBusy(true);
     const res = await fetch(`/api/admin/group-types/${type.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, showOnSite, hasDiscount, showLabel }),
+      body: JSON.stringify({
+        name,
+        showOnSite,
+        hasDiscount,
+        showLabel,
+        defaultDiscountPercent: percentNumber,
+        applyToGroups: applying,
+      }),
     }).catch(() => null);
     setBusy(false);
     if (!res?.ok) {
@@ -103,6 +135,64 @@ function TypeRow({
           Arată numele tipului pe site, lângă preț
         </label>
       )}
+      {hasDiscount && (
+        <div className="flex basis-full flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-taupe-800">
+            <b>Discount implicit</b>
+            {[10, 20, 30, 40, 50].map((n) => (
+              <button
+                key={n}
+                type="button"
+                aria-pressed={percentNumber === n}
+                onClick={() => setPercent(percentNumber === n ? "" : String(n))}
+                className={`rounded-full border px-3 py-0.5 text-sm font-semibold transition-colors ${
+                  percentNumber === n
+                    ? "border-choc bg-choc text-white"
+                    : "border-cream-300 bg-white text-taupe-700 hover:bg-cream-100"
+                }`}
+              >
+                {n}%
+              </button>
+            ))}
+            <label className="flex items-center gap-1.5">
+              sau
+              <input
+                value={percent}
+                onChange={(e) =>
+                  setPercent(e.target.value.replace(/\D/g, "").slice(0, 3))
+                }
+                inputMode="numeric"
+                placeholder="ex. 15"
+                aria-label="Discount implicit în procente"
+                className={controlClass(false, "w-20")}
+              />
+              %
+            </label>
+          </div>
+          <p className="text-xs text-taupe-600">
+            Procentul cu care pornesc grupurile noi de acest tip (îl poți schimba
+            apoi în fiecare grup). Gol: fără procent implicit.
+          </p>
+          {percentChanged && percentNumber !== null && type.groupCount > 0 && (
+            <label className="flex items-start gap-2 text-sm text-taupe-800">
+              <input
+                type="checkbox"
+                checked={applyToGroups}
+                onChange={(e) => setApplyToGroups(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-salamander-500"
+              />
+              <span>
+                Aplică −{percentNumber}% și la cele {type.groupCount}{" "}
+                {type.groupCount === 1 ? "grup existent" : "grupuri existente"}
+                <span className="block text-xs text-taupe-600">
+                  Înlocuiește procentul fiecărui grup de acest tip. Fără bifă,
+                  grupurile existente rămân cum sunt.
+                </span>
+              </span>
+            </label>
+          )}
+        </div>
+      )}
       <span className="text-xs text-taupe-500">
         {type.groupCount} {type.groupCount === 1 ? "grup" : "grupuri"}
       </span>
@@ -159,12 +249,13 @@ export default function TypeManager({ types }: { types: GroupTypeRow[] }) {
         Poți redenumi, adăuga sau șterge tipuri (un tip se șterge doar dacă nu
         are grupuri). „Apare pe site” înseamnă că produsele grupului se văd
         clienților ca „Merge bine cu”. „Are discount %” adaugă câmpul de
-        discount la grupurile acelui tip.
+        discount la grupurile acelui tip, iar „Discount implicit” e procentul cu
+        care pornesc grupurile noi.
       </p>
       <ul className="flex flex-col gap-2">
         {types.map((t) => (
           <TypeRow
-            key={`${t.id}-${t.name}-${t.showOnSite}-${t.hasDiscount}-${t.showLabel}`}
+            key={`${t.id}-${t.name}-${t.showOnSite}-${t.hasDiscount}-${t.showLabel}-${t.defaultDiscountPercent}-${t.groupCount}`}
             type={t}
             onSaved={() => {
               setMessage(null);

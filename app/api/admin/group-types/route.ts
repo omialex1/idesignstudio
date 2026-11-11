@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { logAdminAction } from "@/lib/admin/log";
 import { groupsAdmin } from "@/lib/admin/groups";
-import { cleanTypeName, listGroupTypes } from "@/lib/admin/group-types";
+import { asDiscount, cleanTypeName, listGroupTypes } from "@/lib/admin/group-types";
 
 export async function GET() {
   if (!(await groupsAdmin())) {
@@ -27,6 +27,8 @@ export async function POST(request: Request) {
       showOnSite: body?.showOnSite === true,
       hasDiscount: body?.hasDiscount === true,
       showLabel: body?.showLabel === true,
+      defaultDiscountPercent:
+        body?.hasDiscount === true ? asDiscount(body?.defaultDiscountPercent) : null,
       sortOrder: (last._max.sortOrder ?? -1) + 1,
     },
   });

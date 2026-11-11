@@ -15,7 +15,11 @@ export type GroupTypeInfo = {
   showLabel: boolean;
 };
 
-export type GroupTypeRow = GroupTypeInfo & { groupCount: number };
+export type GroupTypeRow = GroupTypeInfo & {
+  groupCount: number;
+  // the discount new groups of this kind start with (null: none)
+  defaultDiscountPercent: number | null;
+};
 
 // Creates the two starting kinds when there are none, and gives the groups made
 // before kinds existed the kind that matches their old setting.
@@ -56,6 +60,7 @@ export async function listGroupTypes(): Promise<GroupTypeRow[]> {
     showOnSite: t.showOnSite,
     hasDiscount: t.hasDiscount,
     showLabel: t.showLabel,
+    defaultDiscountPercent: t.hasDiscount ? t.defaultDiscountPercent : null,
     groupCount: t._count.groups,
   }));
 }

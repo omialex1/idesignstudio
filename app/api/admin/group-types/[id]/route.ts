@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/client";
 import { logAdminAction } from "@/lib/admin/log";
 import { groupsAdmin } from "@/lib/admin/groups";
-import { cleanTypeName } from "@/lib/admin/group-types";
+import { asDiscount, cleanTypeName } from "@/lib/admin/group-types";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -23,11 +23,25 @@ export async function PUT(request: Request, { params }: Ctx) {
   const showOnSite = body?.showOnSite === true;
   const hasDiscount = body?.hasDiscount === true;
   const showLabel = hasDiscount && body?.showLabel === true;
+  // the percent new groups start with; only kinds with a discount have one
+  const defaultDiscountPercent = hasDiscount
+    ? asDiscount(body?.defaultDiscountPercent)
+    : null;
+  // also set it on the groups that already exist (the admin confirmed in the page)
+  const applyToGroups = body?.applyToGroups === true && defaultDiscountPercent !== null;
   await prisma.$transaction([
     prisma.productGroupType.update({
       where: { id },
-      data: { name, showOnSite, hasDiscount, showLabel },
+      data: { name, showOnSite, hasDiscount, showLabel, defaultDiscountPercent },
     }),
+    ...(applyToGroups
+      ? [
+          prisma.productGroup.updateMany({
+            where: { typeId: id },
+            data: { discountPercent: defaultDiscountPercent },
+          }),
+        ]
+      : []),
     // a kind without a discount: its groups lose the discount they had
     ...(hasDiscount
       ? []
@@ -43,7 +57,11 @@ export async function PUT(request: Request, { params }: Ctx) {
       data: { kind: showOnSite ? "recommended" : "promo" },
     }),
   ]);
-  await logAdminAction(admin, "Tip de grup modificat", name);
+  await logAdminAction(
+    admin,
+    "Tip de grup modificat",
+    applyToGroups ? `${name} (−${defaultDiscountPercent}% aplicat și la grupuri)` : name,
+  );
   revalidatePath("/", "layout");
   return NextResponse.json({ ok: true });
 }

@@ -39,6 +39,111 @@ export type GroupData = {
   items: GroupProduct[];
 };
 
+// The percent a new group of this kind starts with ("" when the kind has none).
+function startPercent(types: GroupTypeRow[], typeId: string | undefined) {
+  const t = types.find((x) => x.id === typeId);
+  return t?.hasDiscount && t.defaultDiscountPercent
+    ? String(t.defaultDiscountPercent)
+    : "";
+}
+
+// In the Discount card: the default percent of the group's kind, edited right
+// here (it saves on the kind, so new groups of this kind start with it).
+function TypeDefaultBar({
+  type,
+  current,
+  onUse,
+  onSaved,
+}: {
+  type: GroupTypeRow;
+  // the percent now in the group's field
+  current: number | null;
+  onUse: (percent: number) => void;
+  onSaved: () => void;
+}) {
+  const [text, setText] = useState(
+    type.defaultDiscountPercent ? String(type.defaultDiscountPercent) : "",
+  );
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const number =
+    /^\d+$/.test(text) && Number(text) >= 1 && Number(text) <= 100
+      ? Number(text)
+      : null;
+  const changed = number !== type.defaultDiscountPercent;
+
+  async function save() {
+    if (text && number === null) {
+      setNote({ ok: false, text: "Între 1 și 100." });
+      return;
+    }
+    setBusy(true);
+    setNote(null);
+    const res = await fetch(`/api/admin/group-types/${type.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: type.name,
+        showOnSite: type.showOnSite,
+        hasDiscount: type.hasDiscount,
+        showLabel: type.showLabel,
+        defaultDiscountPercent: number,
+        applyToGroups: false,
+      }),
+    }).catch(() => null);
+    setBusy(false);
+    if (!res?.ok) {
+      setNote({ ok: false, text: "Nu am putut salva." });
+      return;
+    }
+    setNote({ ok: true, text: "Salvat pentru tip." });
+    onSaved();
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-sm text-taupe-800">
+      <span>
+        Procent implicit pentru tipul <b>„{type.name}”</b>:
+      </span>
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value.replace(/\D/g, "").slice(0, 3))}
+        inputMode="numeric"
+        placeholder="fără"
+        aria-label={`Procent implicit pentru tipul ${type.name}`}
+        className={controlClass(false, "w-20")}
+      />
+      %
+      <button
+        type="button"
+        onClick={save}
+        disabled={busy || !changed}
+        className={btn}
+      >
+        Salvează la tip
+      </button>
+      {type.defaultDiscountPercent !== null &&
+        type.defaultDiscountPercent !== current && (
+          <button
+            type="button"
+            onClick={() => onUse(type.defaultDiscountPercent as number)}
+            className={btn}
+          >
+            Folosește {type.defaultDiscountPercent}% aici
+          </button>
+        )}
+      {note && (
+        <span
+          role="status"
+          className={`text-xs font-medium ${note.ok ? "text-green-700" : "text-red-600"}`}
+        >
+          {note.text}
+        </span>
+      )}
+    </div>
+  );
+}
+
 // The page of one group (or of a new one): its settings, its discount and its products.
 export default function GroupEditor({
   types,
@@ -75,7 +180,7 @@ export default function GroupEditor({
           id: null,
           name: "",
           typeId: newTypeId ?? types[0]?.id ?? "",
-          discount: "",
+          discount: startPercent(types, newTypeId ?? types[0]?.id),
           shuffle: false,
           discountLive: false,
           periodOn: false,
@@ -428,7 +533,12 @@ export default function GroupEditor({
                   key={t.id}
                   type="button"
                   onClick={() => {
-                    update({ typeId: t.id });
+                    update({
+                      typeId: t.id,
+                      ...(!editor.id && !editor.discount
+                        ? { discount: startPercent(types, t.id) }
+                        : {}),
+                    });
                     if (t.hasDiscount) loadConflicts(editor.items);
                   }}
                   className={`px-4 py-2 text-sm ${
@@ -484,6 +594,15 @@ export default function GroupEditor({
               <span className="text-sm font-semibold text-taupe-800">
                 Discount pentru produsele din grup
               </span>
+              {currentType && (
+                <TypeDefaultBar
+                  key={`${currentType.id}-${currentType.defaultDiscountPercent}`}
+                  type={currentType}
+                  current={discountNumber}
+                  onUse={(n) => update({ discount: String(n) })}
+                  onSaved={() => router.refresh()}
+                />
+              )}
               <div className="flex flex-wrap items-center gap-2">
                 {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((n) => (
                   <button
