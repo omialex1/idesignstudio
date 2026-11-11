@@ -7,6 +7,8 @@ export type CategoryHit = {
   kind: "main" | "sub";
   name: string;
   count: number;
+  // for a subcategory: the category it is in
+  parent?: string | null;
 };
 export type Editor = {
   // null while it is a new, unsaved group

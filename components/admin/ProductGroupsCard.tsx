@@ -242,7 +242,9 @@ export default function ProductGroupsCard({
     <AdminCard title="Grupuri" bodyClassName="flex flex-col gap-3 p-6">
       <p className="text-xs text-taupe-400">
         Un grup „Merge bine cu” arată clienților, sub acest produs, celelalte
-        produse din grup. Grupurile promoționale sunt interne.
+        produse din grup. Grupurile promoționale sunt interne. În plus, orice
+        produs arată automat, în ordine aleatorie, celelalte produse din aceeași
+        subcategorie (după grupurile de mai jos).
         {!productId && " Alegerea se aplică după ce creezi produsul."}
       </p>
 

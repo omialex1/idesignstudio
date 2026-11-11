@@ -279,7 +279,8 @@ export type RecommendedProduct = {
 };
 
 // The products of the "Merge bine cu" groups this product is in, in the order set
-// in the groups (a product in several groups: no repeats). Only active products.
+// in the groups (a product in several groups: no repeats), then the other products
+// of its subcategory (the default group, random order). Only active products.
 export async function getRecommendedProducts(
   productId: string,
   locale: string,
@@ -343,6 +344,51 @@ export async function getRecommendedProducts(
       };
       byId.set(p.id, item);
       result.push(item);
+    }
+  }
+  // The default group every product has: all the other active products of its
+  // subcategory, in a random order (mixed in the browser). It comes after the
+  // groups set in the admin, and nothing is shown twice.
+  const own = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { categoryId: true },
+  });
+  if (own) {
+    const siblings = await prisma.product.findMany({
+      where: {
+        categoryId: own.categoryId,
+        isActive: true,
+        id: { not: productId },
+      },
+      orderBy: { createdAt: "asc" },
+      include: {
+        translations: true,
+        inventory: { select: { quantityOnHand: true } },
+        images: { orderBy: { sortOrder: "asc" }, take: 1 },
+        variants: { select: { id: true } },
+        category: {
+          include: { mainCategory: { select: { slug: true, color: true } } },
+        },
+      },
+    });
+    for (const p of siblings) {
+      if (seen.has(p.id) || !p.category.mainCategory) continue;
+      seen.add(p.id);
+      const translation =
+        p.translations.find((t) => t.locale === locale) ??
+        p.translations.find((t) => t.locale === "ro");
+      result.push({
+        id: p.id,
+        href: `/${p.category.mainCategory.slug}/${p.category.slug}/${p.slug}`,
+        name: translation?.name ?? p.slug,
+        priceCents: p.priceCents,
+        currency: p.currency,
+        imageUrl: p.images[0]?.url ?? null,
+        hasVariants: p.variants.length > 0,
+        inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
+        mainColorKey: p.category.mainCategory.color,
+        shuffled: true,
+      });
     }
   }
   // fixed-order products first, in their order; the mixed ones after them

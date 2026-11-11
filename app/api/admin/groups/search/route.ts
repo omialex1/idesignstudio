@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  categorySuggestions,
   discountConflicts,
   groupsAdmin,
   productsOfCategory,
@@ -20,6 +21,12 @@ export async function GET(request: Request) {
     return NextResponse.json(
       await discountConflicts(ids, params.get("exclude") || null),
     );
+  }
+  // ?cats=1&q=text: only categories and subcategories (empty q: all of them)
+  if (params.get("cats")) {
+    return NextResponse.json({
+      categories: await categorySuggestions((params.get("q") ?? "").slice(0, 80)),
+    });
   }
   const main = params.get("main");
   const sub = params.get("sub");

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { GroupProduct } from "@/lib/admin/groups";
 import type { GroupTypeRow } from "@/lib/admin/group-types";
 import AdminCard from "@/components/admin/AdminCard";
+import GroupNameField from "@/components/admin/groups/GroupNameField";
 import { controlClass } from "@/components/admin/FormBits";
 import {
   DiscountCell,
@@ -413,15 +414,12 @@ export default function GroupEditor({
 
       <AdminCard title="General" bodyClassName="flex flex-col gap-5 p-6">
         <div className="flex flex-wrap items-end gap-4">
-          <label className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
-            Nume grup
-            <input
-              value={editor.name}
-              onChange={(e) => update({ name: e.target.value })}
-              maxLength={80}
-              className={controlClass(false, "w-56")}
-            />
-          </label>
+          <GroupNameField
+            value={editor.name}
+            onChange={(name) => update({ name })}
+            onPick={attachCategory}
+            suggest={!editor.id}
+          />
           <div className="flex flex-col gap-1 text-xs font-medium text-taupe-500">
             Tip de grup
             <div className="inline-flex flex-wrap overflow-hidden rounded-2xl border border-taupe-400">

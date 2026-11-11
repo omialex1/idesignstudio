@@ -281,6 +281,56 @@ export async function searchForGroup(query: string) {
   return { products, categories };
 }
 
+// Categories and subcategories for the name field of a new group (autocomplete).
+// Nothing typed: all of them; otherwise the ones whose name has all the words.
+export async function categorySuggestions(query: string) {
+  const words = queryWords(query);
+  const [mains, subs, counts] = await Promise.all([
+    prisma.mainCategory.findMany({
+      include: { translations: true, categories: { select: { id: true } } },
+    }),
+    prisma.category.findMany({
+      where: { mainCategoryId: { not: null } },
+      include: { translations: true, mainCategory: { include: { translations: true } } },
+    }),
+    prisma.product.groupBy({
+      by: ["categoryId"],
+      where: { isActive: true },
+      _count: { _all: true },
+    }),
+  ]);
+  const perCategory = new Map(counts.map((c) => [c.categoryId, c._count._all]));
+  const roName = (t: { locale: string; name: string }[], fallback: string) =>
+    t.find((x) => x.locale === "ro")?.name ?? fallback;
+
+  const list = [
+    ...mains.map((m) => ({
+      id: m.id,
+      kind: "main" as const,
+      name: roName(m.translations, m.slug),
+      parent: null as string | null,
+      count: m.categories.reduce((sum, c) => sum + (perCategory.get(c.id) ?? 0), 0),
+    })),
+    ...subs.map((c) => ({
+      id: c.id,
+      kind: "sub" as const,
+      name: roName(c.translations, c.slug),
+      parent: c.mainCategory
+        ? roName(c.mainCategory.translations, c.mainCategory.slug)
+        : null,
+      count: perCategory.get(c.id) ?? 0,
+    })),
+  ];
+  return list
+    .filter((c) => c.count > 0 && matchesAllWords(words, c.name))
+    .sort(
+      (a, b) =>
+        (a.kind === b.kind ? 0 : a.kind === "main" ? -1 : 1) ||
+        a.name.localeCompare(b.name, "ro"),
+    )
+    .slice(0, 40);
+}
+
 // Active products of a main category or a subcategory (for "Adaugă toate").
 export async function productsOfCategory(kind: "main" | "sub", id: string) {
   const rows = await prisma.product.findMany({
