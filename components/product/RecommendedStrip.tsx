@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import ProductActions from "@/components/product/ProductActions";
 import type { CardProduct } from "@/lib/product-card";
@@ -53,6 +53,19 @@ export default function RecommendedStrip({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems([...fixed, ...mixed]);
   }, [given]);
+
+  // Mixing the products moves the cards in the page, and the browser (scroll snap)
+  // follows the card it had snapped to, so the row could start somewhere in the
+  // middle. After every re-ordering the row goes back to its start.
+  useLayoutEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    el.scrollLeft = 0;
+    const frame = requestAnimationFrame(() => {
+      el.scrollLeft = 0;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [items]);
 
   // whether the row is wider than its space (then the arrows show, at every screen
   // size), and whether it is at its start or its end (the arrow that cannot move
