@@ -172,19 +172,30 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             aria-hidden="true"
           />
         </Reveal>
-        {/* the first category (the one with most products) is big; the others small */}
+        {/* the first category (the one with most products) is a little bigger than the
+            others. With three, it takes the whole left column and the other two sit one
+            above the other on the right, in cells of the same grid, so the edges line up. */}
         <div
           className={`mt-10 grid gap-4 sm:gap-5 ${
-            sections.length > 1 ? "sm:grid-cols-[1.35fr_1fr]" : ""
+            sections.length >= 3
+              ? "grid-cols-2 sm:grid-cols-[1fr_1.1fr] sm:grid-rows-2"
+              : sections.length === 2
+                ? "grid-cols-2"
+                : ""
           }`}
         >
-          {sections.slice(0, 1).map(({ main, imageUrl, count }) => (
+          {sections.map(({ main, imageUrl, count }, i) => (
             <Reveal
               key={main.id}
-              className={sections.length > 1 ? "sm:row-span-2" : ""}
+              index={i}
+              className={`h-full ${
+                i === 0 && sections.length >= 3
+                  ? "col-span-2 sm:col-span-1 sm:row-span-2"
+                  : ""
+              }`}
             >
               <CategoryFeatureCard
-                large
+                large={i === 0}
                 href={`/${main.slug}`}
                 name={main.name}
                 imageUrl={imageUrl}
@@ -194,22 +205,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               />
             </Reveal>
           ))}
-          {sections.length > 1 && (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-1 sm:gap-5">
-              {sections.slice(1).map(({ main, imageUrl, count }, i) => (
-                <Reveal key={main.id} index={i + 1}>
-                  <CategoryFeatureCard
-                    href={`/${main.slug}`}
-                    name={main.name}
-                    imageUrl={imageUrl}
-                    placeholderClass={categoryColorClass(main.colorKey)}
-                    countLabel={t("productCount", { count })}
-                    cta={t("viewCollection")}
-                  />
-                </Reveal>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 

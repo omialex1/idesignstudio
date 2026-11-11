@@ -24,8 +24,8 @@ export default function CategoryFeatureCard({
     <span
       className={`block shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(60,40,25,0.16)] ${
         large
-          ? "h-36 w-36 sm:h-40 sm:w-40"
-          : "h-[72px] w-[72px] sm:h-[84px] sm:w-[84px]"
+          ? "h-28 w-28 sm:h-32 sm:w-32"
+          : "h-20 w-20 sm:h-[104px] sm:w-[104px]"
       }`}
     >
       {imageUrl ? (
@@ -51,15 +51,15 @@ export default function CategoryFeatureCard({
       href={href}
       className={`group flex h-full items-center rounded border border-cream-300/70 bg-[url(/images/card-bg.jpg)] bg-cover bg-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)] ${
         large
-          ? "flex-col gap-4 p-5 text-center sm:flex-row sm:gap-6 sm:p-7 sm:text-left"
-          : "flex-col gap-2 p-3 text-center sm:flex-row sm:gap-4 sm:p-4 sm:text-left"
+          ? "flex-col gap-3 p-4 text-center sm:flex-row sm:gap-5 sm:p-5 sm:text-left"
+          : "flex-col gap-2.5 p-3 text-center sm:flex-row sm:gap-5 sm:p-5 sm:text-left"
       }`}
     >
       {photo}
       <span className="flex min-w-0 flex-col items-center sm:items-start">
         <span
           className={`font-display leading-tight text-taupe-800 ${
-            large ? "text-2xl sm:text-3xl" : "text-base sm:text-xl"
+            large ? "text-xl sm:text-2xl" : "text-base sm:text-xl"
           }`}
         >
           {name}
