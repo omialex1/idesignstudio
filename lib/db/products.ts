@@ -204,58 +204,45 @@ export async function getProductDetail(productSlug: string, locale: string) {
   };
 }
 
-export type FeaturedProduct = {
+export type SubcategoryShowcase = {
   id: string;
   slug: string;
-  categorySlug: string;
   name: string;
-  priceCents: number;
-  currency: string;
-  imageUrl: string | null;
-  hasVariants: boolean;
-  hasColorOptions: boolean;
-  inStock: boolean;
-  promo: PromoPrice | null;
+  // active products in it
+  count: number;
+  // photos of some of its products: the homepage shows one of them, chosen at random
+  images: string[];
 };
 
-// Newest active products of a main category, for the homepage sections.
-export async function getFeaturedProductsByMain(
+// The subcategories of a main category that have at least one active product, in the
+// order set in the admin. A subcategory added later shows up here by itself.
+export async function getSubcategoryShowcase(
   mainCategoryId: string,
   locale: string,
-  take = 4,
-): Promise<FeaturedProduct[]> {
-  const products = await prisma.product.findMany({
-    where: { isActive: true, category: { mainCategoryId } },
-    orderBy: { createdAt: "desc" },
-    take,
+): Promise<SubcategoryShowcase[]> {
+  const categories = await prisma.category.findMany({
+    where: { mainCategoryId, products: { some: { isActive: true } } },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     include: {
       translations: true,
-      category: { select: { slug: true } },
-      inventory: { select: { quantityOnHand: true } },
-      images: { orderBy: { sortOrder: "asc" }, take: 1 },
-      variants: { select: { id: true } },
+      products: {
+        where: { isActive: true },
+        select: {
+          images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
+        },
+      },
     },
   });
-
-  const promos = await promoPrices(products).catch(
-    () => new Map<string, PromoPrice>(),
-  );
-  return products.map((p) => {
+  return categories.map((c) => {
     const translation =
-      p.translations.find((t) => t.locale === locale) ??
-      p.translations.find((t) => t.locale === "ro");
+      c.translations.find((t) => t.locale === locale) ??
+      c.translations.find((t) => t.locale === "ro");
     return {
-      id: p.id,
-      slug: p.slug,
-      categorySlug: p.category.slug,
-      promo: promos.get(p.id) ?? null,
-      name: translation?.name ?? p.slug,
-      priceCents: p.priceCents,
-      currency: p.currency,
-      imageUrl: p.images[0]?.url ?? null,
-      hasVariants: p.variants.length > 0,
-      hasColorOptions: p.hasColorOptions,
-      inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
+      id: c.id,
+      slug: c.slug,
+      name: translation?.name ?? c.slug,
+      count: c.products.length,
+      images: c.products.flatMap((p) => p.images.map((i) => i.url)).slice(0, 8),
     };
   });
 }

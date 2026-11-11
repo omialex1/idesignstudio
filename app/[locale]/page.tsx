@@ -6,11 +6,12 @@ import { Link } from "@/i18n/navigation";
 import { getVisibleMainCategories } from "@/lib/main-categories";
 import { categoryColorClass } from "@/lib/category-colors";
 import {
-  getFeaturedProductsByMain,
   getMainImageUrl,
   getMainProductCount,
+  getSubcategoryShowcase,
 } from "@/lib/db/products";
-import FeaturedTile from "@/components/landing/FeaturedTile";
+import SubcategoryCard from "@/components/landing/SubcategoryCard";
+import EndlessRow from "@/components/layout/EndlessRow";
 import CategoryFeatureCard from "@/components/landing/CategoryFeatureCard";
 import Reveal from "@/components/layout/Reveal";
 import { COMPANY, pageAlternates, siteUrl } from "@/lib/seo";
@@ -30,6 +31,7 @@ export async function generateMetadata({
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   const t = await getTranslations("Home");
+  const tShop = await getTranslations("Shop");
   const mainCategories = await getVisibleMainCategories(locale);
 
   const sections = await Promise.all(
@@ -37,7 +39,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       main,
       imageUrl: await getMainImageUrl(main.id),
       count: await getMainProductCount(main.id),
-      products: await getFeaturedProductsByMain(main.id, locale),
+      subcategories: await getSubcategoryShowcase(main.id, locale),
     })),
   );
 
@@ -209,8 +211,8 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       </section>
 
       {sections
-        .filter(({ products }) => products.length > 0)
-        .map(({ main, products }) => (
+        .filter(({ subcategories }) => subcategories.length > 0)
+        .map(({ main, subcategories }) => (
           <section
             key={main.id}
             className="mx-auto w-full max-w-5xl px-6 py-12"
@@ -224,25 +226,43 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 aria-hidden="true"
               />
             </Reveal>
-            <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-4">
-              {products.map((product, i) => (
-                <Reveal key={product.id} index={i % 4}>
-                  <FeaturedTile
-                    product={product}
-                    main={main}
-                    locale={locale}
-                  />
-                </Reveal>
-              ))}
+            {/* one card per subcategory (a new one shows up by itself), endlessly to the
+                right; the photo is only an example product of that subcategory */}
+            <div className="mt-10">
+              <EndlessRow
+                centered
+                resetKey={subcategories.map((c) => c.id).join(",")}
+                prevLabel={tShop("previous")}
+                nextLabel={tShop("next")}
+                itemClassName="w-[176px] shrink-0 sm:w-[200px]"
+                trackClassName="pt-4 pb-9 -mt-2 -mb-5"
+                arrowClassName="top-[45%]"
+                items={subcategories.map((sub) => ({
+                  key: sub.id,
+                  node: (
+                    <SubcategoryCard
+                      href={`/${main.slug}/${sub.slug}`}
+                      name={sub.name}
+                      countLabel={t("productCount", { count: sub.count })}
+                      cta={t("viewCollection")}
+                      images={sub.images}
+                      placeholderClass={categoryColorClass(main.colorKey)}
+                    />
+                  ),
+                }))}
+              />
             </div>
-            <Reveal className="mt-10 text-center">
-              <Link
-                href={`/${main.slug}`}
-                className="inline-block rounded-full bg-gold-400 px-9 py-3 text-xs font-semibold tracking-[0.14em] text-choc uppercase transition-colors hover:bg-gold-300"
-              >
-                {t("viewMore")}
-              </Link>
-            </Reveal>
+            {/* with a single subcategory its card already leads to everything */}
+            {subcategories.length > 1 && (
+              <Reveal className="mt-10 text-center">
+                <Link
+                  href={`/${main.slug}`}
+                  className="inline-block rounded-full bg-gold-400 px-9 py-3 text-xs font-semibold tracking-[0.14em] text-choc uppercase transition-colors hover:bg-gold-300"
+                >
+                  {t("viewMore")}
+                </Link>
+              </Reveal>
+            )}
           </section>
         ))}
 
