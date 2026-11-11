@@ -11,6 +11,7 @@ const navLinks = [
   { href: "/admin/subcategories", label: "Subcategorii", exact: false },
   { href: "/admin/colors", label: "Culori", exact: false },
   { href: "/admin/orders", label: "Comenzi", exact: false },
+  { href: "/admin/traffic", label: "Trafic", exact: false },
   { href: "/admin/log", label: "Jurnal", exact: false },
   { href: "/admin/users", label: "Conturi admin", exact: false },
   { href: "/admin/security", label: "Securitate", exact: false },

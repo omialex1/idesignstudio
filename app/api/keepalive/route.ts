@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { sendAlert } from "@/lib/alerts";
 import { purgeOldAdminLogs } from "@/lib/admin/log";
+import { purgeOldVisitors } from "@/lib/traffic";
 
 export const dynamic = "force-dynamic";
 
@@ -31,5 +32,7 @@ export async function GET(request: NextRequest) {
   }
 
   const purgedLogs = await purgeOldAdminLogs();
-  return NextResponse.json({ ok: true, purgedLogs });
+  // the visitor counter only needs the last two days of its daily hashes
+  const purgedVisitors = await purgeOldVisitors().catch(() => 0);
+  return NextResponse.json({ ok: true, purgedLogs, purgedVisitors });
 }

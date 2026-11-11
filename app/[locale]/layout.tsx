@@ -12,6 +12,7 @@ import Footer from "@/components/layout/Footer";
 import PendingOrderWatcher from "@/components/checkout/PendingOrderWatcher";
 import ScrollEffects from "@/components/layout/ScrollEffects";
 import CartToast from "@/components/cart/CartToast";
+import TrafficBeacon from "@/components/layout/TrafficBeacon";
 import "../globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -73,6 +74,7 @@ export default async function LocaleLayout({
           <PendingOrderWatcher />
           <ScrollEffects />
           <CartToast />
+          <TrafficBeacon />
           <Header
             categories={mainCategories.map((c) => ({ slug: c.slug, name: c.name }))}
           />

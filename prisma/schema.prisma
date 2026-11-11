@@ -484,3 +484,26 @@ model AdminBackupCode {
 
   @@index([adminUserId])
 }
+
+// Site traffic: counters per day, with nothing personal in them. `kind` is one of
+// views (pages opened), visitors (different people that day), page (views of one
+// page), source (where a visit came from), country and device (one count per visit).
+model TrafficCount {
+  day   String
+  kind  String
+  key   String @default("")
+  count Int    @default(0)
+
+  @@id([day, kind, key])
+  @@index([day])
+}
+
+// One row per visitor per day, only so each visitor is counted once a day. The hash
+// is built with a secret and the day, so it changes daily and cannot be traced back
+// to a person; rows older than two days are deleted.
+model TrafficVisitor {
+  day  String
+  hash String
+
+  @@id([day, hash])
+}

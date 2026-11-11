@@ -45,6 +45,10 @@ export default async function PrivacyPage() {
           </ul>
           <p className="mt-2 text-taupe-600">{t("privacyCookiesOutro")}</p>
         </Section>
+        <Section
+          heading={t("privacyStatsHeading")}
+          body={t("privacyStatsBody")}
+        />
         <Section heading={t("privacySecurityHeading")}>
           <p className="text-taupe-600">{t("privacySecurityBody")}</p>
           {/* shown only while the anti-bot check (Turnstile) is switched on */}
