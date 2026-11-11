@@ -24,8 +24,13 @@ export type StripItem = {
   shuffle?: boolean;
 };
 
+// How many times the list may be repeated at the end of the row (it never really
+// ends: when the visitor gets close to the end, the same list is added again).
+const MAX_COPIES = 12;
+
 // "Merge bine cu…": a row of small photos joined together, swiped (or moved with
-// the arrows) left and right; a click opens the product.
+// the arrows) left and right; a click opens the product. When the row is longer
+// than its space it repeats itself endlessly to the right.
 export default function RecommendedStrip({
   title,
   items: given,
@@ -67,18 +72,40 @@ export default function RecommendedStrip({
     return () => cancelAnimationFrame(frame);
   }, [items]);
 
+  // how many times the list is shown one after the other
+  const [copies, setCopies] = useState(1);
+
   // whether the row is wider than its space (then the arrows show, at every screen
   // size), and whether it is at its start or its end (the arrow that cannot move
-  // is dimmed); it follows the window being resized
-  const [edges, setEdges] = useState({ overflow: false, atStart: true, atEnd: false });
+  // is dimmed); it follows the window being resized. Close to the end, the list is
+  // added once more, so the row keeps going.
+  const [edges, setEdges] = useState({
+    overflow: false,
+    atStart: true,
+    atEnd: false,
+  });
   useEffect(() => {
     const el = track.current;
     if (!el) return;
     const measure = () => {
+      // the width of one copy of the list
+      const oneList = el.scrollWidth / copies;
+      const overflow = oneList > el.clientWidth + 1;
+      if (!overflow && copies > 1) {
+        setCopies(1);
+      } else if (
+        overflow &&
+        copies < MAX_COPIES &&
+        el.scrollLeft + el.clientWidth > el.scrollWidth - el.clientWidth * 1.5
+      ) {
+        setCopies((c) => Math.min(c + 1, MAX_COPIES));
+      }
       const next = {
-        overflow: el.scrollWidth > el.clientWidth + 1,
+        overflow,
         atStart: el.scrollLeft <= 1,
-        atEnd: el.scrollLeft + el.clientWidth >= el.scrollWidth - 1,
+        atEnd:
+          copies >= MAX_COPIES &&
+          el.scrollLeft + el.clientWidth >= el.scrollWidth - 1,
       };
       setEdges((prev) =>
         prev.overflow === next.overflow &&
@@ -102,7 +129,7 @@ export default function RecommendedStrip({
       el.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
-  }, [items]);
+  }, [items, copies]);
 
   function move(direction: 1 | -1) {
     const el = track.current;
@@ -123,75 +150,79 @@ export default function RecommendedStrip({
           ref={track}
           className="flex snap-x snap-mandatory scroll-px-8 gap-3 overflow-x-auto overflow-y-hidden px-8 pt-9 pb-10 -mx-6 -mt-5 -mb-6 [mask-image:linear-gradient(to_right,transparent,black_28px,black_calc(100%-28px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {items.map((item) => (
-            <li
-              key={item.id}
-              className="w-[156px] shrink-0 snap-start sm:w-[176px]"
-            >
-              {/* the photo hangs above its card, on its own: no frame, a few pixels
+          {Array.from({ length: copies }, (_, copy) =>
+            items.map((item) => ({ item, copy })),
+          )
+            .flat()
+            .map(({ item, copy }) => (
+              <li
+                key={`${item.id}-${copy}`}
+                className="w-[156px] shrink-0 snap-start sm:w-[176px]"
+              >
+                {/* the photo hangs above its card, on its own: no frame, a few pixels
                   of air, and a soft glow so it does not look stuck to the page */}
-              <div className="group flex h-full flex-col items-center">
-                <Link
-                  href={item.href}
-                  aria-label={item.name}
-                  className="block shrink-0 rounded-full"
-                >
-                  <span className="block h-[108px] w-[108px] overflow-hidden rounded-full shadow-[0_8px_18px_-2px_rgba(60,40,25,0.28),0_0_18px_3px_rgba(210,168,104,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-[120px] sm:w-[120px]">
-                    {item.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={item.imageUrl}
-                        alt=""
-                        draggable={false}
-                        loading="lazy"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span
-                        className={`flex h-full w-full items-center justify-center font-display text-3xl ${item.placeholderClass}`}
-                      >
-                        {item.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </span>
-                </Link>
-
-                <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded border border-cream-200 bg-paper px-2 pt-2.5 pb-3 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
+                <div className="group flex h-full flex-col items-center">
                   <Link
                     href={item.href}
-                    className="flex flex-1 flex-col items-center"
+                    aria-label={item.name}
+                    className="block shrink-0 rounded-full"
                   >
-                    <h3 className="font-display text-sm leading-tight text-taupe-800 sm:text-[15px]">
-                      {item.name}
-                    </h3>
-                    {item.badge && (
-                      <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[10px] font-semibold text-cream-50">
-                        {item.badge}
-                      </span>
-                    )}
-                    {item.note && (
-                      <span className="mt-1 text-[11px] text-red-600">
-                        {item.note}
-                      </span>
-                    )}
-                  </Link>
-                  {item.price && (
-                    <span className="mt-2 text-xs font-semibold text-salamander-600 sm:text-sm">
-                      {item.oldPrice && (
-                        <span className="mr-1 font-normal text-taupe-400 line-through">
-                          {item.oldPrice}
+                    <span className="block h-[108px] w-[108px] overflow-hidden rounded-full shadow-[0_8px_18px_-2px_rgba(60,40,25,0.28),0_0_18px_3px_rgba(210,168,104,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-[120px] sm:w-[120px]">
+                      {item.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.imageUrl}
+                          alt=""
+                          draggable={false}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span
+                          className={`flex h-full w-full items-center justify-center font-display text-3xl ${item.placeholderClass}`}
+                        >
+                          {item.name.charAt(0).toUpperCase()}
                         </span>
                       )}
-                      {item.price}
                     </span>
-                  )}
-                  <div className="mt-2 border-t border-cream-200 pt-2.5">
-                    <ProductActions product={item.card} compact />
+                  </Link>
+
+                  <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded border border-cream-200 bg-paper px-2 pt-2.5 pb-3 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
+                    <Link
+                      href={item.href}
+                      className="flex flex-1 flex-col items-center"
+                    >
+                      <h3 className="font-display text-sm leading-tight text-taupe-800 sm:text-[15px]">
+                        {item.name}
+                      </h3>
+                      {item.badge && (
+                        <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[10px] font-semibold text-cream-50">
+                          {item.badge}
+                        </span>
+                      )}
+                      {item.note && (
+                        <span className="mt-1 text-[11px] text-red-600">
+                          {item.note}
+                        </span>
+                      )}
+                    </Link>
+                    {item.price && (
+                      <span className="mt-2 text-xs font-semibold text-salamander-600 sm:text-sm">
+                        {item.oldPrice && (
+                          <span className="mr-1 font-normal text-taupe-400 line-through">
+                            {item.oldPrice}
+                          </span>
+                        )}
+                        {item.price}
+                      </span>
+                    )}
+                    <div className="mt-2 border-t border-cream-200 pt-2.5">
+                      <ProductActions product={item.card} compact />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            ))}
         </ul>
         {edges.overflow && (
           <>
