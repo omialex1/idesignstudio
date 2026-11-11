@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import ProductTile, { shortName } from "@/components/product/ProductTile";
+import ProductActions from "@/components/product/ProductActions";
 import { formatPrice } from "@/lib/format";
 import {
   NO_FILTERS,
@@ -337,7 +338,26 @@ export default function FilterableProducts({
                     : (p.promoLabel ?? undefined)
                 }
                 note={p.inStock ? undefined : t("outOfStock")}
-                cta={t("viewProduct")}
+                actions={
+                  <ProductActions
+                    product={{
+                      id: p.id,
+                      href: p.href,
+                      name: p.name,
+                      slug: p.slug,
+                      categorySlug: p.categorySlug,
+                      mainSlug: p.mainSlug,
+                      colorKey: p.colorKey,
+                      imageUrl: p.imageUrl,
+                      priceCents: p.priceCents,
+                      oldPriceCents: p.oldPriceCents,
+                      percentOff: p.percentOff,
+                      promoLabel: p.promoLabel,
+                      currency: p.currency,
+                      quickAdd: p.quickAdd,
+                    }}
+                  />
+                }
               />
             );
           })}

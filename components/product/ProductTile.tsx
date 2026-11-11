@@ -6,11 +6,14 @@ export function shortName(name: string) {
   return name.split(" – ")[0];
 }
 
-// Card with a round photo in a fine gold ring, the name and the price inside.
-// Used for products on the homepage and in category lists, and for
-// categories. Category cards pass `textured`: a soft blurred photo background
-// (a portion of the hero backdrop) with a hairline border and no ring around
-// the photo.
+// Card with a round photo, the name and the price inside. Used for products on the
+// homepage and in category lists, and for categories.
+// - Product cards pass `actions` (the heart and cart buttons): the photo has no ring,
+//   the price sits in a bottom row next to the buttons, and the photo and name are
+//   the link to the product.
+// - Category cards pass `textured`: a soft blurred photo background (a portion of
+//   the hero backdrop) with a hairline border and no ring around the photo; the
+//   whole card is one link with a "View" button.
 export default function ProductTile({
   href,
   name,
@@ -23,6 +26,7 @@ export default function ProductTile({
   eyebrow,
   description,
   cta,
+  actions,
   textured = false,
 }: {
   href: string;
@@ -37,73 +41,111 @@ export default function ProductTile({
   eyebrow?: string;
   description?: string | null;
   cta?: string;
+  actions?: React.ReactNode;
   textured?: boolean;
 }) {
-  const content = (
+  // always a circle: a square box (aspect-square) that cannot be squeezed, with the
+  // photo cropped to fill it
+  const photo = (
+    <div className="mx-auto w-[calc(100%-12px)] shrink-0">
+      <div
+        className={`relative aspect-square shrink-0 overflow-hidden rounded-full ${
+          textured || actions
+            ? "shadow-[0_4px_14px_rgba(60,40,25,0.16)]"
+            : "ring-1 ring-gold-600 ring-offset-[5px] ring-offset-paper"
+        }`}
+      >
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={name}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div
+            className={`flex h-full w-full items-center justify-center font-display text-4xl ${placeholderClass}`}
+          >
+            {name.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const title = (
     <>
-      <div className="mx-auto w-[calc(100%-12px)]">
-        <div
-          className={`relative aspect-square overflow-hidden rounded-full ${
-            textured
-              ? "shadow-[0_4px_14px_rgba(60,40,25,0.16)]"
-              : "ring-1 ring-gold-600 ring-offset-[5px] ring-offset-paper"
-          }`}
-        >
-          {imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={imageUrl}
-              alt={name}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div
-              className={`flex h-full w-full items-center justify-center font-display text-4xl ${placeholderClass}`}
-            >
-              {name.charAt(0).toUpperCase()}
-            </div>
-          )}
+      {eyebrow && (
+        <span className="mb-1 text-[11px] font-semibold tracking-[0.18em] text-salamander-600 uppercase">
+          {eyebrow}
+        </span>
+      )}
+      <h3 className="font-display text-base leading-tight text-taupe-800 sm:text-xl">
+        {name}
+      </h3>
+      {description && (
+        <p className="mt-1.5 line-clamp-2 text-xs text-taupe-600 sm:mt-2 sm:text-sm">
+          {description}
+        </p>
+      )}
+    </>
+  );
+
+  const extras = (
+    <>
+      {badge && (
+        <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[11px] font-semibold text-cream-50">
+          {badge}
+        </span>
+      )}
+      {note && <span className="mt-1 text-xs text-red-600">{note}</span>}
+    </>
+  );
+
+  const price = priceLabel && (
+    <span className="text-sm font-semibold text-salamander-600 sm:text-[15px]">
+      {oldPriceLabel && (
+        <span className="mr-1.5 font-normal text-taupe-400 line-through">
+          {oldPriceLabel}
+        </span>
+      )}
+      {priceLabel}
+    </span>
+  );
+
+  if (actions) {
+    return (
+      <div className="group flex h-full flex-col rounded border border-cream-200 bg-paper px-2.5 pt-3.5 text-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)] sm:px-4 sm:pt-5">
+        <Link href={href} className="flex flex-1 flex-col">
+          {photo}
+          <div className="flex flex-1 flex-col items-center justify-center px-0.5 pt-3 sm:px-1 sm:pt-5">
+            {title}
+            {extras}
+          </div>
+        </Link>
+        <div className="mt-3 flex flex-col items-center gap-2 border-t border-cream-200 py-3 sm:flex-row sm:justify-between sm:py-4">
+          {price}
+          {actions}
         </div>
       </div>
+    );
+  }
 
+  const content = (
+    <>
+      {photo}
       <div className="flex flex-1 flex-col items-center px-0.5 pt-3 sm:px-1 sm:pt-5">
         <div className="flex flex-1 flex-col items-center justify-center">
-          {eyebrow && (
-            <span className="mb-1 text-[11px] font-semibold tracking-[0.18em] text-salamander-600 uppercase">
-              {eyebrow}
-            </span>
-          )}
-          <h3 className="font-display text-base leading-tight text-taupe-800 sm:text-xl">
-            {name}
-          </h3>
-          {description && (
-            <p className="mt-1.5 line-clamp-2 text-xs text-taupe-600 sm:mt-2 sm:text-sm">
-              {description}
-            </p>
-          )}
+          {title}
           {priceLabel && (
             <span
               className="my-2.5 block h-px w-7 bg-gold-600"
               aria-hidden="true"
             />
           )}
-          {priceLabel && (
-            <span className="text-xs font-semibold text-salamander-600 sm:text-sm">
-              {oldPriceLabel && (
-                <span className="mr-1.5 font-normal text-taupe-400 line-through">
-                  {oldPriceLabel}
-                </span>
-              )}
-              {priceLabel}
-            </span>
-          )}
-          {badge && (
-            <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[11px] font-semibold text-cream-50">
-              {badge}
-            </span>
-          )}
-          {note && <span className="mt-1 text-xs text-red-600">{note}</span>}
+          {price}
+          {extras}
         </div>
         {cta && (
           // looks like a button, in the style of the top bar; the whole card is the

@@ -44,6 +44,9 @@
     "outOfStock": "Out of stock",
     "back": "Back",
     "viewProduct": "View product",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "chooseOptions": "Choose options",
     "chooseOption": "Choose an option",
     "chooseColors": "Choose your colours",
     "chooseColor": "Choose your colour",
@@ -92,6 +95,13 @@
     "maxAvailable": "Up to {max} pcs available right now.",
     "minOrder": "Minimum order: {min} pcs.",
     "perPiece": "/ pc"
+  },
+  "Favorites": {
+    "label": "Favorites",
+    "title": "Favorites",
+    "empty": "You have no favorites yet. Tap the heart on a product to find it here.",
+    "browse": "Browse products",
+    "count": "{count, plural, one {# product} other {# products}}"
   },
   "Cart": {
     "cartLabel": "Shopping cart",

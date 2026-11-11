@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart/store";
+import { useFavoritesStore } from "@/lib/favorites/store";
 import SearchForm from "@/components/layout/SearchForm";
 import BackButton from "@/components/layout/BackButton";
 
@@ -16,6 +17,7 @@ export default function Header({
   const tCart = useTranslations("Cart");
   const tAccount = useTranslations("Account");
   const tSearch = useTranslations("Search");
+  const tFav = useTranslations("Favorites");
   const locale = useLocale();
   const pathname = usePathname();
 
@@ -24,6 +26,10 @@ export default function Header({
   const itemCount = hasHydrated
     ? items.reduce((sum, item) => sum + item.quantity, 0)
     : 0;
+
+  const favHydrated = useFavoritesStore((state) => state.hasHydrated);
+  const favCount = useFavoritesStore((state) => state.ids.length);
+  const favoriteCount = favHydrated ? favCount : 0;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -196,6 +202,30 @@ export default function Header({
           </button>
 
           <Link
+            href="/favorites"
+            aria-label={tFav("label")}
+            className="relative hidden h-8 w-8 sm:flex sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4"
+              aria-hidden="true"
+            >
+              <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" />
+            </svg>
+            {favoriteCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-400 px-1 text-[10px] font-semibold text-choc">
+                {favoriteCount}
+              </span>
+            )}
+          </Link>
+
+          <Link
             href="/account"
             // not prefetched: while logged out that answer is a redirect to the
             // login page, and the router would reuse it right after logging in
@@ -270,6 +300,20 @@ export default function Header({
                 </Link>
               </li>
             ))}
+            <li className="sm:hidden">
+              <Link
+                href="/favorites"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 py-2.5 text-sm font-medium text-cream-100 hover:text-gold-400"
+              >
+                {tFav("label")}
+                {favoriteCount > 0 && (
+                  <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-400 px-1 text-[10px] font-semibold text-choc">
+                    {favoriteCount}
+                  </span>
+                )}
+              </Link>
+            </li>
           </ul>
         </nav>
       )}

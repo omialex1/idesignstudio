@@ -4,6 +4,7 @@ import { variantPricing } from "@/lib/pricing";
 import { promoForProduct, promoPrices, type PromoPrice } from "@/lib/discounts";
 import { pricePointsOf } from "@/lib/price-history";
 import type { ProductPromo } from "@/lib/discount-math";
+import { canQuickAdd, type CardProduct } from "@/lib/product-card";
 
 export type ProductWithTranslation = {
   id: string;
@@ -212,6 +213,8 @@ export type FeaturedProduct = {
   currency: string;
   imageUrl: string | null;
   hasVariants: boolean;
+  hasColorOptions: boolean;
+  inStock: boolean;
   promo: PromoPrice | null;
 };
 
@@ -228,6 +231,7 @@ export async function getFeaturedProductsByMain(
     include: {
       translations: true,
       category: { select: { slug: true } },
+      inventory: { select: { quantityOnHand: true } },
       images: { orderBy: { sortOrder: "asc" }, take: 1 },
       variants: { select: { id: true } },
     },
@@ -250,6 +254,8 @@ export async function getFeaturedProductsByMain(
       currency: p.currency,
       imageUrl: p.images[0]?.url ?? null,
       hasVariants: p.variants.length > 0,
+      hasColorOptions: p.hasColorOptions,
+      inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
     };
   });
 }
@@ -407,4 +413,71 @@ export async function getRecommendedProducts(
   }
   // fixed-order products first, in their order; the mixed ones after them
   return [...result.filter((r) => !r.shuffled), ...result.filter((r) => r.shuffled)];
+}
+
+export type FavoriteProduct = CardProduct & {
+  hasVariants: boolean;
+  inStock: boolean;
+};
+
+// The products with these ids that are still on sale, in the order of the ids, with
+// what a card needs (for the Favorites page; the ids come from the visitor's browser).
+export async function getProductsByIds(
+  ids: string[],
+  locale: string,
+): Promise<FavoriteProduct[]> {
+  if (ids.length === 0) return [];
+  const products = await prisma.product.findMany({
+    where: { id: { in: ids }, isActive: true },
+    include: {
+      translations: true,
+      inventory: { select: { quantityOnHand: true } },
+      images: { orderBy: { sortOrder: "asc" }, take: 1 },
+      variants: { select: { id: true } },
+      category: {
+        include: {
+          mainCategory: { select: { slug: true, color: true, usesColors: true } },
+        },
+      },
+    },
+  });
+  const promos = await promoPrices(products).catch(
+    () => new Map<string, PromoPrice>(),
+  );
+  const byId = new Map<string, FavoriteProduct>();
+  for (const p of products) {
+    const main = p.category.mainCategory;
+    if (!main) continue;
+    const translation =
+      p.translations.find((t) => t.locale === locale) ??
+      p.translations.find((t) => t.locale === "ro");
+    const promo = promos.get(p.id);
+    const inStock = (p.inventory?.quantityOnHand ?? 0) > 0;
+    const hasVariants = p.variants.length > 0;
+    byId.set(p.id, {
+      id: p.id,
+      href: `/${main.slug}/${p.category.slug}/${p.slug}`,
+      name: translation?.name ?? p.slug,
+      slug: p.slug,
+      categorySlug: p.category.slug,
+      mainSlug: main.slug,
+      colorKey: main.color,
+      imageUrl: p.images[0]?.url ?? null,
+      priceCents: promo?.finalCents ?? p.priceCents,
+      oldPriceCents: promo?.oldCents ?? null,
+      percentOff: promo?.percentOff ?? 0,
+      promoLabel: promo?.label ?? null,
+      currency: p.currency,
+      quickAdd: canQuickAdd(
+        { hasVariants, hasColorOptions: p.hasColorOptions, inStock },
+        main.usesColors,
+      ),
+      hasVariants,
+      inStock,
+    });
+  }
+  return ids.flatMap((id) => {
+    const found = byId.get(id);
+    return found ? [found] : [];
+  });
 }

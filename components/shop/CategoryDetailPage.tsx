@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { getProductsByCategorySlug } from "@/lib/db/products";
 import FilterableProducts from "@/components/shop/FilterableProducts";
 import { categoryColorClass } from "@/lib/category-colors";
+import { canQuickAdd } from "@/lib/product-card";
 import type { ShopProduct } from "@/lib/shop-filters";
 import type { MainCategory } from "@/lib/main-categories";
 
@@ -32,6 +33,18 @@ export default async function CategoryDetailPage({
     imageUrl: p.imageUrl,
     hasVariants: p.hasVariants,
     inStock: p.quantityOnHand > 0,
+    slug: p.slug,
+    categorySlug: category.slug,
+    mainSlug: main.slug,
+    colorKey: main.colorKey,
+    quickAdd: canQuickAdd(
+      {
+        hasVariants: p.hasVariants,
+        hasColorOptions: p.hasColorOptions,
+        inStock: p.quantityOnHand > 0,
+      },
+      main.usesColors,
+    ),
     createdAt: p.createdAt,
     placeholderClass: categoryColorClass(main.colorKey),
   }));

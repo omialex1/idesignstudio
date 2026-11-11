@@ -16,6 +16,12 @@ export type ShopProduct = {
   promoLabel?: string | null;
   hasVariants: boolean;
   inStock: boolean;
+  // what the cart button of the card needs (see lib/product-card.ts)
+  slug: string;
+  categorySlug: string;
+  mainSlug: string;
+  colorKey: string;
+  quickAdd: boolean;
   // ISO date, for "newest first"
   createdAt: string;
   // the subcategory, for lists that mix several (search results)

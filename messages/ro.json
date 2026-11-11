@@ -44,6 +44,9 @@
     "outOfStock": "Stoc epuizat",
     "back": "Înapoi",
     "viewProduct": "Vezi produsul",
+    "addToFavorites": "Adaugă la favorite",
+    "removeFromFavorites": "Scoate din favorite",
+    "chooseOptions": "Alege opțiunile",
     "chooseOption": "Alege varianta",
     "chooseColors": "Alege culorile",
     "chooseColor": "Alege culoarea",
@@ -92,6 +95,13 @@
     "maxAvailable": "Maximum {max} buc disponibile acum.",
     "minOrder": "Comandă minimă: {min} buc.",
     "perPiece": "/ buc"
+  },
+  "Favorites": {
+    "label": "Favorite",
+    "title": "Favorite",
+    "empty": "Nu ai încă produse favorite. Apasă inimioara de pe un produs ca să-l găsești aici.",
+    "browse": "Vezi produsele",
+    "count": "{count, plural, one {# produs} other {# produse}}"
   },
   "Cart": {
     "cartLabel": "Cos de cumparaturi",

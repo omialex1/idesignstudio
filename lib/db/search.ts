@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { canQuickAdd } from "@/lib/product-card";
 import { promoPrices, type PromoPrice } from "@/lib/discounts";
 import {
   MAX_QUERY_LENGTH,
@@ -21,6 +22,8 @@ export type SearchResult = {
   imageUrl: string | null;
   hasVariants: boolean;
   inStock: boolean;
+  // the cart button of the card can add it at once (nothing to choose)
+  quickAdd: boolean;
   createdAt: string;
   promo: PromoPrice | null;
 };
@@ -48,7 +51,7 @@ export async function searchProducts(
       category: {
         include: {
           translations: true,
-          mainCategory: { select: { slug: true, color: true } },
+          mainCategory: { select: { slug: true, color: true, usesColors: true } },
         },
       },
     },
@@ -88,6 +91,14 @@ export async function searchProducts(
         imageUrl: p.images[0]?.url ?? null,
         hasVariants: p.variants.length > 0,
         inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
+        quickAdd: canQuickAdd(
+          {
+            hasVariants: p.variants.length > 0,
+            hasColorOptions: p.hasColorOptions,
+            inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
+          },
+          p.category.mainCategory.usesColors,
+        ),
         createdAt: p.createdAt.toISOString(),
         promo: null,
       },
