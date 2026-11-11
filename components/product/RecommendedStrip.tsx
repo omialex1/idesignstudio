@@ -12,6 +12,9 @@ export type StripItem = {
   placeholderClass: string;
   // shown on the photo when the product is out of stock
   note?: string;
+  // the price on the photo (after the discount) and the one struck through
+  price?: string;
+  oldPrice?: string;
   // mixed into a new random order at every visit (the others keep their place)
   shuffle?: boolean;
 };
@@ -90,7 +93,7 @@ export default function RecommendedStrip({
   }
 
   const arrow =
-    "absolute top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-cream-300 bg-white/95 text-lg leading-none text-taupe-800 shadow-md transition-colors hover:bg-cream-100 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-white/95 sm:h-9 sm:w-9";
+    "absolute top-[36%] z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-cream-300 bg-white/95 text-lg leading-none text-taupe-800 shadow-md transition-colors hover:bg-cream-100 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-white/95 sm:h-9 sm:w-9";
 
   return (
     <section aria-label={title} className="flex flex-col gap-2">
@@ -108,7 +111,7 @@ export default function RecommendedStrip({
                 href={item.href}
                 title={item.name}
                 aria-label={item.name}
-                className="group relative block h-24 w-24 overflow-hidden rounded-xl sm:h-28 sm:w-28"
+                className="group relative block h-[115px] w-[115px] overflow-hidden rounded-xl sm:h-[134px] sm:w-[134px]"
               >
                 {item.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -127,12 +130,25 @@ export default function RecommendedStrip({
                   </span>
                 )}
                 {item.note && (
-                  <span className="absolute inset-x-0 bottom-0 bg-choc/75 px-1 py-0.5 text-center text-[10px] font-medium text-cream-50">
+                  <span className="absolute top-1.5 left-1.5 rounded-full bg-choc/80 px-2 py-0.5 text-[10px] font-medium text-cream-50">
                     {item.note}
                   </span>
                 )}
-                <span className="pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-choc/70 via-transparent to-transparent p-1.5 text-[11px] leading-tight font-medium text-cream-50 opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="line-clamp-2">{item.name}</span>
+                {/* name and price always on the photo (a phone has no hover) */}
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-gradient-to-t from-choc/90 via-choc/65 to-transparent px-1.5 pt-7 pb-1.5 text-cream-50">
+                  <span className="line-clamp-2 text-[11px] leading-tight font-medium sm:text-xs">
+                    {item.name}
+                  </span>
+                  {item.price && (
+                    <span className="text-[11px] font-semibold sm:text-xs">
+                      {item.oldPrice && (
+                        <span className="mr-1 font-normal line-through opacity-70">
+                          {item.oldPrice}
+                        </span>
+                      )}
+                      {item.price}
+                    </span>
+                  )}
                 </span>
               </Link>
             </li>

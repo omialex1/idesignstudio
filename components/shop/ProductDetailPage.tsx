@@ -10,6 +10,7 @@ import ProductPurchase from "@/components/product/ProductPurchase";
 import ProductGallery from "@/components/product/ProductGallery";
 import { COMPANY, shortText, siteUrl } from "@/lib/seo";
 import { renderRichText } from "@/lib/rich-text";
+import { formatPrice } from "@/lib/format";
 import Reveal from "@/components/layout/Reveal";
 import { calculateShippingCents } from "@/lib/shipping";
 import type { MainCategory } from "@/lib/main-categories";
@@ -201,6 +202,13 @@ export default async function ProductDetailPage({
               imageUrl: p.imageUrl,
               placeholderClass: categoryColorClass(p.mainColorKey),
               note: p.inStock ? undefined : t("outOfStock"),
+              price: (() => {
+                const price = formatPrice(p.priceCents, p.currency, locale);
+                return p.hasVariants ? t("fromPrice", { price }) : price;
+              })(),
+              oldPrice: p.oldPriceCents
+                ? formatPrice(p.oldPriceCents, p.currency, locale)
+                : undefined,
               shuffle: p.shuffled,
             }))}
           />

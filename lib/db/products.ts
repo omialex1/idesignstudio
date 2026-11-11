@@ -268,7 +268,10 @@ export type RecommendedProduct = {
   id: string;
   href: string;
   name: string;
+  // the price to show (after the discount, when one is live)
   priceCents: number;
+  // the price before the discount, when one is live
+  oldPriceCents?: number | null;
   currency: string;
   imageUrl: string | null;
   hasVariants: boolean;
@@ -389,6 +392,17 @@ export async function getRecommendedProducts(
         mainColorKey: p.category.mainCategory.color,
         shuffled: true,
       });
+    }
+  }
+  // the price shown on the photo: after the discount when one is live
+  const promos = await promoPrices(result).catch(
+    () => new Map<string, PromoPrice>(),
+  );
+  for (const item of result) {
+    const promo = promos.get(item.id);
+    if (promo) {
+      item.priceCents = promo.finalCents;
+      item.oldPriceCents = promo.oldCents;
     }
   }
   // fixed-order products first, in their order; the mixed ones after them
