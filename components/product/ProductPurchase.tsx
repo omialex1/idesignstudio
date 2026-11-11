@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/cart/store";
+import { FavoriteButton } from "@/components/product/ProductActions";
 import {
   CART_ADDED_EVENT,
   type CartAddedDetail,
@@ -556,23 +557,26 @@ export default function ProductPurchase({
         </fieldset>
       )}
 
-      {inStock && (
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={missingColors || (tiered && !qtyValid)}
-            className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {justAdded ? tCart("added") : tCart("addToCart")}
-          </button>
-          {/* with one thing to colour the heading above is enough; with several
-              pieces, say what is still missing */}
-          {missingColors && targets.length > 1 && (
-            <p className="text-xs text-taupe-500">{t("pickColorAll")}</p>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          {inStock && (
+            <button
+              type="button"
+              onClick={handleAdd}
+              disabled={missingColors || (tiered && !qtyValid)}
+              className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {justAdded ? tCart("added") : tCart("addToCart")}
+            </button>
           )}
+          <FavoriteButton productId={productId} />
         </div>
-      )}
+        {/* with one thing to colour the heading above is enough; with several
+            pieces, say what is still missing */}
+        {inStock && missingColors && targets.length > 1 && (
+          <p className="text-xs text-taupe-500">{t("pickColorAll")}</p>
+        )}
+      </div>
     </div>
   );
 }

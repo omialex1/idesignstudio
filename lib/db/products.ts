@@ -278,11 +278,18 @@ export type RecommendedProduct = {
   priceCents: number;
   // the price before the discount, when one is live
   oldPriceCents?: number | null;
+  percentOff?: number;
+  promoLabel?: string | null;
   currency: string;
   imageUrl: string | null;
   hasVariants: boolean;
   inStock: boolean;
   mainColorKey: string;
+  // what the cart button of the card needs
+  slug: string;
+  categorySlug: string;
+  mainSlug: string;
+  quickAdd: boolean;
   // comes from a group set to a random order (mixed in the browser)
   shuffled: boolean;
 };
@@ -312,7 +319,7 @@ export async function getRecommendedProducts(
               images: { orderBy: { sortOrder: "asc" }, take: 1 },
               variants: { select: { id: true } },
               category: {
-                include: { mainCategory: { select: { slug: true, color: true } } },
+                include: { mainCategory: { select: { slug: true, color: true, usesColors: true } } },
               },
             },
           },
@@ -349,6 +356,17 @@ export async function getRecommendedProducts(
         hasVariants: p.variants.length > 0,
         inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
         mainColorKey: p.category.mainCategory.color,
+        slug: p.slug,
+        categorySlug: p.category.slug,
+        mainSlug: p.category.mainCategory.slug,
+        quickAdd: canQuickAdd(
+          {
+            hasVariants: p.variants.length > 0,
+            hasColorOptions: p.hasColorOptions,
+            inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
+          },
+          p.category.mainCategory.usesColors,
+        ),
         shuffled: group.shuffle,
       };
       byId.set(p.id, item);
@@ -376,7 +394,7 @@ export async function getRecommendedProducts(
         images: { orderBy: { sortOrder: "asc" }, take: 1 },
         variants: { select: { id: true } },
         category: {
-          include: { mainCategory: { select: { slug: true, color: true } } },
+          include: { mainCategory: { select: { slug: true, color: true, usesColors: true } } },
         },
       },
     });
@@ -396,6 +414,17 @@ export async function getRecommendedProducts(
         hasVariants: p.variants.length > 0,
         inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
         mainColorKey: p.category.mainCategory.color,
+        slug: p.slug,
+        categorySlug: p.category.slug,
+        mainSlug: p.category.mainCategory.slug,
+        quickAdd: canQuickAdd(
+          {
+            hasVariants: p.variants.length > 0,
+            hasColorOptions: p.hasColorOptions,
+            inStock: (p.inventory?.quantityOnHand ?? 0) > 0,
+          },
+          p.category.mainCategory.usesColors,
+        ),
         shuffled: true,
       });
     }
@@ -409,6 +438,8 @@ export async function getRecommendedProducts(
     if (promo) {
       item.priceCents = promo.finalCents;
       item.oldPriceCents = promo.oldCents;
+      item.percentOff = promo.percentOff;
+      item.promoLabel = promo.label;
     }
   }
   // fixed-order products first, in their order; the mixed ones after them

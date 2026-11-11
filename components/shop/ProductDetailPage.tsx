@@ -209,6 +209,26 @@ export default async function ProductDetailPage({
               oldPrice: p.oldPriceCents
                 ? formatPrice(p.oldPriceCents, p.currency, locale)
                 : undefined,
+              badge:
+                p.oldPriceCents && p.percentOff
+                  ? `−${p.percentOff}%${p.promoLabel ? ` · ${p.promoLabel}` : ""}`
+                  : (p.promoLabel ?? undefined),
+              card: {
+                id: p.id,
+                href: p.href,
+                name: p.name,
+                slug: p.slug,
+                categorySlug: p.categorySlug,
+                mainSlug: p.mainSlug,
+                colorKey: p.mainColorKey,
+                imageUrl: p.imageUrl,
+                priceCents: p.priceCents,
+                oldPriceCents: p.oldPriceCents,
+                percentOff: p.percentOff,
+                promoLabel: p.promoLabel,
+                currency: p.currency,
+                quickAdd: p.quickAdd,
+              },
               shuffle: p.shuffled,
             }))}
           />

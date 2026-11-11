@@ -27,6 +27,7 @@ export default function ProductTile({
   description,
   cta,
   actions,
+  compact = false,
   textured = false,
 }: {
   href: string;
@@ -42,6 +43,8 @@ export default function ProductTile({
   description?: string | null;
   cta?: string;
   actions?: React.ReactNode;
+  // smaller text and padding, for the narrow cards of "Merge bine cu"
+  compact?: boolean;
   textured?: boolean;
 }) {
   // always a circle: a square box (aspect-square) that cannot be squeezed, with the
@@ -50,9 +53,11 @@ export default function ProductTile({
     <div className="mx-auto w-[calc(100%-12px)] shrink-0">
       <div
         className={`relative aspect-square shrink-0 overflow-hidden rounded-full ${
-          textured || actions
-            ? "shadow-[0_4px_14px_rgba(60,40,25,0.16)]"
-            : "ring-1 ring-gold-600 ring-offset-[5px] ring-offset-paper"
+          actions
+            ? "" // product cards: just the photo, no ring, no shadow, no frame
+            : textured
+              ? "shadow-[0_4px_14px_rgba(60,40,25,0.16)]"
+              : "ring-1 ring-gold-600 ring-offset-[5px] ring-offset-paper"
         }`}
       >
         {imageUrl ? (
@@ -81,7 +86,11 @@ export default function ProductTile({
           {eyebrow}
         </span>
       )}
-      <h3 className="font-display text-base leading-tight text-taupe-800 sm:text-xl">
+      <h3
+        className={`font-display leading-tight text-taupe-800 ${
+          compact ? "text-sm sm:text-base" : "text-base sm:text-xl"
+        }`}
+      >
         {name}
       </h3>
       {description && (
@@ -104,7 +113,11 @@ export default function ProductTile({
   );
 
   const price = priceLabel && (
-    <span className="text-sm font-semibold text-salamander-600 sm:text-[15px]">
+    <span
+      className={`font-semibold text-salamander-600 ${
+        compact ? "text-xs sm:text-sm" : "text-sm sm:text-[15px]"
+      }`}
+    >
       {oldPriceLabel && (
         <span className="mr-1.5 font-normal text-taupe-400 line-through">
           {oldPriceLabel}
@@ -116,15 +129,29 @@ export default function ProductTile({
 
   if (actions) {
     return (
-      <div className="group flex h-full flex-col rounded border border-cream-200 bg-paper px-2.5 pt-3.5 text-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)] sm:px-4 sm:pt-5">
+      <div
+        className={`group flex h-full flex-col rounded border border-cream-200 bg-paper text-center transition duration-300 hover:-translate-y-1 ${
+          compact
+            ? "px-2.5 pt-3 shadow-[0_3px_10px_rgba(60,40,25,0.10)] hover:shadow-[0_6px_14px_rgba(60,40,25,0.16)]"
+            : "px-2.5 pt-3.5 shadow-[0_8px_22px_rgba(60,40,25,0.10)] hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)] sm:px-4 sm:pt-5"
+        }`}
+      >
         <Link href={href} className="flex flex-1 flex-col">
           {photo}
-          <div className="flex flex-1 flex-col items-center justify-center px-0.5 pt-3 sm:px-1 sm:pt-5">
+          <div
+            className={`flex flex-1 flex-col items-center justify-center px-0.5 ${
+              compact ? "pt-2.5" : "pt-3 sm:px-1 sm:pt-5"
+            }`}
+          >
             {title}
             {extras}
           </div>
         </Link>
-        <div className="mt-3 flex flex-col items-center gap-2 border-t border-cream-200 py-3 sm:flex-row sm:justify-between sm:py-4">
+        <div
+          className={`mt-3 flex flex-col items-center gap-2 border-t border-cream-200 py-3 ${
+            compact ? "" : "sm:flex-row sm:justify-between sm:py-4"
+          }`}
+        >
           {price}
           {actions}
         </div>

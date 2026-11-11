@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@/i18n/navigation";
+import ProductTile from "@/components/product/ProductTile";
+import ProductActions from "@/components/product/ProductActions";
+import type { CardProduct } from "@/lib/product-card";
 
 export type StripItem = {
   id: string;
@@ -10,11 +12,14 @@ export type StripItem = {
   imageUrl: string | null;
   // background of the placeholder when there is no photo
   placeholderClass: string;
-  // shown on the photo when the product is out of stock
+  // shown on the card when the product is out of stock
   note?: string;
-  // the price on the photo (after the discount) and the one struck through
+  // the price (after the discount) and the one struck through, and the discount tag
   price?: string;
   oldPrice?: string;
+  badge?: string;
+  // what the heart and cart buttons need
+  card: CardProduct;
   // mixed into a new random order at every visit (the others keep their place)
   shuffle?: boolean;
 };
@@ -93,7 +98,7 @@ export default function RecommendedStrip({
   }
 
   const arrow =
-    "absolute top-[36%] z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-cream-300 bg-white/95 text-lg leading-none text-taupe-800 shadow-md transition-colors hover:bg-cream-100 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-white/95 sm:h-9 sm:w-9";
+    "absolute top-[28%] z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-cream-300 bg-white/95 text-lg leading-none text-taupe-800 shadow-md transition-colors hover:bg-cream-100 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-white/95 sm:h-9 sm:w-9";
 
   return (
     <section aria-label={title} className="flex flex-col gap-2">
@@ -103,54 +108,25 @@ export default function RecommendedStrip({
       <div className="relative">
         <ul
           ref={track}
-          className="flex snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-1 pt-2 pb-9 -mb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item) => (
-            <li key={item.id} className="shrink-0 snap-start">
-              <Link
+            <li
+              key={item.id}
+              className="w-[172px] shrink-0 snap-start sm:w-[196px]"
+            >
+              <ProductTile
+                compact
                 href={item.href}
-                title={item.name}
-                aria-label={item.name}
-                className="group relative block h-[115px] w-[115px] overflow-hidden rounded-xl sm:h-[134px] sm:w-[134px]"
-              >
-                {item.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.imageUrl}
-                    alt=""
-                    draggable={false}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <span
-                    className={`flex h-full w-full items-center justify-center font-display text-2xl ${item.placeholderClass}`}
-                  >
-                    {item.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
-                {item.note && (
-                  <span className="absolute top-1.5 left-1.5 rounded-full bg-choc/80 px-2 py-0.5 text-[10px] font-medium text-cream-50">
-                    {item.note}
-                  </span>
-                )}
-                {/* name and price always on the photo (a phone has no hover) */}
-                <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-gradient-to-t from-choc/90 via-choc/65 to-transparent px-1.5 pt-7 pb-1.5 text-cream-50">
-                  <span className="line-clamp-2 text-[11px] leading-tight font-medium sm:text-xs">
-                    {item.name}
-                  </span>
-                  {item.price && (
-                    <span className="text-[11px] font-semibold sm:text-xs">
-                      {item.oldPrice && (
-                        <span className="mr-1 font-normal line-through opacity-70">
-                          {item.oldPrice}
-                        </span>
-                      )}
-                      {item.price}
-                    </span>
-                  )}
-                </span>
-              </Link>
+                name={item.name}
+                imageUrl={item.imageUrl}
+                placeholderClass={item.placeholderClass}
+                priceLabel={item.price}
+                oldPriceLabel={item.oldPrice}
+                badge={item.badge}
+                note={item.note}
+                actions={<ProductActions product={item.card} compact />}
+              />
             </li>
           ))}
         </ul>
@@ -161,7 +137,7 @@ export default function RecommendedStrip({
               aria-label={prevLabel}
               disabled={edges.atStart}
               onClick={() => move(-1)}
-              className={`${arrow} left-1.5`}
+              className={`${arrow} -left-2`}
             >
               ‹
             </button>
@@ -170,7 +146,7 @@ export default function RecommendedStrip({
               aria-label={nextLabel}
               disabled={edges.atEnd}
               onClick={() => move(1)}
-              className={`${arrow} right-1.5`}
+              className={`${arrow} -right-2`}
             >
               ›
             </button>
