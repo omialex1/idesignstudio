@@ -157,7 +157,7 @@ export default function RecommendedStrip({
             .map(({ item, copy }) => (
               <li
                 key={`${item.id}-${copy}`}
-                className="w-[156px] shrink-0 snap-start sm:w-[176px]"
+                className="w-[125px] shrink-0 snap-start sm:w-[141px]"
               >
                 {/* the photo hangs above its card, on its own: no frame, a few pixels
                   of air, and a soft glow so it does not look stuck to the page */}
@@ -187,27 +187,27 @@ export default function RecommendedStrip({
                     </span>
                   </Link>
 
-                  <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded border border-cream-200 bg-paper px-2 pt-2.5 pb-3 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
+                  <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded border border-cream-200 bg-paper px-1.5 pt-2 pb-2.5 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
                     <Link
                       href={item.href}
                       className="flex flex-1 flex-col items-center"
                     >
-                      <h3 className="font-display text-sm leading-tight text-taupe-800 sm:text-[15px]">
+                      <h3 className="line-clamp-3 font-display text-[12px] leading-tight text-taupe-800 sm:text-[13px]">
                         {item.name}
                       </h3>
                       {item.badge && (
-                        <span className="mt-1 rounded-full bg-salamander-500 px-2 py-0.5 text-[10px] font-semibold text-cream-50">
+                        <span className="mt-1 rounded-full bg-salamander-500 px-1.5 py-0.5 text-[9px] font-semibold text-cream-50">
                           {item.badge}
                         </span>
                       )}
                       {item.note && (
-                        <span className="mt-1 text-[11px] text-red-600">
+                        <span className="mt-1 text-[10px] text-red-600">
                           {item.note}
                         </span>
                       )}
                     </Link>
                     {item.price && (
-                      <span className="mt-2 text-xs font-semibold text-salamander-600 sm:text-sm">
+                      <span className="mt-1.5 text-[11px] font-semibold text-salamander-600 sm:text-xs">
                         {item.oldPrice && (
                           <span className="mr-1 font-normal text-taupe-400 line-through">
                             {item.oldPrice}
@@ -216,7 +216,7 @@ export default function RecommendedStrip({
                         {item.price}
                       </span>
                     )}
-                    <div className="mt-2 border-t border-cream-200 pt-2.5">
+                    <div className="mt-1.5 border-t border-cream-200 pt-2">
                       <ProductActions product={item.card} compact />
                     </div>
                   </div>

@@ -5,15 +5,19 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useCartStore } from "@/lib/cart/store";
 import { useFavoritesStore } from "@/lib/favorites/store";
-import { CART_ADDED_EVENT, type CartAddedDetail } from "@/components/cart/CartToast";
+import {
+  CART_ADDED_EVENT,
+  type CartAddedDetail,
+} from "@/components/cart/CartToast";
 import type { CardProduct } from "@/lib/product-card";
 
 const HEART_PATH =
   "M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572";
 
-const roundBase = "flex shrink-0 items-center justify-center rounded-full transition-colors";
+const roundBase =
+  "flex shrink-0 items-center justify-center rounded-full transition-colors";
 const sizeMd = "h-9 w-9 sm:h-10 sm:w-10";
-const sizeSm = "h-8 w-8 sm:h-9 sm:w-9";
+const sizeSm = "h-7 w-7 sm:h-8 sm:w-8";
 
 // The heart on the product page: a pill with the words, next to "Add to cart".
 export function FavoriteButton({ productId }: { productId: string }) {
@@ -54,9 +58,11 @@ export function FavoriteButton({ productId }: { productId: string }) {
 function Icon({
   children,
   filled = false,
+  small = false,
 }: {
   children: React.ReactNode;
   filled?: boolean;
+  small?: boolean;
 }) {
   return (
     <svg
@@ -66,7 +72,11 @@ function Icon({
       strokeWidth={1.8}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-[19px] w-[19px] sm:h-5 sm:w-5"
+      className={
+        small
+          ? "h-4 w-4 sm:h-[17px] sm:w-[17px]"
+          : "h-[19px] w-[19px] sm:h-5 sm:w-5"
+      }
       aria-hidden="true"
     >
       {children}
@@ -117,7 +127,9 @@ export default function ProductActions({
       nameSnapshot: product.name,
       priceCents: product.priceCents,
       fullPriceCents: product.oldPriceCents ?? null,
-      discountPercent: product.oldPriceCents ? (product.percentOff ?? null) : null,
+      discountPercent: product.oldPriceCents
+        ? (product.percentOff ?? null)
+        : null,
       discountLabel: product.promoLabel ?? null,
       currency: product.currency,
       imageUrl: product.imageUrl,
@@ -152,7 +164,7 @@ export default function ProductActions({
             : "bg-cream-100 text-choc hover:bg-cream-200"
         }`}
       >
-        <Icon filled={favorite}>
+        <Icon filled={favorite} small={compact}>
           <path d={HEART_PATH} />
         </Icon>
       </button>
@@ -165,7 +177,7 @@ export default function ProductActions({
           onClick={add}
           className={`${base} bg-choc text-cream-50 hover:bg-gold-400 hover:text-choc`}
         >
-          <Icon>
+          <Icon small={compact}>
             {justAdded ? (
               <path d="M5 12l5 5l10 -10" />
             ) : (
@@ -186,7 +198,7 @@ export default function ProductActions({
           title={t("chooseOptions")}
           className={`${base} bg-choc text-cream-50 hover:bg-gold-400 hover:text-choc`}
         >
-          <Icon>
+          <Icon small={compact}>
             <path d="M4 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
             <path d="M15 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
             <path d="M17 17h-11v-14h-2" />
