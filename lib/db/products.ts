@@ -260,6 +260,13 @@ export async function getFeaturedProductsByMain(
   });
 }
 
+// How many active products a main category has (shown on its card on the homepage).
+export async function getMainProductCount(mainCategoryId: string) {
+  return prisma.product.count({
+    where: { isActive: true, category: { mainCategoryId } },
+  });
+}
+
 // First product photo found in a main category, used as its tile image.
 export async function getMainImageUrl(mainCategoryId: string) {
   const image = await prisma.productImage.findFirst({

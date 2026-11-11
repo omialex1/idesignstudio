@@ -5,9 +5,13 @@ import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { getVisibleMainCategories } from "@/lib/main-categories";
 import { categoryColorClass } from "@/lib/category-colors";
-import { getFeaturedProductsByMain, getMainImageUrl } from "@/lib/db/products";
+import {
+  getFeaturedProductsByMain,
+  getMainImageUrl,
+  getMainProductCount,
+} from "@/lib/db/products";
 import FeaturedTile from "@/components/landing/FeaturedTile";
-import ProductTile from "@/components/product/ProductTile";
+import CategoryFeatureCard from "@/components/landing/CategoryFeatureCard";
 import Reveal from "@/components/layout/Reveal";
 import { COMPANY, pageAlternates, siteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -23,61 +27,6 @@ export async function generateMetadata({
 }
 
 
-const iconProps = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.6,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-  className: "h-[22px] w-[22px]",
-  "aria-hidden": true,
-};
-
-// The four trust points shown under the hero title, one after another.
-const HERO_POINTS = [
-  {
-    key: "trustMade",
-    icon: (
-      <svg {...iconProps}>
-        <path d="M3 21l3.5-.9L19 7.6a2.1 2.1 0 0 0-3-3L3.9 17 3 21z" />
-        <path d="M14.5 6.1l3.4 3.4" />
-      </svg>
-    ),
-  },
-  {
-    key: "trustColors",
-    icon: (
-      <svg {...iconProps}>
-        <path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-1.8 0-1.2-.9-1.4-.9-2.4 0-.9.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z" />
-        <circle cx="7.5" cy="11" r=".9" />
-        <circle cx="10.5" cy="7.2" r=".9" />
-        <circle cx="15" cy="7.4" r=".9" />
-      </svg>
-    ),
-  },
-  {
-    key: "trustShip",
-    icon: (
-      <svg {...iconProps}>
-        <path d="M2 6h11v10H2z" />
-        <path d="M13 9h4.5l3.5 3.5V16h-8" />
-        <circle cx="6.5" cy="17.5" r="1.8" />
-        <circle cx="17" cy="17.5" r="1.8" />
-      </svg>
-    ),
-  },
-  {
-    key: "trustPay",
-    icon: (
-      <svg {...iconProps}>
-        <path d="M12 3l7.5 3v5.5c0 4.6-3.1 8.2-7.5 9.5-4.4-1.3-7.5-4.9-7.5-9.5V6L12 3z" />
-        <path d="M8.8 12l2.3 2.3 4.2-4.6" />
-      </svg>
-    ),
-  },
-] as const;
-
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   const t = await getTranslations("Home");
@@ -87,6 +36,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
     mainCategories.map(async (main) => ({
       main,
       imageUrl: await getMainImageUrl(main.id),
+      count: await getMainProductCount(main.id),
       products: await getFeaturedProductsByMain(main.id, locale),
     })),
   );
@@ -143,7 +93,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-32 sm:px-6 sm:pt-24 sm:pb-36 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-6 sm:px-6 sm:pt-24 sm:pb-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
           {/* gradient frame: champagne gold fading to terracotta */}
           <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_6px_18px_rgba(60,40,25,0.14)]">
             <div className="relative aspect-[16/9] overflow-hidden rounded-[calc(1.75rem-3px)] [container-type:inline-size]">
@@ -201,36 +151,20 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               className="hero-rise my-5 block h-px w-14 bg-gold-600"
               aria-hidden="true"
             />
-            {/* four plain facts, no boxes and no buttons: they only inform */}
-            <ul className="w-full max-w-[300px] divide-y divide-gold-600/30">
-              {HERO_POINTS.map((point, i) => (
-                <li
-                  key={point.key}
-                  style={{ animationDelay: `${0.45 + i * 0.18}s` }}
-                  className="hero-rise flex items-center gap-3 py-3 text-left"
-                >
-                  <span className="shrink-0 text-gold-600">{point.icon}</span>
-                  <span className="min-w-0 leading-tight">
-                    <span className="block text-sm font-semibold text-taupe-800">
-                      {t(`${point.key}Title`)}
-                    </span>
-                    <span className="block text-xs text-taupe-600">
-                      {t(`${point.key}Body`)}
-                    </span>
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {/* one plain line, no icons, no boxes, nothing that looks like a button */}
+            <p className="hero-rise max-w-[300px] text-sm leading-relaxed text-taupe-600">
+              {t("heroLine")}
+            </p>
           </div>
         </div>
       </section>
 
       <section
         id="categorii"
-        className="mx-auto w-full max-w-5xl scroll-mt-24 px-6 py-16"
+        className="mx-auto w-full max-w-5xl scroll-mt-24 px-6 pt-6 pb-16"
       >
         <Reveal>
-          <h2 className="text-center font-display text-4xl text-taupe-800 italic">
+          <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
             {t("discover")}
           </h2>
           <span
@@ -238,23 +172,44 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             aria-hidden="true"
           />
         </Reveal>
-        <div className="mt-10 flex flex-wrap justify-center gap-5">
-          {sections.map(({ main, imageUrl }, i) => (
+        {/* the first category (the one with most products) is big; the others small */}
+        <div
+          className={`mt-10 grid gap-4 sm:gap-5 ${
+            sections.length > 1 ? "sm:grid-cols-[1.35fr_1fr]" : ""
+          }`}
+        >
+          {sections.slice(0, 1).map(({ main, imageUrl, count }) => (
             <Reveal
               key={main.id}
-              index={i}
-              className="w-[calc(50%-10px)] sm:w-56"
+              className={sections.length > 1 ? "sm:row-span-2" : ""}
             >
-              <ProductTile
+              <CategoryFeatureCard
+                large
                 href={`/${main.slug}`}
                 name={main.name}
                 imageUrl={imageUrl}
                 placeholderClass={categoryColorClass(main.colorKey)}
+                countLabel={t("productCount", { count })}
                 cta={t("viewCollection")}
-                textured
               />
             </Reveal>
           ))}
+          {sections.length > 1 && (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-1 sm:gap-5">
+              {sections.slice(1).map(({ main, imageUrl, count }, i) => (
+                <Reveal key={main.id} index={i + 1}>
+                  <CategoryFeatureCard
+                    href={`/${main.slug}`}
+                    name={main.name}
+                    imageUrl={imageUrl}
+                    placeholderClass={categoryColorClass(main.colorKey)}
+                    countLabel={t("productCount", { count })}
+                    cta={t("viewCollection")}
+                  />
+                </Reveal>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -295,6 +250,44 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             </Reveal>
           </section>
         ))}
+
+      <section className="mx-auto w-full max-w-5xl px-6 pt-8 pb-16">
+        <Reveal>
+          <h2 className="text-center font-display text-4xl text-taupe-800 italic">
+            {t("howTitle")}
+          </h2>
+          <span
+            className="mx-auto mt-3 block h-px w-12 bg-gold-600"
+            aria-hidden="true"
+          />
+        </Reveal>
+        {/* numbered, with fine lines and no icons: plainly information, not buttons */}
+        <ol className="mt-10 grid grid-cols-2 border-y border-gold-600/40 lg:grid-cols-4">
+          {(["step1", "step2", "step3", "step4"] as const).map((key, i) => (
+            <li
+              key={key}
+              className={`px-4 py-6 text-center ${
+                i % 2 === 1 ? "border-l border-gold-600/30" : ""
+              } ${i >= 2 ? "border-t border-gold-600/30 lg:border-t-0" : ""} ${
+                i > 0 ? "lg:border-l lg:border-gold-600/30" : ""
+              }`}
+            >
+              <span
+                className="block font-display text-4xl leading-none text-gold-600"
+                aria-hidden="true"
+              >
+                {i + 1}
+              </span>
+              <span className="mt-3 block text-sm font-semibold text-taupe-800">
+                {t(`${key}Title`)}
+              </span>
+              <span className="mt-0.5 block text-xs text-taupe-600">
+                {t(`${key}Body`)}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
     </div>
   );
 }
