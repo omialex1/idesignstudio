@@ -19,6 +19,7 @@ export type SubcategoryFormDefaults = {
   enName: string;
   enDescription: string;
   sortOrder: number;
+  isHidden: boolean;
 };
 
 const TRANSLATE_PAIRS: [string, string][] = [
@@ -46,6 +47,7 @@ export default function SubcategoryForm({
     enName: "",
     enDescription: "",
     sortOrder: 0,
+    isHidden: false,
   };
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -195,6 +197,21 @@ export default function SubcategoryForm({
           className={controlClass(!!errors.sortOrder)}
         />
       </Field>
+
+      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-cream-200 bg-cream-50 p-4 text-sm text-taupe-700">
+        <input
+          name="isHidden"
+          type="checkbox"
+          defaultChecked={d.isHidden}
+          className="mt-0.5 h-4 w-4 accent-salamander-500"
+        />
+        <span>
+          <span className="font-medium">Ascunde subcategoria de pe site</span>
+          <span className="mt-0.5 block text-xs text-taupe-500">
+            Dispare de pe site (pagina de start, pagina categoriei, căutare, sitemap), iar produsele ei dispar odată cu ea. Linkurile directe dau „pagină negăsită”. În admin rămâne totul, ca s-o poți arăta din nou oricând.
+          </span>
+        </span>
+      </label>
 
       {hasErrors(errors) && (
         <p

@@ -169,7 +169,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                   key: p.id,
                   node: (
                     <StripCard
-                      cornerClass="rounded-2xl"
                       item={{
                         id: p.id,
                         href: p.href,

@@ -1,5 +1,6 @@
 import { sortTiers, type PriceTier } from "@/lib/tiers";
 import { prisma } from "@/lib/db/client";
+import { categoryShown } from "@/lib/visibility";
 import { variantPricing } from "@/lib/pricing";
 import { promoForProduct, promoPrices, type PromoPrice } from "@/lib/discounts";
 import { pricePointsOf } from "@/lib/price-history";
@@ -83,7 +84,7 @@ export async function getProductsByCategorySlug(
   locale: string,
 ) {
   const category = await prisma.category.findFirst({
-    where: { slug: categorySlug, mainCategoryId },
+    where: { slug: categorySlug, mainCategoryId, isHidden: false },
     include: {
       translations: true,
       products: {
@@ -131,7 +132,7 @@ function toPiece(
 
 export async function getProductDetail(productSlug: string, locale: string) {
   const product = await prisma.product.findFirst({
-    where: { slug: productSlug, isActive: true },
+    where: { slug: productSlug, isActive: true, category: categoryShown },
     include: {
       translations: true,
       inventory: true,
@@ -221,7 +222,11 @@ export async function getSubcategoryShowcase(
   locale: string,
 ): Promise<SubcategoryShowcase[]> {
   const categories = await prisma.category.findMany({
-    where: { mainCategoryId, products: { some: { isActive: true } } },
+    where: {
+      mainCategoryId,
+      isHidden: false,
+      products: { some: { isActive: true } },
+    },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     include: {
       translations: true,
@@ -250,14 +255,16 @@ export async function getSubcategoryShowcase(
 // How many active products a main category has (shown on its card on the homepage).
 export async function getMainProductCount(mainCategoryId: string) {
   return prisma.product.count({
-    where: { isActive: true, category: { mainCategoryId } },
+    where: { isActive: true, category: { mainCategoryId, isHidden: false } },
   });
 }
 
 // First product photo found in a main category, used as its tile image.
 export async function getMainImageUrl(mainCategoryId: string) {
   const image = await prisma.productImage.findFirst({
-    where: { product: { isActive: true, category: { mainCategoryId } } },
+    where: {
+      product: { isActive: true, category: { mainCategoryId, isHidden: false } },
+    },
     orderBy: { sortOrder: "asc" },
     select: { url: true },
   });
@@ -313,7 +320,7 @@ export async function getRecommendedProducts(
               images: { orderBy: { sortOrder: "asc" }, take: 1 },
               variants: { select: { id: true } },
               category: {
-                include: { mainCategory: { select: { slug: true, color: true, usesColors: true } } },
+                include: { mainCategory: { select: { slug: true, color: true, usesColors: true, isHidden: true } } },
               },
             },
           },
@@ -328,6 +335,7 @@ export async function getRecommendedProducts(
   for (const group of groups) {
     for (const { product: p } of group.items) {
       if (!p.isActive || !p.category.mainCategory) continue;
+      if (p.category.isHidden || p.category.mainCategory.isHidden) continue;
       // in a fixed-order group as well: it keeps its place there
       if (seen.has(p.id)) {
         if (!group.shuffle) {
@@ -379,6 +387,7 @@ export async function getRecommendedProducts(
       where: {
         categoryId: own.categoryId,
         isActive: true,
+        category: categoryShown,
         id: { not: productId },
       },
       orderBy: { createdAt: "asc" },
@@ -388,7 +397,7 @@ export async function getRecommendedProducts(
         images: { orderBy: { sortOrder: "asc" }, take: 1 },
         variants: { select: { id: true } },
         category: {
-          include: { mainCategory: { select: { slug: true, color: true, usesColors: true } } },
+          include: { mainCategory: { select: { slug: true, color: true, usesColors: true, isHidden: true } } },
         },
       },
     });
@@ -453,7 +462,7 @@ export async function getProductsByIds(
 ): Promise<FavoriteProduct[]> {
   if (ids.length === 0) return [];
   const products = await prisma.product.findMany({
-    where: { id: { in: ids }, isActive: true },
+    where: { id: { in: ids }, isActive: true, category: categoryShown },
     include: {
       translations: true,
       inventory: { select: { quantityOnHand: true } },
@@ -514,7 +523,7 @@ export async function getNewestProducts(
   take = 5,
 ): Promise<FavoriteProduct[]> {
   const rows = await prisma.product.findMany({
-    where: { isActive: true, category: { mainCategoryId: { not: null } } },
+    where: { isActive: true, category: categoryShown },
     orderBy: { createdAt: "desc" },
     take,
     select: { id: true },

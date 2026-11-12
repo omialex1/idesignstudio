@@ -37,6 +37,7 @@ export default async function EditCategoryPage({
           enDescription: en?.description ?? "",
           color: main.color,
           sortOrder: main.sortOrder,
+          isHidden: main.isHidden,
         }}
       />
 

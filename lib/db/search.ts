@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { categoryShown } from "@/lib/visibility";
 import { canQuickAdd } from "@/lib/product-card";
 import { promoPrices, type PromoPrice } from "@/lib/discounts";
 import {
@@ -42,7 +43,7 @@ export async function searchProducts(
   if (words.length === 0) return [];
 
   const products = await prisma.product.findMany({
-    where: { isActive: true },
+    where: { isActive: true, category: categoryShown },
     include: {
       translations: true,
       inventory: { select: { quantityOnHand: true } },
@@ -133,7 +134,7 @@ async function suggestEntries(): Promise<SuggestEntry[]> {
     return suggestCache.entries;
   }
   const products = await prisma.product.findMany({
-    where: { isActive: true },
+    where: { isActive: true, category: categoryShown },
     select: {
       slug: true,
       translations: { select: { locale: true, name: true } },

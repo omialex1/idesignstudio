@@ -41,6 +41,7 @@ export default async function EditSubcategoryPage({
           enName: en?.name ?? "",
           enDescription: en?.description ?? "",
           sortOrder: category.sortOrder,
+          isHidden: category.isHidden,
         }}
       />
 

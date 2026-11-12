@@ -31,6 +31,9 @@ model MainCategory {
   // True when products here are made to order in a colour the customer picks
   // (3D-printed items). Only such categories show colours, in admin and shop.
   usesColors   Boolean                   @default(false)
+  // Hidden from the whole site (menu, homepage, pages, search, sitemap) but kept in
+  // the admin; the subcategories and products inside it are hidden with it.
+  isHidden     Boolean                   @default(false)
   createdAt    DateTime                  @default(now())
   updatedAt    DateTime                  @updatedAt
   translations MainCategoryTranslation[]
@@ -80,6 +83,8 @@ model Category {
   slug           String                @unique
   sortOrder      Int                   @default(0)
   heroImageUrl   String?
+  // Hidden from the site (like a hidden main category, for this subcategory only).
+  isHidden       Boolean               @default(false)
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   translations   CategoryTranslation[]

@@ -40,7 +40,21 @@ export default async function AdminSubcategoriesPage() {
                 : "—";
               return (
                 <tr key={c.id} className="border-b border-cream-100 last:border-0">
-                  <td className="px-4 py-3 font-medium text-taupe-800">{name}</td>
+                  <td className="px-4 py-3 font-medium text-taupe-800">
+                    <span className="flex items-center gap-3">
+                      {name}
+                      {c.isHidden && (
+                        <span className="rounded-full bg-taupe-700 px-2 py-0.5 text-[11px] font-medium text-cream-50">
+                          Ascunsă
+                        </span>
+                      )}
+                      {!c.isHidden && c.mainCategory?.isHidden && (
+                        <span className="rounded-full bg-taupe-400 px-2 py-0.5 text-[11px] font-medium text-cream-50">
+                          Ascunsă odată cu categoria
+                        </span>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-taupe-600">{mainName}</td>
                   <td className="px-4 py-3 text-taupe-600">{c.sortOrder}</td>
                   <td className="px-4 py-3 text-taupe-600">{c._count.products}</td>

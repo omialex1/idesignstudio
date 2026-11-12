@@ -23,6 +23,7 @@ function readForm(formData: FormData) {
     enDescription: text("enDescription") || null,
     color: text("color"),
     sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
+    isHidden: formData.get("isHidden") === "on",
   };
 }
 
@@ -83,6 +84,7 @@ export async function saveMainCategory(
         slug: slugCheck.slug,
         sortOrder: data.sortOrder,
         color: data.color,
+        isHidden: data.isHidden,
         translations: { create: translationRows(data) },
       },
     });
@@ -98,6 +100,7 @@ export async function saveMainCategory(
       // the address stays as it was
       sortOrder: data.sortOrder,
       color: data.color,
+      isHidden: data.isHidden,
       translations: {
         upsert: translationRows(data).map((row) => ({
           where: {

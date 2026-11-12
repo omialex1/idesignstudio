@@ -31,7 +31,7 @@ export default function SubcategoryCard({
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col items-center rounded border border-cream-300/70 bg-[url(/images/card-bg.jpg)] bg-cover bg-center px-3 pt-4 pb-4 text-center shadow-[0_6px_16px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_12px_26px_rgba(60,40,25,0.16)]"
+      className="group flex h-full flex-col items-center rounded-2xl border border-cream-300/70 bg-[url(/images/card-bg.jpg)] bg-cover bg-center px-3 pt-4 pb-4 text-center shadow-[0_6px_16px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_12px_26px_rgba(60,40,25,0.16)]"
     >
       <span className="block h-28 w-28 shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(60,40,25,0.16)] sm:h-32 sm:w-32">
         {image ? (

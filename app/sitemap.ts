@@ -1,3 +1,4 @@
+import { categoryShown } from "@/lib/visibility";
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db/client";
 import { routing } from "@/i18n/routing";
@@ -28,15 +29,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const [mains, categories, products] = await Promise.all([
     prisma.mainCategory.findMany({
-      where: { categories: { some: { products: { some: { isActive: true } } } } },
+      where: {
+        isHidden: false,
+        categories: {
+          some: { isHidden: false, products: { some: { isActive: true } } },
+        },
+      },
       select: { slug: true, updatedAt: true },
     }),
     prisma.category.findMany({
-      where: { mainCategoryId: { not: null } },
+      where: { isHidden: false, mainCategory: { isHidden: false } },
       select: { slug: true, updatedAt: true, mainCategory: { select: { slug: true } } },
     }),
     prisma.product.findMany({
-      where: { isActive: true, category: { mainCategoryId: { not: null } } },
+      where: { isActive: true, category: categoryShown },
       select: {
         slug: true,
         updatedAt: true,

@@ -59,7 +59,10 @@ export const getVisibleMainCategories = cache(
   async (locale: string): Promise<MainCategory[]> => {
     const rows = await prisma.mainCategory.findMany({
       where: {
-        categories: { some: { products: { some: { isActive: true } } } },
+        isHidden: false,
+        categories: {
+          some: { isHidden: false, products: { some: { isActive: true } } },
+        },
       },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       include: { translations: true },
@@ -72,8 +75,9 @@ export async function getMainCategoryBySlug(
   slug: string,
   locale: string,
 ): Promise<MainCategory | null> {
-  const row = await prisma.mainCategory.findUnique({
-    where: { slug },
+  // a hidden category does not exist for visitors (its pages give "not found")
+  const row = await prisma.mainCategory.findFirst({
+    where: { slug, isHidden: false },
     include: { translations: true },
   });
   return row ? localize(row, locale) : null;

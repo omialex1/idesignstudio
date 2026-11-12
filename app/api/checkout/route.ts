@@ -1,3 +1,4 @@
+import { categoryShown } from "@/lib/visibility";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { getCurrentCustomerId } from "@/lib/customer/auth";
@@ -214,7 +215,11 @@ export async function POST(request: NextRequest) {
   }
 
   const products = await prisma.product.findMany({
-    where: { id: { in: [...quantities.keys()] }, isActive: true },
+    where: {
+      id: { in: [...quantities.keys()] },
+      isActive: true,
+      category: categoryShown,
+    },
     include: {
       translations: true,
       inventory: true,

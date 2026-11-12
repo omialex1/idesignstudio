@@ -56,6 +56,11 @@ export default async function AdminCategoriesPage() {
                         {name.charAt(0).toUpperCase()}
                       </span>
                       {name}
+                      {m.isHidden && (
+                        <span className="rounded-full bg-taupe-700 px-2 py-0.5 text-[11px] font-medium text-cream-50">
+                          Ascunsă
+                        </span>
+                      )}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-taupe-600">/{m.slug}</td>

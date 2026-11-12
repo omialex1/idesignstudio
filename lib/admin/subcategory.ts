@@ -80,6 +80,7 @@ function readSubcategoryForm(formData: FormData) {
     enName,
     enDescription: enDescription || null,
     sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
+    isHidden: formData.get("isHidden") === "on",
   };
 }
 
@@ -132,6 +133,7 @@ export async function saveSubcategory(
         mainCategoryId: data.mainCategoryId,
         slug: data.slug,
         sortOrder: data.sortOrder,
+        isHidden: data.isHidden,
         translations: {
           create: [
             { locale: "ro", name: data.roName, description: data.roDescription },
@@ -151,6 +153,7 @@ export async function saveSubcategory(
       mainCategoryId: data.mainCategoryId,
       slug: data.slug,
       sortOrder: data.sortOrder,
+      isHidden: data.isHidden,
       translations: {
         upsert: [
           {

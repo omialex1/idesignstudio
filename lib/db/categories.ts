@@ -16,13 +16,15 @@ export async function getCategoriesByMain(
   locale: string,
 ): Promise<CategoryWithTranslation[]> {
   const categories = await prisma.category.findMany({
-    where: { mainCategoryId },
+    where: { mainCategoryId, isHidden: false },
     orderBy: { sortOrder: "asc" },
     include: { translations: true },
   });
 
   const photos = await prisma.productImage.findMany({
-    where: { product: { isActive: true, category: { mainCategoryId } } },
+    where: {
+      product: { isActive: true, category: { mainCategoryId, isHidden: false } },
+    },
     orderBy: { sortOrder: "asc" },
     select: { url: true, product: { select: { categoryId: true } } },
   });
