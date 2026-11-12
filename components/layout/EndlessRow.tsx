@@ -152,7 +152,7 @@ export default function EndlessRow({
             aria-label={prevLabel}
             disabled={edges.atStart}
             onClick={() => move(-1)}
-            className={`${arrow} -left-2 lg:-left-12`}
+            className={`${arrow} -left-2 min-[1100px]:-left-12`}
           >
             ‹
           </button>
@@ -161,7 +161,7 @@ export default function EndlessRow({
             aria-label={nextLabel}
             disabled={edges.atEnd}
             onClick={() => move(1)}
-            className={`${arrow} -right-2 lg:-right-12`}
+            className={`${arrow} -right-2 min-[1100px]:-right-12`}
           >
             ›
           </button>

@@ -107,6 +107,7 @@ export default function HeroSlideshow({
                     alt=""
                     fill
                     priority={i === 0}
+                    loading={i === 0 ? undefined : "eager"}
                     sizes="(min-width: 1024px) 976px, 100vw"
                     className="object-cover"
                     style={{ objectPosition: slide.focus ?? "50% 40%" }}
