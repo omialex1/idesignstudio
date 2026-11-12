@@ -24,7 +24,14 @@ export type StripItem = {
 
 // The card of a product in those rows: the photo hangs above a small card, on its own:
 // no frame, a few pixels of air, and a soft glow so it does not look stuck to the page.
-export default function StripCard({ item }: { item: StripItem }) {
+export default function StripCard({
+  item,
+  cornerClass = "rounded",
+}: {
+  item: StripItem;
+  // the corners of the small white card (Tailwind class), e.g. "rounded-2xl"
+  cornerClass?: string;
+}) {
   return (
     <div className="group flex h-full flex-col items-center">
       <Link
@@ -52,7 +59,7 @@ export default function StripCard({ item }: { item: StripItem }) {
         </span>
       </Link>
 
-      <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded border border-cream-200 bg-paper px-1.5 pt-2 pb-2.5 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
+      <div className={`mt-3.5 flex w-full flex-1 flex-col items-center ${cornerClass} border border-cream-200 bg-paper px-1.5 pt-2 pb-2.5 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]`}>
         <Link href={item.href} className="flex flex-1 flex-col items-center">
           <h3 className="line-clamp-3 font-display text-[12px] leading-tight text-taupe-800 sm:text-[13px]">
             {item.name}

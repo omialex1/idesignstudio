@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
@@ -12,6 +11,8 @@ import {
   getSubcategoryShowcase,
 } from "@/lib/db/products";
 import SubcategoryCard from "@/components/landing/SubcategoryCard";
+import HeroSlideshow from "@/components/landing/HeroSlideshow";
+import { HERO_SLIDES } from "@/lib/hero-slides";
 import StripCard from "@/components/product/StripCard";
 import { shortName } from "@/components/product/ProductTile";
 import { formatPrice } from "@/lib/format";
@@ -72,98 +73,25 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           }),
         }}
       />
-      <section className="relative -mt-[68px] overflow-hidden border-b-2 border-cream-50 bg-cream-50">
-        {/* soft blurred copy of the photo as the backdrop, fading into the page */}
-        {/* it stops a little above the bottom edge (where the fade is already the page
-            colour), so no blurred layer ever ends exactly on the edge of the section */}
-        <div className="absolute inset-x-0 top-0 bottom-8 overflow-hidden" aria-hidden="true">
-          <Image
-            src="/images/hero-triptych.jpg"
-            alt=""
-            fill
-            sizes="96px"
-            className="scale-125 object-cover blur-2xl brightness-[1.04] saturate-110"
-            aria-hidden="true"
+      {/* the slideshow: the title of the page stays for screen readers and Google */}
+      <section className="relative -mt-[68px] px-4 pt-[84px] pb-4 sm:px-6 sm:pt-24 sm:pb-6">
+        <h1 className="sr-only">{t("heroTitle")}</h1>
+        <div className="mx-auto max-w-5xl">
+          <HeroSlideshow
+            label={t("heroLabel")}
+            cta={t("viewCollection")}
+            prevLabel={t("heroPrev")}
+            nextLabel={t("heroNext")}
+            dotLabels={HERO_SLIDES.map((_, i) =>
+              t("heroSlide", { n: i + 1, total: HERO_SLIDES.length }),
+            )}
+            slides={HERO_SLIDES.map((slide) => ({
+              src: slide.image,
+              title: locale === "en" ? slide.title.en : slide.title.ro,
+              href: slide.href,
+              focus: slide.focus,
+            }))}
           />
-        </div>
-        <div
-          className="absolute inset-0 bg-cream-50/25"
-          aria-hidden="true"
-        />
-        {/* the photo's blurred copy melts into the page: one long, eased fade (an
-            S-curve, so there is no visible start or end) down to the page colour */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-[280px] [background:linear-gradient(to_bottom,rgba(251,245,233,0)_0%,rgba(251,245,233,0.028)_10%,rgba(251,245,233,0.104)_20%,rgba(251,245,233,0.216)_30%,rgba(251,245,233,0.352)_40%,rgba(251,245,233,0.5)_50%,rgba(251,245,233,0.648)_60%,rgba(251,245,233,0.784)_70%,rgba(251,245,233,0.896)_80%,rgba(251,245,233,0.972)_85%,#fbf5e9_89%)]"
-          aria-hidden="true"
-        />
-        <div
-          className="absolute inset-x-0 -bottom-px h-1.5 bg-cream-50"
-          aria-hidden="true"
-        />
-
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[84px] pb-6 sm:px-6 sm:pt-24 sm:pb-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-16">
-          {/* gradient frame: champagne gold fading to terracotta */}
-          <div className="hero-rise w-full rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_6px_18px_rgba(60,40,25,0.14)]">
-            <div className="relative aspect-[16/9] overflow-hidden rounded-[calc(1.75rem-3px)] [container-type:inline-size]">
-              {/* photo and bars zoom together, so the bars stay on the joins */}
-              <div className="hero-zoom absolute inset-0">
-                <Image
-                  src="/images/hero-triptych.jpg"
-                  alt={t("heroPhotoAlt")}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 620px, 92vw"
-                  className="object-cover object-center"
-                />
-                {/* the photo is three pictures side by side; a bar in the colour and
-                    style of the frame (gold to terracotta, with a soft highlight and
-                    shadow, like the frame catching the light) sits on each join */}
-                {["31.25%", "68.2%"].map((left) => (
-                  <span
-                    key={left}
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-y-0 -translate-x-1/2 shadow-[0_0_8px_rgba(60,40,25,0.22)]"
-                    style={{
-                      left,
-                      width: "clamp(2px, 0.55cqw, 6px)",
-                      background:
-                        "linear-gradient(to right, rgba(255,255,255,0.42), rgba(255,255,255,0) 45%, rgba(60,40,25,0.12)), linear-gradient(to bottom, var(--color-gold-300), var(--color-gold-400) 50%, var(--color-salamander-400))",
-                    }}
-                  />
-                ))}
-              </div>
-              {/* the three captions are real text over the photo, so they follow the
-                  language and stay sharp at any size (about 2.5% of the photo width) */}
-              {[
-                { left: "14.6%", title: t("heroCaption1Title"), sub: t("heroCaption1Sub") },
-                { left: "50%", title: t("heroCaption2Title"), sub: t("heroCaption2Sub") },
-                { left: "87.3%", title: t("heroCaption3Title"), sub: t("heroCaption3Sub") },
-              ].map((caption) => (
-                <p
-                  key={caption.left}
-                  className="pointer-events-none absolute top-[8%] -translate-x-1/2 whitespace-nowrap text-center leading-[1.2] text-taupe-800"
-                  style={{ left: caption.left, fontSize: "clamp(10px, 2.5cqw, 24px)" }}
-                >
-                  <span className="block font-semibold">{caption.title}</span>
-                  <span className="block italic">{caption.sub}</span>
-                </p>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center text-center text-taupe-800">
-            <h1 className="hero-rise font-display text-xl leading-[1.15] italic sm:text-2xl">
-              {t("heroTitle")}
-            </h1>
-            <span
-              className="hero-rise my-5 block h-px w-14 bg-gold-600"
-              aria-hidden="true"
-            />
-            {/* one plain line, no icons, no boxes, nothing that looks like a button */}
-            <p className="hero-rise max-w-[300px] text-sm leading-relaxed text-taupe-600">
-              {t("heroLine")}
-            </p>
-          </div>
         </div>
       </section>
 
@@ -241,6 +169,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                   key: p.id,
                   node: (
                     <StripCard
+                      cornerClass="rounded-2xl"
                       item={{
                         id: p.id,
                         href: p.href,
