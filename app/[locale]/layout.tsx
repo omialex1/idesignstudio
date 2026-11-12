@@ -4,6 +4,7 @@ import { hasLocale } from "next-intl";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/seo";
 import { getVisibleMainCategories } from "@/lib/main-categories";
@@ -81,6 +82,7 @@ export default async function LocaleLayout({
           <main className="flex-1 flex flex-col">{children}</main>
           <Footer />
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );
