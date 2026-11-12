@@ -1,4 +1,4 @@
-import { getCategoriesByMain } from "@/lib/db/categories";
+import { getSubcategoryShowcase } from "@/lib/db/products";
 import CategoryFeed from "@/components/landing/CategoryFeed";
 import type { MainCategory } from "@/lib/main-categories";
 
@@ -9,7 +9,7 @@ export default async function CategoryIndexPage({
   main: MainCategory;
   locale: string;
 }) {
-  const categories = await getCategoriesByMain(main.id, locale);
+  const subcategories = await getSubcategoryShowcase(main.id, locale);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -26,7 +26,7 @@ export default async function CategoryIndexPage({
           </p>
         )}
       </div>
-      <CategoryFeed categories={categories} main={main} />
+      <CategoryFeed subcategories={subcategories} main={main} />
     </div>
   );
 }
