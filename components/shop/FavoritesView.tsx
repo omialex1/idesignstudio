@@ -70,7 +70,7 @@ export default function FavoritesView() {
         <p className="mt-2 text-sm text-taupe-600">
           {t("count", { count: shown.length })}
         </p>
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5">
           {shown.map((p) => {
             const price = formatPrice(p.priceCents, p.currency, locale);
             return (
@@ -94,7 +94,7 @@ export default function FavoritesView() {
                       : (p.promoLabel ?? undefined)
                   }
                   note={p.inStock ? undefined : tShop("outOfStock")}
-                  actions={<ProductActions product={p} />}
+                  actions={<ProductActions product={p} compact />}
                 />
                 <button
                   type="button"

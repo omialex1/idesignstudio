@@ -316,7 +316,7 @@ export default function FilterableProducts({
       )}
 
       {shown.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5">
           {shown.map((p) => {
             const price = formatPrice(p.priceCents, p.currency, locale);
             return (
@@ -340,6 +340,7 @@ export default function FilterableProducts({
                 note={p.inStock ? undefined : t("outOfStock")}
                 actions={
                   <ProductActions
+                    compact
                     product={{
                       id: p.id,
                       href: p.href,

@@ -8,9 +8,13 @@ import { categoryColorClass } from "@/lib/category-colors";
 import {
   getMainImageUrl,
   getMainProductCount,
+  getNewestProducts,
   getSubcategoryShowcase,
 } from "@/lib/db/products";
 import SubcategoryCard from "@/components/landing/SubcategoryCard";
+import StripCard from "@/components/product/StripCard";
+import { shortName } from "@/components/product/ProductTile";
+import { formatPrice } from "@/lib/format";
 import EndlessRow from "@/components/layout/EndlessRow";
 import CategoryFeatureCard from "@/components/landing/CategoryFeatureCard";
 import Reveal from "@/components/layout/Reveal";
@@ -33,6 +37,8 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   const t = await getTranslations("Home");
   const tShop = await getTranslations("Shop");
   const mainCategories = await getVisibleMainCategories(locale);
+
+  const newest = await getNewestProducts(locale, 5);
 
   const sections = await Promise.all(
     mainCategories.map(async (main) => ({
@@ -209,6 +215,59 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           ))}
         </div>
       </section>
+
+      {/* the five newest products, shown like "Merge bine cu" */}
+      {newest.length > 0 && (
+        <section className="mx-auto w-full max-w-5xl px-6 py-12">
+          <Reveal>
+            <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
+              {t("newTitle")}
+            </h2>
+            <span
+              className="mx-auto mt-3 block h-px w-12 bg-gold-600"
+              aria-hidden="true"
+            />
+          </Reveal>
+          <div className="mt-8">
+            <EndlessRow
+              centered
+              resetKey={newest.map((p) => p.id).join(",")}
+              prevLabel={tShop("previous")}
+              nextLabel={tShop("next")}
+              itemClassName="w-[125px] shrink-0 sm:w-[141px]"
+              items={newest.map((p) => {
+                const price = formatPrice(p.priceCents, p.currency, locale);
+                return {
+                  key: p.id,
+                  node: (
+                    <StripCard
+                      item={{
+                        id: p.id,
+                        href: p.href,
+                        name: shortName(p.name),
+                        imageUrl: p.imageUrl,
+                        placeholderClass: categoryColorClass(p.colorKey),
+                        note: p.inStock ? undefined : tShop("outOfStock"),
+                        price: p.hasVariants
+                          ? tShop("fromPrice", { price })
+                          : price,
+                        oldPrice: p.oldPriceCents
+                          ? formatPrice(p.oldPriceCents, p.currency, locale)
+                          : undefined,
+                        badge:
+                          p.oldPriceCents && p.percentOff
+                            ? `−${p.percentOff}%${p.promoLabel ? ` · ${p.promoLabel}` : ""}`
+                            : (p.promoLabel ?? undefined),
+                        card: p,
+                      }}
+                    />
+                  ),
+                };
+              })}
+            />
+          </div>
+        </section>
+      )}
 
       {sections
         .filter(({ subcategories }) => subcategories.length > 0)

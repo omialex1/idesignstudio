@@ -506,3 +506,21 @@ export async function getProductsByIds(
     return found ? [found] : [];
   });
 }
+
+// The most recently added active products (for "Noutăți" on the homepage), newest first,
+// with what a card needs.
+export async function getNewestProducts(
+  locale: string,
+  take = 5,
+): Promise<FavoriteProduct[]> {
+  const rows = await prisma.product.findMany({
+    where: { isActive: true, category: { mainCategoryId: { not: null } } },
+    orderBy: { createdAt: "desc" },
+    take,
+    select: { id: true },
+  });
+  return getProductsByIds(
+    rows.map((r) => r.id),
+    locale,
+  );
+}
