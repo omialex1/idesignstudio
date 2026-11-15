@@ -17,6 +17,7 @@ import StripCard from "@/components/product/StripCard";
 import { shortName } from "@/components/product/ProductTile";
 import { formatPrice } from "@/lib/format";
 import EndlessRow from "@/components/layout/EndlessRow";
+import GoldFrame from "@/components/layout/GoldFrame";
 import CategoryFeatureCard from "@/components/landing/CategoryFeatureCard";
 import Reveal from "@/components/layout/Reveal";
 import { COMPANY, pageAlternates, siteUrl } from "@/lib/seo";
@@ -147,6 +148,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       {/* the five newest products, shown like "Merge bine cu" */}
       {newest.length > 0 && (
         <section className="mx-auto w-full max-w-5xl px-6 py-12">
+          <GoldFrame>
           <Reveal>
             <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
               {t("newTitle")}
@@ -159,6 +161,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           <div className="mt-8">
             <EndlessRow
               centered
+              arrowsInside
               resetKey={newest.map((p) => p.id).join(",")}
               prevLabel={tShop("previous")}
               nextLabel={tShop("next")}
@@ -194,16 +197,18 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               })}
             />
           </div>
+          </GoldFrame>
         </section>
       )}
 
       {sections
         .filter(({ subcategories }) => subcategories.length > 0)
-        .map(({ main, subcategories }) => (
+        .map(({ main, subcategories }, sectionIndex) => (
           <section
             key={main.id}
             className="mx-auto w-full max-w-5xl px-6 py-12"
           >
+            <GoldFrame enabled={sectionIndex === 0}>
             <Reveal>
               <h2 className="text-center font-display text-4xl text-taupe-800 italic">
                 {main.name}
@@ -218,6 +223,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             <div className="mt-10">
               <EndlessRow
                 centered
+                arrowsInside={sectionIndex === 0}
                 resetKey={subcategories.map((c) => c.id).join(",")}
                 prevLabel={tShop("previous")}
                 nextLabel={tShop("next")}
@@ -250,6 +256,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 </Link>
               </Reveal>
             )}
+            </GoldFrame>
           </section>
         ))}
 

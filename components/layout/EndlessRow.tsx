@@ -27,6 +27,7 @@ export default function EndlessRow({
   trackClassName = "pt-9 pb-10 -mt-5 -mb-6",
   arrowClassName = "top-[88px]",
   centered = false,
+  arrowsInside = false,
 }: {
   items: EndlessItem[];
   // changes whenever the order of the items changes: the row then goes back to its start
@@ -41,6 +42,9 @@ export default function EndlessRow({
   arrowClassName?: string;
   // a row that fits in its space sits in the middle instead of at the left
   centered?: boolean;
+  // keep the arrows on the row's edges at every width (a frame around the row would
+  // otherwise be crossed by arrows that sit outside it)
+  arrowsInside?: boolean;
 }) {
   const track = useRef<HTMLUListElement>(null);
 
@@ -152,7 +156,7 @@ export default function EndlessRow({
             aria-label={prevLabel}
             disabled={edges.atStart}
             onClick={() => move(-1)}
-            className={`${arrow} -left-2 min-[1100px]:-left-12`}
+            className={`${arrow} -left-2 ${arrowsInside ? "" : "min-[1100px]:-left-12"}`}
           >
             ‹
           </button>
@@ -161,7 +165,7 @@ export default function EndlessRow({
             aria-label={nextLabel}
             disabled={edges.atEnd}
             onClick={() => move(1)}
-            className={`${arrow} -right-2 min-[1100px]:-right-12`}
+            className={`${arrow} -right-2 ${arrowsInside ? "" : "min-[1100px]:-right-12"}`}
           >
             ›
           </button>

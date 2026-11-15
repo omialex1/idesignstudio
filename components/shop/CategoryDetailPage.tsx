@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getProductsByCategorySlug } from "@/lib/db/products";
 import FilterableProducts from "@/components/shop/FilterableProducts";
+import GoldFrame from "@/components/layout/GoldFrame";
 import { categoryColorClass } from "@/lib/category-colors";
 import { canQuickAdd } from "@/lib/product-card";
 import type { ShopProduct } from "@/lib/shop-filters";
@@ -63,7 +64,9 @@ export default async function CategoryDetailPage({
 
         <div className="mt-10">
           {category.products.length > 0 ? (
-            <FilterableProducts products={products} />
+            <GoldFrame>
+              <FilterableProducts products={products} />
+            </GoldFrame>
           ) : (
             <p className="text-taupe-500">{t("noProducts")}</p>
           )}
