@@ -318,11 +318,12 @@ export default function FilterableProducts({
 
       {shown.length > 0 ? (
         <CenteredGrid variant="products">
-          {shown.map((p) => {
+          {shown.map((p, i) => {
             const price = formatPrice(p.priceCents, p.currency, locale);
             return (
               <ProductTile
                 key={p.id}
+                priority={i < 4}
                 href={p.href}
                 name={shortName(p.name)}
                 imageUrl={p.imageUrl}

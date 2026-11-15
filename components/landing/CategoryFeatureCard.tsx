@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import ProductPhoto from "@/components/product/ProductPhoto";
 
 // A main category on the homepage. All of them have the same photo size, text size
 // and button, so they look alike side by side (the first one may be a taller cell).
@@ -19,15 +20,14 @@ export default function CategoryFeatureCard({
 }) {
   const photo = (
     <span
-      className="block h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(60,40,25,0.22)] ring-2 ring-white/70 sm:h-[112px] sm:w-[112px]"
+      className="relative block h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(60,40,25,0.22)] ring-2 ring-white/70 sm:h-[112px] sm:w-[112px]"
     >
       {imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <ProductPhoto
           src={imageUrl}
           alt=""
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          sizes="112px"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
       ) : (
         <span

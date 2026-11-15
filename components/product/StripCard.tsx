@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import ProductPhoto from "@/components/product/ProductPhoto";
 import ProductActions from "@/components/product/ProductActions";
 import type { CardProduct } from "@/lib/product-card";
 
@@ -32,15 +33,13 @@ export default function StripCard({ item }: { item: StripItem }) {
         aria-label={item.name}
         className="block shrink-0 rounded-full"
       >
-        <span className="block h-[130px] w-[130px] overflow-hidden rounded-full shadow-[0_8px_18px_-2px_rgba(60,40,25,0.28),0_0_18px_3px_rgba(210,168,104,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-[144px] sm:w-[144px]">
+        <span className="relative block h-[130px] w-[130px] overflow-hidden rounded-full shadow-[0_8px_18px_-2px_rgba(60,40,25,0.28),0_0_18px_3px_rgba(210,168,104,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-[144px] sm:w-[144px]">
           {item.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <ProductPhoto
               src={item.imageUrl}
               alt=""
-              draggable={false}
-              loading="lazy"
-              className="h-full w-full object-cover"
+              sizes="144px"
+              className="object-cover"
             />
           ) : (
             <span

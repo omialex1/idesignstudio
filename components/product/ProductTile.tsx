@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import ProductPhoto from "@/components/product/ProductPhoto";
 
 // Product names carry the search keywords after a dash ("MORRA – cu drenaj și
 // farfurie"); on cards only the part before the dash is shown.
@@ -20,6 +21,7 @@ export default function ProductTile({
   badge,
   note,
   actions,
+  priority = false,
 }: {
   href: string;
   name: string;
@@ -31,6 +33,8 @@ export default function ProductTile({
   badge?: string;
   note?: string;
   actions: React.ReactNode;
+  // the first cards of a page: their photo is loaded first
+  priority?: boolean;
 }) {
   return (
     <div className="group flex h-full flex-col rounded-2xl border border-cream-200 bg-paper px-1.5 pt-2.5 text-center shadow-[0_4px_12px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_8px_18px_rgba(60,40,25,0.16)] sm:px-2.5 sm:pt-3.5">
@@ -39,12 +43,12 @@ export default function ProductTile({
         <div className="mx-auto w-[84%] shrink-0 lg:w-[82%]">
           <div className="relative aspect-square shrink-0 overflow-hidden rounded-full">
             {imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <ProductPhoto
                 src={imageUrl}
                 alt={name}
-                loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(min-width: 640px) 200px, 150px"
+                priority={priority}
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
               <div

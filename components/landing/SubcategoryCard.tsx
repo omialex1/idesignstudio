@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import ProductPhoto from "@/components/product/ProductPhoto";
 
 // A subcategory on the homepage. The photo is one of its products, only an example,
 // chosen at random at every visit (the page is cached for everyone, so the choice is
@@ -33,15 +34,13 @@ export default function SubcategoryCard({
       href={href}
       className="group flex h-full flex-col items-center rounded-3xl border border-gold-600/50 bg-paper/55 text-taupe-800 shadow-[0_8px_30px_rgba(60,40,25,0.12)] backdrop-blur-xl backdrop-saturate-150 transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_36px_rgba(60,40,25,0.18)] px-3 pt-4 pb-4 text-center"
     >
-      <span className="block h-28 w-28 shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(60,40,25,0.22)] ring-2 ring-white/70 sm:h-32 sm:w-32">
+      <span className="relative block h-28 w-28 shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(60,40,25,0.22)] ring-2 ring-white/70 sm:h-32 sm:w-32">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <ProductPhoto
             src={image}
             alt=""
-            loading="lazy"
-            draggable={false}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="128px"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <span

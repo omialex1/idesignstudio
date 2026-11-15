@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ProductPhoto from "@/components/product/ProductPhoto";
 
 const SWIPE_THRESHOLD_PX = 50;
 const DRAG_CLICK_TOLERANCE_PX = 5;
@@ -206,16 +207,14 @@ export default function ProductGallery({
               type="button"
               onClick={() => openLightbox(index)}
               aria-label={`${alt} – enlarge`}
-              className="block w-full shrink-0 cursor-zoom-in snap-center"
+              className="relative block aspect-[4/5] w-full shrink-0 cursor-zoom-in snap-center"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <ProductPhoto
                 src={url}
                 alt={many ? `${alt} (${index + 1}/${images.length})` : alt}
-                loading={index === 0 ? "eager" : "lazy"}
-                fetchPriority={index === 0 ? "high" : "auto"}
-                draggable={false}
-                className="aspect-[4/5] w-full object-cover"
+                sizes="(min-width: 1024px) 480px, (min-width: 640px) 45vw, 100vw"
+                priority={index === 0}
+                className="object-cover"
               />
             </button>
           ))}
@@ -255,17 +254,17 @@ export default function ProductGallery({
               onClick={() => goTo(index)}
               aria-label={`${alt} ${index + 1}`}
               aria-current={index === active}
-              className={`overflow-hidden rounded-lg border-2 ${
+              className={`relative aspect-square overflow-hidden rounded-lg border-2 ${
                 index === active
                   ? "border-salamander-500"
                   : "border-transparent"
               }`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <ProductPhoto
                 src={url}
                 alt=""
-                className="aspect-square w-full object-cover"
+                sizes="96px"
+                className="object-cover"
               />
             </button>
           ))}
