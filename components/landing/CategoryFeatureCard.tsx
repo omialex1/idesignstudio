@@ -22,7 +22,7 @@ export default function CategoryFeatureCard({
 }) {
   const photo = (
     <span
-      className={`block shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(60,40,25,0.16)] ${
+      className={`block shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.28)] ring-2 ring-white/20 ${
         large
           ? "h-28 w-28 sm:h-32 sm:w-32"
           : "h-20 w-20 sm:h-[104px] sm:w-[104px]"
@@ -49,7 +49,7 @@ export default function CategoryFeatureCard({
   return (
     <Link
       href={href}
-      className={`group flex h-full items-center rounded-2xl border border-cream-300/70 bg-[url(/images/card-bg.jpg)] bg-cover bg-center shadow-[0_8px_22px_rgba(60,40,25,0.10)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(60,40,25,0.16)] ${
+      className={`group flex h-full items-center rounded-3xl border border-white/15 bg-choc/55 backdrop-blur-md text-cream-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_36px_rgba(0,0,0,0.18)] ${
         large
           ? "flex-col gap-3 p-4 text-center sm:flex-row sm:gap-5 sm:p-5 sm:text-left"
           : "flex-col gap-2.5 p-3 text-center sm:flex-row sm:gap-5 sm:p-5 sm:text-left"
@@ -58,19 +58,19 @@ export default function CategoryFeatureCard({
       {photo}
       <span className="flex min-w-0 flex-col items-center sm:items-start">
         <span
-          className={`font-display leading-tight text-taupe-800 ${
+          className={`font-display leading-tight text-cream-50 ${
             large ? "text-xl sm:text-2xl" : "text-base sm:text-xl"
           }`}
         >
           {name}
         </span>
         <span
-          className={`text-taupe-600 ${large ? "mt-1 text-sm" : "mt-0.5 text-xs sm:text-sm"}`}
+          className={`text-cream-100/90 ${large ? "mt-1 text-sm" : "mt-0.5 text-xs sm:text-sm"}`}
         >
           {countLabel}
         </span>
         <span
-          className={`mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-choc font-semibold text-cream-50 shadow-sm transition-colors group-hover:bg-gold-400 group-hover:text-choc ${
+          className={`mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold-400 font-semibold text-choc shadow-sm transition-colors group-hover:bg-gold-300 ${
             large
               ? "px-5 py-2 text-sm"
               : "px-3 py-1.5 text-xs sm:px-4 sm:text-sm"
