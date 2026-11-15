@@ -21,7 +21,7 @@ export default function MidBackdrop({
           className="fixed inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${src})` }}
         />
-        <div className="absolute inset-0 bg-cream-50/50" />
+        <div className="absolute inset-0 bg-cream-50/45" />
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-cream-50 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-cream-50 to-transparent" />
       </div>
