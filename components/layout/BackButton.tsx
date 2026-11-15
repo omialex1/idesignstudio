@@ -59,7 +59,7 @@ export default function BackButton() {
       onClick={goBack}
       aria-label={t("back")}
       title={t("back")}
-      className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 shrink-0 items-center justify-center gap-1.5 rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400 sm:h-9 sm:w-auto sm:px-4 sm:text-sm sm:font-semibold"
+      className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 shrink-0 items-center justify-center gap-1.5 rounded-full border border-taupe-800/20 text-taupe-800 transition-colors hover:text-gold-600 sm:h-9 sm:w-auto sm:px-4 sm:text-sm sm:font-semibold"
     >
       {arrow}
       <span className="hidden sm:inline">{t("back")}</span>

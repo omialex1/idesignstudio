@@ -1,8 +1,7 @@
 import { Link } from "@/i18n/navigation";
 
-// A main category on the homepage. The biggest one (`large`) is the wide card with
-// a big round photo; the others are small. Same look as the other category cards: a
-// soft textured background, a round photo with a soft shadow, a dark "view" button.
+// A main category on the homepage. All of them have the same photo size, text size
+// and button, so they look alike side by side (the first one may be a taller cell).
 export default function CategoryFeatureCard({
   href,
   name,
@@ -10,7 +9,6 @@ export default function CategoryFeatureCard({
   placeholderClass,
   countLabel,
   cta,
-  large = false,
 }: {
   href: string;
   name: string;
@@ -18,15 +16,10 @@ export default function CategoryFeatureCard({
   placeholderClass: string;
   countLabel: string;
   cta: string;
-  large?: boolean;
 }) {
   const photo = (
     <span
-      className={`block shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.28)] ring-2 ring-white/20 ${
-        large
-          ? "h-28 w-28 sm:h-32 sm:w-32"
-          : "h-20 w-20 sm:h-[104px] sm:w-[104px]"
-      }`}
+      className="block h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-[0_4px_14px_rgba(60,40,25,0.22)] ring-2 ring-white/70 sm:h-[112px] sm:w-[112px]"
     >
       {imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -49,32 +42,22 @@ export default function CategoryFeatureCard({
   return (
     <Link
       href={href}
-      className={`group flex h-full items-center rounded-3xl border border-white/15 bg-choc/55 backdrop-blur-md text-cream-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_36px_rgba(0,0,0,0.18)] ${
-        large
-          ? "flex-col gap-3 p-4 text-center sm:flex-row sm:gap-5 sm:p-5 sm:text-left"
-          : "flex-col gap-2.5 p-3 text-center sm:flex-row sm:gap-5 sm:p-5 sm:text-left"
-      }`}
+      className={`group flex h-full items-center rounded-3xl border border-gold-600/50 bg-paper/55 text-taupe-800 shadow-[0_8px_30px_rgba(60,40,25,0.12)] backdrop-blur-xl backdrop-saturate-150 transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_36px_rgba(60,40,25,0.18)] flex-col gap-2.5 p-3 text-center sm:flex-row sm:gap-5 sm:p-5 sm:text-left`}
     >
       {photo}
       <span className="flex min-w-0 flex-col items-center sm:items-start">
         <span
-          className={`font-display leading-tight text-cream-50 ${
-            large ? "text-xl sm:text-2xl" : "text-base sm:text-xl"
-          }`}
+          className="font-display text-base leading-tight text-taupe-800 sm:text-xl"
         >
           {name}
         </span>
         <span
-          className={`text-cream-100/90 ${large ? "mt-1 text-sm" : "mt-0.5 text-xs sm:text-sm"}`}
+          className="mt-0.5 text-xs text-taupe-600 sm:text-sm"
         >
           {countLabel}
         </span>
         <span
-          className={`mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold-400 font-semibold text-choc shadow-sm transition-colors group-hover:bg-gold-300 ${
-            large
-              ? "px-5 py-2 text-sm"
-              : "px-3 py-1.5 text-xs sm:px-4 sm:text-sm"
-          }`}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-choc px-3 py-1.5 text-xs font-semibold text-cream-50 shadow-sm transition-colors group-hover:bg-taupe-700 sm:px-4 sm:text-sm"
         >
           {cta}
           <svg

@@ -19,6 +19,7 @@ import { formatPrice } from "@/lib/format";
 import EndlessRow from "@/components/layout/EndlessRow";
 import GoldFrame from "@/components/layout/GoldFrame";
 import GoldDot from "@/components/layout/GoldDot";
+import MidBackdrop from "@/components/layout/MidBackdrop";
 import CategoryFeatureCard from "@/components/landing/CategoryFeatureCard";
 import Reveal from "@/components/layout/Reveal";
 import { COMPANY, pageAlternates, siteUrl } from "@/lib/seo";
@@ -97,13 +98,14 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         </div>
       </section>
 
+      <MidBackdrop src="/images/bg-interior.jpg">
       <section
         id="categorii"
         className="mx-auto w-full max-w-5xl scroll-mt-24 px-6 pt-6 pb-12"
       >
         <GoldFrame horizontal={false}>
         <Reveal>
-          <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
+          <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl [text-shadow:0_0_16px_rgba(251,245,233,0.95),0_0_6px_rgba(251,245,233,0.9)]">
             {t("discover")}
           </h2>
           <span
@@ -134,7 +136,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               }`}
             >
               <CategoryFeatureCard
-                large={i === 0}
                 href={`/${main.slug}`}
                 name={main.name}
                 imageUrl={imageUrl}
@@ -154,7 +155,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           <GoldDot className="-top-[7.5px]" />
           <GoldFrame horizontal={false}>
           <Reveal>
-            <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
+            <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl [text-shadow:0_0_16px_rgba(251,245,233,0.95),0_0_6px_rgba(251,245,233,0.9)]">
               {t("newTitle")}
             </h2>
             <span
@@ -215,7 +216,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             <GoldDot className="-top-[7.5px]" />
             <GoldFrame horizontal={false}>
             <Reveal>
-              <h2 className="text-center font-display text-4xl text-taupe-800 italic">
+              <h2 className="text-center font-display text-4xl text-taupe-800 italic [text-shadow:0_0_16px_rgba(251,245,233,0.95),0_0_6px_rgba(251,245,233,0.9)]">
                 {main.name}
               </h2>
               <span
@@ -264,6 +265,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             </GoldFrame>
           </section>
         ))}
+      </MidBackdrop>
 
       <section className="mx-auto w-full max-w-5xl px-6 pt-8 pb-16">
         <Reveal>

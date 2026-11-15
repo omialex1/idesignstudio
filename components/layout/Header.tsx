@@ -104,7 +104,7 @@ export default function Header({
       className="sticky top-0 z-50 px-3 pt-3 sm:px-6"
     >
       <div
-        className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/15 bg-choc/60 px-2.5 max-[359px]:px-1.5 py-2 text-cream-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md sm:px-6 sm:py-2.5"
+        className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-gold-600/50 bg-paper/60 px-2.5 max-[359px]:px-1.5 py-2 text-taupe-800 shadow-[0_8px_30px_rgba(60,40,25,0.12)] backdrop-blur-xl backdrop-saturate-150 sm:px-6 sm:py-2.5"
       >
         <div className="flex items-center gap-0.5 min-[360px]:gap-1 sm:gap-3">
           <BackButton />
@@ -116,7 +116,7 @@ export default function Header({
               setSearchOpen(false);
               setMenuOpen((open) => !open);
             }}
-            className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full text-cream-100 transition-colors hover:text-gold-400 lg:hidden"
+            className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full text-taupe-800 transition-colors hover:text-gold-600 lg:hidden"
           >
             <svg
               viewBox="0 0 24 24"
@@ -135,19 +135,19 @@ export default function Header({
           </button>
           <Link
             href="/"
-            className="font-display text-sm max-[339px]:text-xs tracking-wide whitespace-nowrap text-cream-50 min-[400px]:text-lg sm:text-2xl"
+            className="font-display text-sm max-[339px]:text-xs tracking-wide whitespace-nowrap text-taupe-800 min-[400px]:text-lg sm:text-2xl"
           >
             iDesignStudio
-            <span className="text-gold-400">.ro</span>
+            <span className="text-gold-600">.ro</span>
           </Link>
         </div>
 
-        <nav className="hidden items-center gap-8 text-sm font-medium text-cream-100/90 lg:flex">
+        <nav className="hidden items-center gap-8 text-sm font-medium text-taupe-700 lg:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="transition-colors hover:text-gold-400"
+              className="transition-colors hover:text-gold-600"
             >
               {link.label}
             </Link>
@@ -155,7 +155,7 @@ export default function Header({
         </nav>
 
         <div className="flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-4">
-          <div className="flex items-center gap-1 rounded-full border border-white/20 p-1 text-xs font-semibold text-cream-100/80">
+          <div className="flex items-center gap-1 rounded-full border border-taupe-800/20 p-1 text-xs font-semibold text-taupe-600">
             {routing.locales.map((loc) => (
               <Link
                 key={loc}
@@ -163,8 +163,8 @@ export default function Header({
                 locale={loc}
                 className={`rounded-full px-1.5 max-[359px]:px-1 py-1 transition-colors sm:px-2 ${
                   locale === loc
-                    ? "bg-gold-400 text-choc"
-                    : "hover:text-gold-400"
+                    ? "bg-choc text-cream-50"
+                    : "hover:text-gold-600"
                 }`}
               >
                 {loc.toUpperCase()}
@@ -180,7 +180,7 @@ export default function Header({
               setMenuOpen(false);
               setSearchOpen((open) => !open);
             }}
-            className="hidden h-8 w-8 sm:flex sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
+            className="hidden h-8 w-8 sm:flex sm:h-9 sm:w-9 items-center justify-center rounded-full border border-taupe-800/20 text-taupe-800 transition-colors hover:text-gold-600"
           >
             <svg
               viewBox="0 0 24 24"
@@ -204,7 +204,7 @@ export default function Header({
           <Link
             href="/favorites"
             aria-label={tFav("label")}
-            className="relative hidden h-8 w-8 sm:flex sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
+            className="relative hidden h-8 w-8 sm:flex sm:h-9 sm:w-9 items-center justify-center rounded-full border border-taupe-800/20 text-taupe-800 transition-colors hover:text-gold-600"
           >
             <svg
               viewBox="0 0 24 24"
@@ -231,7 +231,7 @@ export default function Header({
             // login page, and the router would reuse it right after logging in
             prefetch={false}
             aria-label={tAccount("accountLabel")}
-            className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
+            className="flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-taupe-800/20 text-taupe-800 transition-colors hover:text-gold-600"
           >
             <svg
               viewBox="0 0 24 24"
@@ -249,7 +249,7 @@ export default function Header({
           <Link
             href="/cart"
             aria-label={tCart("cartLabel")}
-            className="relative flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 text-cream-100 transition-colors hover:text-gold-400"
+            className="relative flex h-8 w-8 max-[359px]:h-7 max-[359px]:w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-taupe-800/20 text-taupe-800 transition-colors hover:text-gold-600"
           >
             <svg
               viewBox="0 0 24 24"
@@ -273,9 +273,9 @@ export default function Header({
       </div>
 
       {searchOpen && (
-        <div className="mx-auto mt-2 max-w-6xl rounded-3xl border border-white/15 bg-choc/80 px-4 py-3 text-cream-100 backdrop-blur-md sm:px-6">
+        <div className="mx-auto mt-2 max-w-6xl rounded-3xl border border-gold-600/40 bg-paper/85 px-4 py-3 text-taupe-800 backdrop-blur-xl sm:px-6">
           <SearchForm
-            tone="dark"
+            tone="light"
             autoFocus
             onSubmitted={() => setSearchOpen(false)}
           />
@@ -283,10 +283,10 @@ export default function Header({
       )}
 
       {menuOpen && (
-        <nav className="mx-auto mt-2 max-w-6xl rounded-3xl border border-white/15 bg-choc/80 px-6 py-3 text-cream-100 backdrop-blur-md lg:hidden">
+        <nav className="mx-auto mt-2 max-w-6xl rounded-3xl border border-gold-600/40 bg-paper/85 px-6 py-3 text-taupe-800 backdrop-blur-xl lg:hidden">
           {/* on phones the search icon would not fit in the bar, so it lives here */}
           <div className="pb-2 sm:hidden">
-            <SearchForm tone="dark" onSubmitted={() => setMenuOpen(false)} />
+            <SearchForm tone="light" onSubmitted={() => setMenuOpen(false)} />
           </div>
           <ul className="flex flex-col">
             {navLinks.map((link) => (
@@ -294,7 +294,7 @@ export default function Header({
                 <Link
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className="block py-2.5 text-sm font-medium text-cream-100 hover:text-gold-400"
+                  className="block py-2.5 text-sm font-medium text-taupe-800 hover:text-gold-600"
                 >
                   {link.label}
                 </Link>
@@ -304,7 +304,7 @@ export default function Header({
               <Link
                 href="/favorites"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 py-2.5 text-sm font-medium text-cream-100 hover:text-gold-400"
+                className="flex items-center gap-2 py-2.5 text-sm font-medium text-taupe-800 hover:text-gold-600"
               >
                 {tFav("label")}
                 {favoriteCount > 0 && (

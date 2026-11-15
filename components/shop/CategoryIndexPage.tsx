@@ -1,5 +1,6 @@
 import { getSubcategoryShowcase } from "@/lib/db/products";
 import CategoryFeed from "@/components/landing/CategoryFeed";
+import MidBackdrop from "@/components/layout/MidBackdrop";
 import type { MainCategory } from "@/lib/main-categories";
 
 export default async function CategoryIndexPage({
@@ -26,7 +27,9 @@ export default async function CategoryIndexPage({
           </p>
         )}
       </div>
-      <CategoryFeed subcategories={subcategories} main={main} />
+      <MidBackdrop src="/images/bg-interior.jpg">
+        <CategoryFeed subcategories={subcategories} main={main} />
+      </MidBackdrop>
     </div>
   );
 }
