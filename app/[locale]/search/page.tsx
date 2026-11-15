@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import FilterableProducts from "@/components/shop/FilterableProducts";
+import GoldFrame from "@/components/layout/GoldFrame";
 import SearchForm from "@/components/layout/SearchForm";
 import { searchProducts } from "@/lib/db/search";
 import { MAX_QUERY_LENGTH } from "@/lib/search";
@@ -43,6 +44,7 @@ export default async function SearchPage({
       </div>
 
       {results.length > 0 && (
+        <GoldFrame>
         <FilterableProducts
           relevanceFirst
           products={results.map(
@@ -69,6 +71,7 @@ export default async function SearchPage({
             }),
           )}
         />
+        </GoldFrame>
       )}
 
       {query && results.length === 0 && (

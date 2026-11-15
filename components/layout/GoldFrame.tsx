@@ -1,5 +1,6 @@
 // A fine gold frame around a block of content (a row of products, a list of
-// subcategories), to set it apart from the page. It is not a closed rectangle: each
+// subcategories), to set it apart from the page. On phones only the top and bottom
+// lines are drawn (the sides would be too close to the edge of the screen). It is not a closed rectangle: each
 // side is a thin line over about 85% of its length, centered, fading out at both ends,
 // and the corners are left open. The frame sits just outside the content (it uses the
 // gutter of the page), so the content keeps the width it had.
@@ -14,21 +15,29 @@ export default function GoldFrame({
   children,
   className = "",
   enabled = true,
+  horizontal = true,
 }: {
   children: React.ReactNode;
   className?: string;
   // false: the content as it is, without the frame
   enabled?: boolean;
+  // false: only the sides are drawn (no top and bottom line), e.g. when the blocks are
+  // separated by dots
+  horizontal?: boolean;
 }) {
   if (!enabled) return <>{children}</>;
   return (
     <div
-      className={`relative -mx-3 px-3 py-7 sm:-mx-6 sm:px-6 sm:py-9 ${className}`}
+      className={`relative py-7 sm:-mx-6 sm:px-6 sm:py-9 ${className}`}
     >
-      <span aria-hidden="true" className={`${line} ${h} top-0`} />
-      <span aria-hidden="true" className={`${line} ${h} bottom-0`} />
-      <span aria-hidden="true" className={`${line} ${v} left-0`} />
-      <span aria-hidden="true" className={`${line} ${v} right-0`} />
+      {horizontal && (
+        <>
+          <span aria-hidden="true" className={`${line} ${h} top-0`} />
+          <span aria-hidden="true" className={`${line} ${h} bottom-0`} />
+        </>
+      )}
+      <span aria-hidden="true" className={`${line} ${v} left-0 hidden sm:block`} />
+      <span aria-hidden="true" className={`${line} ${v} right-0 hidden sm:block`} />
       {children}
     </div>
   );

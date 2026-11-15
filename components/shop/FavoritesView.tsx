@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import ProductTile, { shortName } from "@/components/product/ProductTile";
+import GoldFrame from "@/components/layout/GoldFrame";
 import ProductActions from "@/components/product/ProductActions";
 import { useFavoritesStore } from "@/lib/favorites/store";
 import { formatPrice } from "@/lib/format";
@@ -70,7 +71,8 @@ export default function FavoritesView() {
         <p className="mt-2 text-sm text-taupe-600">
           {t("count", { count: shown.length })}
         </p>
-        <div className="mt-10 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5">
+        <GoldFrame className="mt-10">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5">
           {shown.map((p) => {
             const price = formatPrice(p.priceCents, p.currency, locale);
             return (
@@ -122,6 +124,7 @@ export default function FavoritesView() {
             );
           })}
         </div>
+        </GoldFrame>
       </div>
     </div>
   );

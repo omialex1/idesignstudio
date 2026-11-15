@@ -18,6 +18,7 @@ import { shortName } from "@/components/product/ProductTile";
 import { formatPrice } from "@/lib/format";
 import EndlessRow from "@/components/layout/EndlessRow";
 import GoldFrame from "@/components/layout/GoldFrame";
+import GoldDot from "@/components/layout/GoldDot";
 import CategoryFeatureCard from "@/components/landing/CategoryFeatureCard";
 import Reveal from "@/components/layout/Reveal";
 import { COMPANY, pageAlternates, siteUrl } from "@/lib/seo";
@@ -98,8 +99,9 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       <section
         id="categorii"
-        className="mx-auto w-full max-w-5xl scroll-mt-24 px-6 pt-6 pb-16"
+        className="mx-auto w-full max-w-5xl scroll-mt-24 px-6 pt-6 pb-12"
       >
+        <GoldFrame horizontal={false}>
         <Reveal>
           <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
             {t("discover")}
@@ -143,12 +145,14 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             </Reveal>
           ))}
         </div>
+        </GoldFrame>
       </section>
 
       {/* the five newest products, shown like "Merge bine cu" */}
       {newest.length > 0 && (
-        <section className="mx-auto w-full max-w-5xl px-6 py-12">
-          <GoldFrame>
+        <section className="relative mx-auto w-full max-w-5xl px-6 py-12">
+          <GoldDot className="-top-[7.5px]" />
+          <GoldFrame horizontal={false}>
           <Reveal>
             <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
               {t("newTitle")}
@@ -203,12 +207,13 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       {sections
         .filter(({ subcategories }) => subcategories.length > 0)
-        .map(({ main, subcategories }, sectionIndex) => (
+        .map(({ main, subcategories }) => (
           <section
             key={main.id}
-            className="mx-auto w-full max-w-5xl px-6 py-12"
+            className="relative mx-auto w-full max-w-5xl px-6 py-12"
           >
-            <GoldFrame enabled={sectionIndex === 0}>
+            <GoldDot className="-top-[7.5px]" />
+            <GoldFrame horizontal={false}>
             <Reveal>
               <h2 className="text-center font-display text-4xl text-taupe-800 italic">
                 {main.name}
@@ -223,7 +228,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             <div className="mt-10">
               <EndlessRow
                 centered
-                arrowsInside={sectionIndex === 0}
+                arrowsInside
                 resetKey={subcategories.map((c) => c.id).join(",")}
                 prevLabel={tShop("previous")}
                 nextLabel={tShop("next")}

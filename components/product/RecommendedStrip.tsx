@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import EndlessRow from "@/components/layout/EndlessRow";
 import StripCard, { type StripItem } from "@/components/product/StripCard";
+import GoldFrame from "@/components/layout/GoldFrame";
 
 // "Merge bine cu…": a row of small photos above small cards, swiped (or moved with the
 // arrows) left and right; a click opens the product. The row repeats itself endlessly
@@ -35,11 +36,13 @@ export default function RecommendedStrip({
   }, [given]);
 
   return (
+    <GoldFrame>
     <section aria-label={title} className="flex flex-col gap-2">
       <h2 className="text-sm font-semibold tracking-wide text-taupe-600 uppercase">
         {title}
       </h2>
       <EndlessRow
+        arrowsInside
         resetKey={items.map((i) => i.id).join(",")}
         prevLabel={prevLabel}
         nextLabel={nextLabel}
@@ -50,5 +53,6 @@ export default function RecommendedStrip({
         }))}
       />
     </section>
+    </GoldFrame>
   );
 }
