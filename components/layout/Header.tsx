@@ -104,7 +104,7 @@ export default function Header({
       className="sticky top-0 z-50 px-3 pt-3 sm:px-6"
     >
       <div
-        className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-gold-600/50 bg-paper/60 px-2.5 max-[359px]:px-1.5 py-2 text-taupe-800 shadow-[0_8px_30px_rgba(60,40,25,0.12)] backdrop-blur-xl backdrop-saturate-150 sm:px-6 sm:py-2.5"
+        className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-gold-600/50 bg-paper/60 px-2.5 max-[359px]:px-1.5 py-2 text-taupe-800 shadow-[0_8px_30px_rgba(60,40,25,0.12)] backdrop-blur-xl backdrop-saturate-150 sm:px-6 sm:py-2.5"
       >
         <div className="flex items-center gap-0.5 min-[360px]:gap-1 sm:gap-3">
           <BackButton />
@@ -273,7 +273,7 @@ export default function Header({
       </div>
 
       {searchOpen && (
-        <div className="mx-auto mt-2 max-w-6xl rounded-3xl border border-gold-600/40 bg-paper/85 px-4 py-3 text-taupe-800 backdrop-blur-xl sm:px-6">
+        <div className="mx-auto mt-2 max-w-7xl rounded-3xl border border-gold-600/40 bg-paper/85 px-4 py-3 text-taupe-800 backdrop-blur-xl sm:px-6">
           <SearchForm
             tone="light"
             autoFocus
@@ -283,7 +283,7 @@ export default function Header({
       )}
 
       {menuOpen && (
-        <nav className="mx-auto mt-2 max-w-6xl rounded-3xl border border-gold-600/40 bg-paper/85 px-6 py-3 text-taupe-800 backdrop-blur-xl lg:hidden">
+        <nav className="mx-auto mt-2 max-w-7xl rounded-3xl border border-gold-600/40 bg-paper/85 px-6 py-3 text-taupe-800 backdrop-blur-xl lg:hidden">
           {/* on phones the search icon would not fit in the bar, so it lives here */}
           <div className="pb-2 sm:hidden">
             <SearchForm tone="light" onSubmitted={() => setMenuOpen(false)} />

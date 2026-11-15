@@ -213,6 +213,7 @@ export default function ProductGallery({
                 src={url}
                 alt={many ? `${alt} (${index + 1}/${images.length})` : alt}
                 loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "auto"}
                 draggable={false}
                 className="aspect-[4/5] w-full object-cover"
               />

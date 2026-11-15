@@ -79,7 +79,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       {/* the slideshow: the title of the page stays for screen readers and Google */}
       <section className="relative -mt-[68px] px-4 pt-[84px] pb-4 sm:px-6 sm:pt-24 sm:pb-6">
         <h1 className="sr-only">{t("heroTitle")}</h1>
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-7xl">
           <HeroSlideshow
             label={t("heroLabel")}
             cta={t("viewCollection")}
@@ -101,7 +101,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       <MidBackdrop src="/images/bg-interior.jpg">
       <section
         id="categorii"
-        className="mx-auto w-full max-w-5xl scroll-mt-24 px-6 pt-6 pb-12"
+        className="mx-auto w-full max-w-7xl scroll-mt-24 px-6 pt-6 pb-12"
       >
         <GoldFrame horizontal={false}>
         <Reveal>
@@ -151,7 +151,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       {/* the five newest products, shown like "Merge bine cu" */}
       {newest.length > 0 && (
-        <section className="relative mx-auto w-full max-w-5xl px-6 py-12">
+        <section className="relative mx-auto w-full max-w-7xl px-6 py-12">
           <GoldDot className="-top-[7.5px]" />
           <GoldFrame horizontal={false}>
           <Reveal>
@@ -170,7 +170,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               resetKey={newest.map((p) => p.id).join(",")}
               prevLabel={tShop("previous")}
               nextLabel={tShop("next")}
-              itemClassName="w-[125px] shrink-0 sm:w-[141px]"
+              itemClassName="w-[150px] shrink-0 sm:w-[170px]"
               items={newest.map((p) => {
                 const price = formatPrice(p.priceCents, p.currency, locale);
                 return {
@@ -211,7 +211,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         .map(({ main, subcategories }) => (
           <section
             key={main.id}
-            className="relative mx-auto w-full max-w-5xl px-6 py-12"
+            className="relative mx-auto w-full max-w-7xl px-6 py-12"
           >
             <GoldDot className="-top-[7.5px]" />
             <GoldFrame horizontal={false}>
@@ -267,7 +267,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         ))}
       </MidBackdrop>
 
-      <section className="mx-auto w-full max-w-5xl px-6 pt-8 pb-16">
+      <section className="mx-auto w-full max-w-7xl px-6 pt-8 pb-16">
         <Reveal>
           <h2 className="text-center font-display text-4xl text-taupe-800 italic">
             {t("howTitle")}

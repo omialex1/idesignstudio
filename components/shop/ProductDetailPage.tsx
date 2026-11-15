@@ -133,7 +133,7 @@ export default async function ProductDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
-      <div className="mx-auto grid w-full max-w-4xl gap-10 sm:grid-cols-2">
+      <div className="mx-auto grid w-full max-w-5xl gap-10 sm:grid-cols-2">
         {product.images.length > 0 ? (
           <ProductGallery
             images={product.images.map((i) => i.url)}
@@ -190,7 +190,7 @@ export default async function ProductDetailPage({
         </div>
       </div>
       {recommended.length > 0 && (
-        <div className="mx-auto mt-8 w-full max-w-4xl">
+        <div className="mx-auto mt-8 w-full max-w-5xl">
           <RecommendedStrip
             title={t("goesWith")}
             prevLabel={t("previous")}
@@ -235,7 +235,7 @@ export default async function ProductDetailPage({
         </div>
       )}
       {product.longDescription && (
-        <Reveal className="mx-auto mt-12 w-full max-w-4xl border-t border-cream-200 pt-10">
+        <Reveal className="mx-auto mt-12 w-full max-w-5xl border-t border-cream-200 pt-10">
           <p className="max-w-2xl leading-relaxed whitespace-pre-line text-taupe-600">
             {renderRichText(product.longDescription)}
           </p>

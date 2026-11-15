@@ -29,7 +29,7 @@ export default async function SearchPage({
   const results = query ? await searchProducts(query, locale) : [];
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 pt-28 pb-16">
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-6 pt-28 pb-16">
       <div className="flex flex-col gap-4">
         <h1 className="font-display text-3xl text-taupe-800">{t("title")}</h1>
         <SearchForm initialQuery={query} autoFocus={!query} />

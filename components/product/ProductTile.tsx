@@ -56,7 +56,7 @@ export default function ProductTile({
           </div>
         </div>
         <div className="flex flex-1 flex-col items-center justify-center px-0.5 pt-2 sm:pt-2.5">
-          <h3 className="font-display text-[11px] leading-tight text-taupe-800 sm:text-sm">
+          <h3 className="font-display text-xs leading-tight text-taupe-800 sm:text-sm">
             {name}
           </h3>
           {badge && (
@@ -74,7 +74,7 @@ export default function ProductTile({
       {/* stacked on phones and tablets; price and buttons side by side on wide screens */}
       <div className="mt-2 flex flex-col items-center gap-1.5 border-t border-cream-200 py-2 lg:flex-row lg:justify-between lg:py-2.5">
         {priceLabel && (
-          <span className="text-[10px] leading-tight font-semibold text-salamander-600 sm:text-xs lg:text-left">
+          <span className="text-[11px] leading-tight font-semibold text-salamander-600 sm:text-xs lg:text-left">
             {oldPriceLabel && (
               <span className="mr-1.5 font-normal text-taupe-400 line-through">
                 {oldPriceLabel}

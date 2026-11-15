@@ -52,7 +52,7 @@ export default async function CategoryDetailPage({
 
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="mx-auto w-full max-w-7xl">
         <h1 className="font-display text-3xl text-taupe-800">
           {category.name}
         </h1>

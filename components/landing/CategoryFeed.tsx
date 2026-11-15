@@ -21,7 +21,7 @@ export default async function CategoryFeed({
   const t = await getTranslations("Home");
 
   return (
-    <section className="mx-auto w-full max-w-5xl px-4 pb-24 sm:px-6">
+    <section className="mx-auto w-full max-w-7xl px-4 pb-24 sm:px-6">
       <GoldFrame>
       <CenteredGrid variant="cards">
         {subcategories.map((sub, i) => (

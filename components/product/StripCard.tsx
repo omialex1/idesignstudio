@@ -32,7 +32,7 @@ export default function StripCard({ item }: { item: StripItem }) {
         aria-label={item.name}
         className="block shrink-0 rounded-full"
       >
-        <span className="block h-[108px] w-[108px] overflow-hidden rounded-full shadow-[0_8px_18px_-2px_rgba(60,40,25,0.28),0_0_18px_3px_rgba(210,168,104,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-[120px] sm:w-[120px]">
+        <span className="block h-[130px] w-[130px] overflow-hidden rounded-full shadow-[0_8px_18px_-2px_rgba(60,40,25,0.28),0_0_18px_3px_rgba(210,168,104,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-[144px] sm:w-[144px]">
           {item.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -54,7 +54,7 @@ export default function StripCard({ item }: { item: StripItem }) {
 
       <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded-2xl border border-cream-200 bg-paper px-1.5 pt-2 pb-2.5 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
         <Link href={item.href} className="flex flex-1 flex-col items-center">
-          <h3 className="line-clamp-3 font-display text-[12px] leading-tight text-taupe-800 sm:text-[13px]">
+          <h3 className="line-clamp-3 font-display text-[14px] leading-tight text-taupe-800 sm:text-[15px]">
             {item.name}
           </h3>
           {item.badge && (
@@ -67,7 +67,7 @@ export default function StripCard({ item }: { item: StripItem }) {
           )}
         </Link>
         {item.price && (
-          <span className="mt-1.5 text-[11px] font-semibold text-salamander-600 sm:text-xs">
+          <span className="mt-1.5 text-[13px] font-semibold text-salamander-600 sm:text-sm">
             {item.oldPrice && (
               <span className="mr-1 font-normal text-taupe-400 line-through">
                 {item.oldPrice}

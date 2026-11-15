@@ -25,7 +25,7 @@ export default function EndlessRow({
   nextLabel,
   itemClassName,
   trackClassName = "pt-9 pb-10 -mt-5 -mb-6",
-  arrowClassName = "top-[88px]",
+  arrowClassName = "top-[100px]",
   centered = false,
   arrowsInside = false,
 }: {
@@ -38,7 +38,7 @@ export default function EndlessRow({
   itemClassName: string;
   // vertical room around the cards (for their shadows and glow)
   trackClassName?: string;
-  // where the arrows sit from the top of the row, e.g. "top-[88px]"
+  // where the arrows sit from the top of the row, e.g. "top-[100px]"
   arrowClassName?: string;
   // a row that fits in its space sits in the middle instead of at the left
   centered?: boolean;

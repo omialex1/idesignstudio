@@ -47,7 +47,7 @@ export default function RecommendedStrip({
         resetKey={items.map((i) => i.id).join(",")}
         prevLabel={prevLabel}
         nextLabel={nextLabel}
-        itemClassName="w-[125px] shrink-0 sm:w-[141px]"
+        itemClassName="w-[150px] shrink-0 sm:w-[170px]"
         items={items.map((item) => ({
           key: item.id,
           node: <StripCard item={item} />,

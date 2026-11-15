@@ -3,16 +3,17 @@ import { Children } from "react";
 // A grid of cards where the last (or the only) row sits in the middle instead of at the
 // left, so a category with only a few cards looks balanced. The cards have the same
 // width as in a normal grid with that many columns:
-//  - "cards":    2 columns on phones, 3, 4, then 5 on wide screens
-//  - "products": 3 columns on phones, 4, then 5 on wide screens
+//  - "cards":    2 columns on phones, 3, 4, 5, then 6 on very wide screens
+//  - "products": 2 columns on phones, 3, 4, then 5 on very wide screens (bigger cards,
+//    easier to see on a phone without zooming)
 const VARIANTS = {
   cards: {
     gap: "gap-3 sm:gap-4",
-    cell: "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-2rem)/3)] md:w-[calc((100%-3rem)/4)] lg:w-[calc((100%-4rem)/5)]",
+    cell: "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-2rem)/3)] md:w-[calc((100%-3rem)/4)] lg:w-[calc((100%-4rem)/5)] xl:w-[calc((100%-5rem)/6)]",
   },
   products: {
-    gap: "gap-2 sm:gap-4",
-    cell: "w-[calc((100%-1rem)/3)] sm:w-[calc((100%-3rem)/4)] lg:w-[calc((100%-4rem)/5)]",
+    gap: "gap-3 sm:gap-4",
+    cell: "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)]",
   },
 } as const;
 

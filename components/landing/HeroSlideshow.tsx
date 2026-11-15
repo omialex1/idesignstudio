@@ -78,7 +78,7 @@ export default function HeroSlideshow({
       {/* gold-to-terracotta frame, rounded */}
       <div className="rounded-[1.75rem] bg-gradient-to-br from-gold-300 via-gold-400 to-salamander-400 p-[3px] shadow-[0_6px_18px_rgba(60,40,25,0.16)]">
         <div
-          className="relative aspect-[4/3] overflow-hidden rounded-[calc(1.75rem-3px)] bg-choc sm:aspect-[16/9]"
+          className="relative aspect-[4/3] overflow-hidden rounded-[calc(1.75rem-3px)] bg-choc sm:aspect-[16/9] xl:aspect-[11/5]"
           onTouchStart={(e) => {
             touchX.current = e.touches[0]?.clientX ?? null;
           }}
