@@ -9,6 +9,7 @@ import ProductActions from "@/components/product/ProductActions";
 import { useFavoritesStore } from "@/lib/favorites/store";
 import { formatPrice } from "@/lib/format";
 import { categoryColorClass } from "@/lib/category-colors";
+import CenteredGrid from "@/components/layout/CenteredGrid";
 import type { FavoriteProduct } from "@/lib/db/products";
 
 // The page of the products marked with the heart. The ids are in the browser; the
@@ -72,7 +73,7 @@ export default function FavoritesView() {
           {t("count", { count: shown.length })}
         </p>
         <GoldFrame className="mt-10">
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5">
+        <CenteredGrid variant="products">
           {shown.map((p) => {
             const price = formatPrice(p.priceCents, p.currency, locale);
             return (
@@ -123,7 +124,7 @@ export default function FavoritesView() {
               </div>
             );
           })}
-        </div>
+        </CenteredGrid>
         </GoldFrame>
       </div>
     </div>

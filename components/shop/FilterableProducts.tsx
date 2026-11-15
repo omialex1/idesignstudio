@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import ProductTile, { shortName } from "@/components/product/ProductTile";
 import ProductActions from "@/components/product/ProductActions";
 import { formatPrice } from "@/lib/format";
+import CenteredGrid from "@/components/layout/CenteredGrid";
 import {
   NO_FILTERS,
   PRICE_RANGES,
@@ -316,7 +317,7 @@ export default function FilterableProducts({
       )}
 
       {shown.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5">
+        <CenteredGrid variant="products">
           {shown.map((p) => {
             const price = formatPrice(p.priceCents, p.currency, locale);
             return (
@@ -362,7 +363,7 @@ export default function FilterableProducts({
               />
             );
           })}
-        </div>
+        </CenteredGrid>
       ) : (
         <div className="flex flex-col items-start gap-3">
           <p className="text-taupe-500">{t("noMatches")}</p>

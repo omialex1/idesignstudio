@@ -42,6 +42,7 @@ export default function RecommendedStrip({
         {title}
       </h2>
       <EndlessRow
+        centered
         arrowsInside
         resetKey={items.map((i) => i.id).join(",")}
         prevLabel={prevLabel}

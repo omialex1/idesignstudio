@@ -3,6 +3,7 @@ import { categoryColorClass } from "@/lib/category-colors";
 import SubcategoryCard from "@/components/landing/SubcategoryCard";
 import Reveal from "@/components/layout/Reveal";
 import GoldFrame from "@/components/layout/GoldFrame";
+import CenteredGrid from "@/components/layout/CenteredGrid";
 import type { SubcategoryShowcase } from "@/lib/db/products";
 import type { MainCategory } from "@/lib/main-categories";
 
@@ -22,7 +23,7 @@ export default async function CategoryFeed({
   return (
     <section className="mx-auto w-full max-w-5xl px-4 pb-24 sm:px-6">
       <GoldFrame>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+      <CenteredGrid variant="cards">
         {subcategories.map((sub, i) => (
           <Reveal key={sub.id} index={i % 5} className="h-full">
             <SubcategoryCard
@@ -35,7 +36,7 @@ export default async function CategoryFeed({
             />
           </Reveal>
         ))}
-      </div>
+      </CenteredGrid>
       </GoldFrame>
     </section>
   );
