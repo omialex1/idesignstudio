@@ -80,18 +80,7 @@ function Icon({
   );
 }
 
-// The two round buttons of a product card, next to the price: the heart (favorites,
-// kept in the browser) and the cart. The cart adds the product at once when there is
-// nothing to choose; otherwise it opens the product page.
-export default function ProductActions({
-  product,
-  compact = false,
-}: {
-  product: CardProduct;
-  // smaller buttons, for the narrow cards of "Merge bine cu"
-  compact?: boolean;
-}) {
-  const base = `${roundBase} ${compact ? sizeSm : sizeMd}`;
+function useProductActions(product: CardProduct) {
   const t = useTranslations("Shop");
   const tCart = useTranslations("Cart");
   const addItem = useCartStore((s) => s.addItem);
@@ -144,23 +133,59 @@ export default function ProductActions({
     timer.current = setTimeout(() => setJustAdded(false), 1500);
   }
 
-  const heartLabel = favorite ? t("removeFromFavorites") : t("addToFavorites");
+  return {
+    favorite,
+    toggle: () => toggle(product.id),
+    add,
+    justAdded,
+    heartLabel: favorite ? t("removeFromFavorites") : t("addToFavorites"),
+    cartLabel: justAdded ? tCart("added") : tCart("addToCart"),
+    optionsLabel: t("chooseOptions"),
+  };
+}
+
+const CART_PATHS = (
+  <>
+    <path d="M4 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+    <path d="M15 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+    <path d="M17 17h-11v-14h-2" />
+    <path d="M6 5l6.005 .429m7.138 6.573l-.143 .998h-13" />
+    <path d="M15 6h6m-3 -3v6" />
+  </>
+);
+
+// The colours of the buttons: black (the shop's dark brown) with cream; a favorite
+// is a black heart button with a gold heart.
+const heartIdle =
+  "border border-choc/25 bg-cream-100 text-choc hover:bg-cream-200";
+const heartOn = "bg-choc text-gold-300 hover:bg-taupe-700";
+const cartDark = "bg-choc text-cream-50 shadow-sm hover:bg-taupe-700";
+
+// The two round buttons of a small product card ("Noutăți", "Merge bine cu"): the heart
+// (favorites, kept in the browser) and the cart. The cart adds the product at once when
+// there is nothing to choose; otherwise it opens the product page.
+export default function ProductActions({
+  product,
+  compact = false,
+}: {
+  product: CardProduct;
+  // smaller buttons, for the narrow cards of "Merge bine cu"
+  compact?: boolean;
+}) {
+  const base = `${roundBase} ${compact ? sizeSm : sizeMd}`;
+  const a = useProductActions(product);
 
   return (
     <span className="flex items-center gap-2.5">
       <button
         type="button"
-        aria-pressed={favorite}
-        aria-label={heartLabel}
-        title={heartLabel}
-        onClick={() => toggle(product.id)}
-        className={`${base} ${
-          favorite
-            ? "bg-salamander-500 text-cream-50 hover:bg-salamander-600"
-            : "border border-salamander-500/40 bg-cream-100 text-salamander-600 hover:bg-cream-200"
-        }`}
+        aria-pressed={a.favorite}
+        aria-label={a.heartLabel}
+        title={a.heartLabel}
+        onClick={a.toggle}
+        className={`${base} ${a.favorite ? heartOn : heartIdle}`}
       >
-        <Icon filled={favorite} small={compact}>
+        <Icon filled={a.favorite} small={compact}>
           <path d={HEART_PATH} />
         </Icon>
       </button>
@@ -168,41 +193,103 @@ export default function ProductActions({
       {product.quickAdd ? (
         <button
           type="button"
-          aria-label={justAdded ? tCart("added") : tCart("addToCart")}
-          title={tCart("addToCart")}
-          onClick={add}
-          className={`${base} bg-salamander-500 text-cream-50 shadow-sm hover:bg-salamander-600`}
+          aria-label={a.cartLabel}
+          title={a.cartLabel}
+          onClick={a.add}
+          className={`${base} ${cartDark}`}
         >
           <Icon small={compact}>
-            {justAdded ? (
-              <path d="M5 12l5 5l10 -10" />
-            ) : (
-              <>
-                <path d="M4 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                <path d="M15 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                <path d="M17 17h-11v-14h-2" />
-                <path d="M6 5l6.005 .429m7.138 6.573l-.143 .998h-13" />
-                <path d="M15 6h6m-3 -3v6" />
-              </>
-            )}
+            {a.justAdded ? <path d="M5 12l5 5l10 -10" /> : CART_PATHS}
           </Icon>
         </button>
       ) : (
         <Link
           href={product.href}
-          aria-label={t("chooseOptions")}
-          title={t("chooseOptions")}
-          className={`${base} bg-salamander-500 text-cream-50 shadow-sm hover:bg-salamander-600`}
+          aria-label={a.optionsLabel}
+          title={a.optionsLabel}
+          className={`${base} ${cartDark}`}
         >
-          <Icon small={compact}>
-            <path d="M4 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-            <path d="M15 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-            <path d="M17 17h-11v-14h-2" />
-            <path d="M6 5l6.005 .429m7.138 6.573l-.143 .998h-13" />
-            <path d="M15 6h6m-3 -3v6" />
-          </Icon>
+          <Icon small={compact}>{CART_PATHS}</Icon>
         </Link>
       )}
     </span>
+  );
+}
+
+// The bottom of a product card in the lists: the price, the heart and a big cart button
+// with the words. Two layouts (the same three parts):
+//  - on phones and tablets: the price and the heart on one line, the button alone below,
+//    wide and tall;
+//  - on desktop (lg and up): the price on top, then the heart and the button side by side.
+// This block is always the bottom of the card (the card pins it there).
+export function CardBuyBar({
+  product,
+  priceLabel,
+  oldPriceLabel,
+}: {
+  product: CardProduct;
+  priceLabel: string;
+  oldPriceLabel?: string;
+}) {
+  const a = useProductActions(product);
+
+  const heart = (
+    <button
+      type="button"
+      aria-pressed={a.favorite}
+      aria-label={a.heartLabel}
+      title={a.heartLabel}
+      onClick={a.toggle}
+      className={`${roundBase} ${sizeMd} justify-self-end ${a.favorite ? heartOn : heartIdle} lg:col-start-1 lg:row-start-2 lg:justify-self-start`}
+    >
+      <Icon filled={a.favorite}>
+        <path d={HEART_PATH} />
+      </Icon>
+    </button>
+  );
+
+  const buttonClass = `flex h-12 min-w-0 items-center justify-center gap-2 rounded-full px-3 text-sm font-semibold whitespace-nowrap transition-colors lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:h-11 ${cartDark}`;
+  // the words on the button are always "Add to cart"; when there is something to choose
+  // (variants, colours) the button opens the product page instead of adding at once
+  const label = a.cartLabel;
+  // split "de la 69,99 RON" / "from RON 69.99" into the small words and the price
+  const fromMatch = /^(de la|from)\s+(.+)$/i.exec(priceLabel);
+  const fromWords = fromMatch?.[1];
+  const priceOnly = fromMatch ? fromMatch[2] : priceLabel;
+
+  return (
+    <div className="grid grid-cols-[1fr_auto] items-center gap-x-2.5 gap-y-2.5 lg:grid-cols-[auto_1fr]">
+      <span className="text-left text-[15px] leading-tight font-semibold text-choc sm:text-base lg:col-span-2 lg:row-start-1 lg:text-center">
+        {oldPriceLabel && (
+          <span className="block text-xs font-normal text-taupe-400 line-through lg:mr-1.5 lg:inline">
+            {oldPriceLabel}
+          </span>
+        )}
+        {/* "de la 69,99 RON": the small words go above the price when the column is narrow */}
+        {fromWords && (
+          <span className="block text-xs font-medium text-taupe-600 lg:mr-1.5 lg:inline lg:text-base lg:leading-tight lg:font-semibold lg:text-choc">
+            {fromWords}
+          </span>
+        )}
+        {priceOnly}
+      </span>
+      {heart}
+      {product.quickAdd ? (
+        <button
+          type="button"
+          onClick={a.add}
+          title={a.cartLabel}
+          className={`${buttonClass} col-span-2`}
+        >
+          <Icon small>{a.justAdded ? <path d="M5 12l5 5l10 -10" /> : CART_PATHS}</Icon>
+          {label}
+        </button>
+      ) : (
+        <Link href={product.href} title={a.optionsLabel} className={`${buttonClass} col-span-2`}>
+          <Icon small>{CART_PATHS}</Icon>
+          {label}
+        </Link>
+      )}
+    </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import ProductTile, { shortName } from "@/components/product/ProductTile";
-import ProductActions from "@/components/product/ProductActions";
+import { CardBuyBar } from "@/components/product/ProductActions";
 import { formatPrice } from "@/lib/format";
 import CenteredGrid from "@/components/layout/CenteredGrid";
 import { isLimitedEdition } from "@/lib/limited-edition";
@@ -332,12 +332,6 @@ export default function FilterableProducts({
                 name={shortName(p.name)}
                 imageUrl={p.imageUrl}
                 placeholderClass={p.placeholderClass}
-                priceLabel={p.hasVariants ? t("fromPrice", { price }) : price}
-                oldPriceLabel={
-                  p.oldPriceCents
-                    ? formatPrice(p.oldPriceCents, p.currency, locale)
-                    : undefined
-                }
                 badge={
                   p.oldPriceCents && p.percentOff
                     ? `−${p.percentOff}%${p.promoLabel ? ` · ${p.promoLabel}` : ""}`
@@ -345,8 +339,15 @@ export default function FilterableProducts({
                 }
                 note={p.inStock ? undefined : t("outOfStock")}
                 actions={
-                  <ProductActions
-                    compact
+                  <CardBuyBar
+                    priceLabel={
+                      p.hasVariants ? t("fromPrice", { price }) : price
+                    }
+                    oldPriceLabel={
+                      p.oldPriceCents
+                        ? formatPrice(p.oldPriceCents, p.currency, locale)
+                        : undefined
+                    }
                     product={{
                       id: p.id,
                       href: p.href,

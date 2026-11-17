@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import ProductTile, { shortName } from "@/components/product/ProductTile";
 import GoldFrame from "@/components/layout/GoldFrame";
-import ProductActions from "@/components/product/ProductActions";
+import { CardBuyBar } from "@/components/product/ProductActions";
 import { useFavoritesStore } from "@/lib/favorites/store";
 import { formatPrice } from "@/lib/format";
 import { categoryColorClass } from "@/lib/category-colors";
@@ -84,14 +84,6 @@ export default function FavoritesView() {
                   name={shortName(p.name)}
                   imageUrl={p.imageUrl}
                   placeholderClass={categoryColorClass(p.colorKey)}
-                  priceLabel={
-                    p.hasVariants ? tShop("fromPrice", { price }) : price
-                  }
-                  oldPriceLabel={
-                    p.oldPriceCents
-                      ? formatPrice(p.oldPriceCents, p.currency, locale)
-                      : undefined
-                  }
                   badge={
                     p.oldPriceCents && p.percentOff
                       ? `−${p.percentOff}%${p.promoLabel ? ` · ${p.promoLabel}` : ""}`
@@ -103,7 +95,19 @@ export default function FavoritesView() {
                       ? tShop("limitedEdition")
                       : undefined
                   }
-                  actions={<ProductActions product={p} compact />}
+                  actions={
+                    <CardBuyBar
+                      product={p}
+                      priceLabel={
+                        p.hasVariants ? tShop("fromPrice", { price }) : price
+                      }
+                      oldPriceLabel={
+                        p.oldPriceCents
+                          ? formatPrice(p.oldPriceCents, p.currency, locale)
+                          : undefined
+                      }
+                    />
+                  }
                 />
                 <button
                   type="button"

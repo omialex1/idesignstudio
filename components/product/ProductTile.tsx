@@ -17,8 +17,6 @@ export default function ProductTile({
   name,
   imageUrl,
   placeholderClass,
-  priceLabel,
-  oldPriceLabel,
   badge,
   note,
   limitedLabel,
@@ -29,9 +27,7 @@ export default function ProductTile({
   name: string;
   imageUrl: string | null;
   placeholderClass: string;
-  priceLabel?: string;
-  // with a discount: the prior price (struck through) and e.g. "−30% · Black Friday"
-  oldPriceLabel?: string;
+  // with a discount: e.g. "−30% · Black Friday"
   badge?: string;
   note?: string;
   // small "Limited edition" label (products of the Season and gifts subcategory)
@@ -80,20 +76,8 @@ export default function ProductTile({
           )}
         </div>
       </Link>
-      {/* stacked on phones and tablets; price and buttons side by side on wide screens */}
-      <div className="mt-2 flex flex-col items-center gap-1.5 border-t border-cream-200 py-2 lg:flex-row lg:justify-between lg:py-2.5">
-        {priceLabel && (
-          <span className="text-[11px] leading-tight font-semibold text-salamander-600 sm:text-xs lg:text-left">
-            {oldPriceLabel && (
-              <span className="mr-1.5 font-normal text-taupe-400 line-through">
-                {oldPriceLabel}
-              </span>
-            )}
-            {priceLabel}
-          </span>
-        )}
-        {actions}
-      </div>
+      {/* the bottom of the card: price, heart and the cart button (pinned to the bottom) */}
+      <div className="mt-2 border-t border-cream-200 py-2.5">{actions}</div>
     </div>
   );
 }
