@@ -85,6 +85,13 @@ body {
   }
 }
 
+/* Italic titles use the italic Cormorant (a separate font, loaded only when needed);
+   the normal one stays as a fallback while it loads. Not in a layer, so it wins over
+   the font-display utility. */
+.font-display.italic {
+  font-family: var(--font-cormorant-italic), var(--font-cormorant), serif;
+}
+
 /* Scroll and entrance motion (see components/layout/ScrollEffects.tsx).
    Content is visible by default; it only waits when JS has marked it. */
 [data-reveal] {

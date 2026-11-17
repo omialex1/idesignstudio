@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { cormorant, cormorantItalic, manrope } from "@/lib/fonts";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/seo";
 import { getVisibleMainCategories } from "@/lib/main-categories";
@@ -14,18 +14,6 @@ import ScrollEffects from "@/components/layout/ScrollEffects";
 import CartToast from "@/components/cart/CartToast";
 import TrafficBeacon from "@/components/layout/TrafficBeacon";
 import "../globals.css";
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin", "latin-ext"],
-});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -67,7 +55,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${cormorant.variable} ${manrope.variable} h-full antialiased`}
+      className={`${cormorant.variable} ${cormorantItalic.variable} ${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         <NextIntlClientProvider>
