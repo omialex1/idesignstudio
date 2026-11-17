@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/cart/store";
 import { FavoriteButton } from "@/components/product/ProductActions";
@@ -155,6 +155,15 @@ export default function ProductPurchase({
   // are remembered, the one used last wins.
   const [mode, setMode] = useState<"each" | "set">("each");
   const [justAdded, setJustAdded] = useState(false);
+  // A product with a single possible colour has it chosen from the start. The "whole
+  // set" target never gets a default.
+  const onlyColor = colors.length === 1 ? [colors[0].id] : [];
+  const pickedOf = (id: string) =>
+    picked[id] ?? (id === ALL_COMPONENTS_ID ? [] : onlyColor);
+  // The button is always clickable: when a colour is missing it says so and brings the
+  // colours into view instead of looking switched off.
+  const [triedWithoutColor, setTriedWithoutColor] = useState(false);
+  const colorsBox = useRef<HTMLFieldSetElement>(null);
 
   // Tiered products: the customer types a quantity, the price follows it.
   const tiered = tiers.length > 0;
@@ -199,13 +208,13 @@ export default function ProductPurchase({
     (picked[ALL_COMPONENTS_ID] ?? []).length > 0;
   const finalTargets = wholeSetPicked && setTarget ? [setTarget] : pickers;
   const missingColors = finalTargets.some(
-    (p) => (picked[p.id] ?? []).length === 0,
+    (p) => pickedOf(p.id).length === 0,
   );
   const active = targets.find((x) => x.id === activeId) ?? targets[0];
 
   function toggleColor(colorId: string) {
     if (!active) return;
-    const selected = picked[active.id] ?? [];
+    const selected = pickedOf(active.id);
     let next: string[];
     if (selected.includes(colorId)) {
       next = selected.filter((c) => c !== colorId);
@@ -236,7 +245,12 @@ export default function ProductPurchase({
   }
 
   function handleAdd() {
-    if (missingColors || (tiered && !qtyValid) || overStock) return;
+    if (missingColors) {
+      setTriedWithoutColor(true);
+      colorsBox.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if ((tiered && !qtyValid) || overStock) return;
     addItem(
       {
         productId,
@@ -245,9 +259,9 @@ export default function ProductPurchase({
         colorChoices: finalTargets.map((p) => ({
           componentId: p.id,
           componentName: p.name,
-          colors: picked[p.id] ?? [],
+          colors: pickedOf(p.id),
           labels: Object.fromEntries(
-            (picked[p.id] ?? []).map((id) => [
+            pickedOf(p.id).map((id) => [
               id,
               {
                 ro: colorById.get(id)?.ro ?? id,
@@ -457,7 +471,7 @@ export default function ProductPurchase({
       )}
 
       {inStock && active && (
-        <fieldset className="flex flex-col gap-3">
+        <fieldset ref={colorsBox} className="flex flex-col gap-3">
           <legend className="text-sm font-medium text-taupe-700">
             {targets.length <= 1 && active.maxColors === 1
               ? t("chooseColor")
@@ -468,7 +482,7 @@ export default function ProductPurchase({
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap gap-2">
                 {targets.map((target) => {
-                  const own = picked[target.id] ?? [];
+                  const own = pickedOf(target.id);
                   const isActive = target.id === active.id;
                   const isSet = target.id === ALL_COMPONENTS_ID;
                   // A component is covered when it, or the whole set, has colours.
@@ -488,7 +502,7 @@ export default function ProductPurchase({
                       aria-pressed={isActive}
                       onClick={() => {
                         setActiveId(target.id);
-                        if ((picked[target.id] ?? []).length > 0) {
+                        if (pickedOf(target.id).length > 0) {
                           setMode(isSet ? "set" : "each");
                         }
                       }}
@@ -543,7 +557,7 @@ export default function ProductPurchase({
 
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">
             {colors.map((color) => {
-              const isSelected = (picked[active.id] ?? []).includes(color.id);
+              const isSelected = pickedOf(active.id).includes(color.id);
               const label = colorName(color.id);
               return (
                 <button
@@ -611,7 +625,7 @@ export default function ProductPurchase({
             <button
               type="button"
               onClick={handleAdd}
-              disabled={missingColors || (tiered && !qtyValid) || overStock}
+              disabled={(tiered && !qtyValid) || overStock}
               className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {justAdded ? tCart("added") : tCart("addToCart")}
@@ -628,7 +642,12 @@ export default function ProductPurchase({
               : t("quantityZeroHint")}
           </p>
         )}
-        {inStock && missingColors && targets.length > 1 && (
+        {inStock && missingColors && triedWithoutColor && (
+          <p className="text-sm font-medium text-red-600" role="alert">
+            {targets.length > 1 ? t("pickColorAll") : t("pickColorFirst")}
+          </p>
+        )}
+        {inStock && missingColors && !triedWithoutColor && targets.length > 1 && (
           <p className="text-xs text-taupe-500">{t("pickColorAll")}</p>
         )}
       </div>
