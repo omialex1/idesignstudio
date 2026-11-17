@@ -160,10 +160,10 @@ export default function ProductPurchase({
   const onlyColor = colors.length === 1 ? [colors[0].id] : [];
   const pickedOf = (id: string) =>
     picked[id] ?? (id === ALL_COMPONENTS_ID ? [] : onlyColor);
-  // The button is always clickable: when a colour is missing it says so and brings the
-  // colours into view instead of looking switched off.
-  const [triedWithoutColor, setTriedWithoutColor] = useState(false);
-  const colorsBox = useRef<HTMLFieldSetElement>(null);
+  // While a colour is missing the button looks switched off; hovering it or pressing it
+  // (also on a phone) shows a small glass pop-up that says to pick the colour first.
+  const [colorHint, setColorHint] = useState(false);
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Tiered products: the customer types a quantity, the price follows it.
   const tiered = tiers.length > 0;
@@ -246,8 +246,9 @@ export default function ProductPurchase({
 
   function handleAdd() {
     if (missingColors) {
-      setTriedWithoutColor(true);
-      colorsBox.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setColorHint(true);
+      if (hintTimer.current) clearTimeout(hintTimer.current);
+      hintTimer.current = setTimeout(() => setColorHint(false), 2500);
       return;
     }
     if ((tiered && !qtyValid) || overStock) return;
@@ -471,7 +472,7 @@ export default function ProductPurchase({
       )}
 
       {inStock && active && (
-        <fieldset ref={colorsBox} className="flex flex-col gap-3">
+        <fieldset className="flex flex-col gap-3">
           <legend className="text-sm font-medium text-taupe-700">
             {targets.length <= 1 && active.maxColors === 1
               ? t("chooseColor")
@@ -622,14 +623,33 @@ export default function ProductPurchase({
             </div>
           )}
           {inStock && (
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={(tiered && !qtyValid) || overStock}
-              className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {justAdded ? tCart("added") : tCart("addToCart")}
-            </button>
+            <div className="group relative">
+              <button
+                type="button"
+                onClick={handleAdd}
+                disabled={(tiered && !qtyValid) || overStock}
+                aria-disabled={missingColors || undefined}
+                className={`w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                  missingColors
+                    ? "cursor-not-allowed opacity-50"
+                    : "hover:bg-salamander-600"
+                }`}
+              >
+                {justAdded ? tCart("added") : tCart("addToCart")}
+              </button>
+              {missingColors && (
+                <span
+                  role="status"
+                  className={`pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 rounded-full border border-gold-600/50 bg-paper/60 px-4 py-2 text-sm font-medium whitespace-nowrap text-taupe-800 shadow-[0_8px_30px_rgba(60,40,25,0.12)] backdrop-blur-xl backdrop-saturate-150 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 ${
+                    colorHint ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  {targets.length > 1
+                    ? t("pickColorsFirstPopup")
+                    : t("pickColorFirstPopup")}
+                </span>
+              )}
+            </div>
           )}
           <FavoriteButton productId={productId} />
         </div>
@@ -642,12 +662,7 @@ export default function ProductPurchase({
               : t("quantityZeroHint")}
           </p>
         )}
-        {inStock && missingColors && triedWithoutColor && (
-          <p className="text-sm font-medium text-red-600" role="alert">
-            {targets.length > 1 ? t("pickColorAll") : t("pickColorFirst")}
-          </p>
-        )}
-        {inStock && missingColors && !triedWithoutColor && targets.length > 1 && (
+        {inStock && missingColors && targets.length > 1 && (
           <p className="text-xs text-taupe-500">{t("pickColorAll")}</p>
         )}
       </div>

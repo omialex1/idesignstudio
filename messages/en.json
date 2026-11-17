@@ -110,7 +110,9 @@
     "aboutProduct": "About this product",
     "quantityField": "Quantity",
     "quantityZeroHint": "Leave 0 for 1 piece.",
-    "imageTitleLabel": "Photo title"
+    "imageTitleLabel": "Photo title",
+    "pickColorFirstPopup": "Pick the colour first",
+    "pickColorsFirstPopup": "Pick the colours first"
   },
   "Favorites": {
     "label": "Favorites",
