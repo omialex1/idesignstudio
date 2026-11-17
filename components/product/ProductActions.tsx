@@ -226,10 +226,14 @@ export function CardBuyBar({
   product,
   priceLabel,
   oldPriceLabel,
+  stacked = false,
 }: {
   product: CardProduct;
   priceLabel: string;
   oldPriceLabel?: string;
+  // always the narrow layout (price and heart on a line, button below), also on a wide
+  // screen: for the narrow cards of the rows "Noutăți" and "Merge bine cu"
+  stacked?: boolean;
 }) {
   const a = useProductActions(product);
 
@@ -240,7 +244,7 @@ export function CardBuyBar({
       aria-label={a.heartLabel}
       title={a.heartLabel}
       onClick={a.toggle}
-      className={`${roundBase} ${sizeMd} justify-self-end ${a.favorite ? heartOn : heartIdle} lg:col-start-1 lg:row-start-2 lg:justify-self-start`}
+      className={`${roundBase} ${sizeMd} justify-self-end ${a.favorite ? heartOn : heartIdle} ${stacked ? "" : "lg:col-start-1 lg:row-start-2 lg:justify-self-start"}`}
     >
       <Icon filled={a.favorite}>
         <path d={HEART_PATH} />
@@ -248,7 +252,7 @@ export function CardBuyBar({
     </button>
   );
 
-  const buttonClass = `flex h-12 min-w-0 items-center justify-center gap-2 rounded-full px-3 text-sm font-semibold whitespace-nowrap transition-colors lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:h-11 ${cartDark}`;
+  const buttonClass = `flex h-12 min-w-0 items-center justify-center gap-2 rounded-full px-3 text-sm font-semibold whitespace-nowrap transition-colors ${stacked ? "px-2 text-[13px] sm:px-3 sm:text-sm" : "lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:h-11"} ${cartDark}`;
   // the words on the button are always "Add to cart"; when there is something to choose
   // (variants, colours) the button opens the product page instead of adding at once
   const label = a.cartLabel;
@@ -258,16 +262,24 @@ export function CardBuyBar({
   const priceOnly = fromMatch ? fromMatch[2] : priceLabel;
 
   return (
-    <div className="grid grid-cols-[1fr_auto] items-center gap-x-2.5 gap-y-2.5 lg:grid-cols-[auto_1fr]">
-      <span className="text-left text-[15px] leading-tight font-semibold text-choc sm:text-base lg:col-span-2 lg:row-start-1 lg:text-center">
+    <div
+      className={`grid grid-cols-[1fr_auto] items-center gap-x-2.5 gap-y-2.5 ${stacked ? "" : "lg:grid-cols-[auto_1fr]"}`}
+    >
+      <span
+        className={`text-left text-[15px] leading-tight font-semibold text-choc sm:text-base ${stacked ? "" : "lg:col-span-2 lg:row-start-1 lg:text-center"}`}
+      >
         {oldPriceLabel && (
-          <span className="block text-xs font-normal text-taupe-400 line-through lg:mr-1.5 lg:inline">
+          <span
+            className={`block text-xs font-normal text-taupe-400 line-through ${stacked ? "" : "lg:mr-1.5 lg:inline"}`}
+          >
             {oldPriceLabel}
           </span>
         )}
         {/* "de la 69,99 RON": the small words go above the price when the column is narrow */}
         {fromWords && (
-          <span className="block text-xs font-medium text-taupe-600 lg:mr-1.5 lg:inline lg:text-base lg:leading-tight lg:font-semibold lg:text-choc">
+          <span
+            className={`block text-xs font-medium text-taupe-600 ${stacked ? "" : "lg:mr-1.5 lg:inline lg:text-base lg:leading-tight lg:font-semibold lg:text-choc"}`}
+          >
             {fromWords}
           </span>
         )}

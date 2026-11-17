@@ -3,13 +3,13 @@ import { Cormorant_Garamond, Manrope } from "next/font/google";
 // The site fonts, declared once and shared by the shop and the admin, so the browser
 // never has two copies of the same font.
 //
-// Titles use Cormorant Garamond in the 500 weight only (see globals.css). The normal
-// style is loaded in advance; the italic one is used by a few titles of the home page
+// Titles use Cormorant Garamond in the 500 weight (see globals.css); product names on the
+// cards use the 700 (bold) weight. The normal style is loaded in advance; the italic one is used by a few titles of the home page
 // only, so it is not preloaded (pages without italic titles never download it).
 export const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin", "latin-ext"],
-  weight: ["500"],
+  weight: "variable",
   style: ["normal"],
 });
 

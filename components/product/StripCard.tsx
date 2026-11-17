@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import ProductPhoto from "@/components/product/ProductPhoto";
 import LimitedBadge from "@/components/product/LimitedBadge";
-import ProductActions from "@/components/product/ProductActions";
+import ProductActions, { CardBuyBar } from "@/components/product/ProductActions";
 import type { CardProduct } from "@/lib/product-card";
 
 // What one card of a row of products ("Merge bine cu", "Noutăți") needs.
@@ -55,9 +55,9 @@ export default function StripCard({ item }: { item: StripItem }) {
         {item.limitedLabel && <LimitedBadge label={item.limitedLabel} />}
       </Link>
 
-      <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded-2xl border border-cream-200 bg-paper px-1.5 pt-2 pb-2.5 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
+      <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded-2xl border border-cream-200 bg-paper px-2 pt-2.5 pb-2.5 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
         <Link href={item.href} className="flex flex-1 flex-col items-center">
-          <h3 className="line-clamp-3 font-display text-[14px] leading-tight text-taupe-800 sm:text-[15px]">
+          <h3 className="line-clamp-3 font-display text-[19px] leading-tight font-bold text-taupe-800 sm:text-[20px]">
             {item.name}
           </h3>
           {item.badge && (
@@ -69,18 +69,18 @@ export default function StripCard({ item }: { item: StripItem }) {
             <span className="mt-1 text-[10px] text-red-600">{item.note}</span>
           )}
         </Link>
-        {item.price && (
-          <span className="mt-1.5 text-[13px] font-semibold text-salamander-600 sm:text-sm">
-            {item.oldPrice && (
-              <span className="mr-1 font-normal text-taupe-400 line-through">
-                {item.oldPrice}
-              </span>
-            )}
-            {item.price}
-          </span>
-        )}
-        <div className="mt-1.5 border-t border-cream-200 pt-2">
-          <ProductActions product={item.card} compact />
+        {/* the bottom: price, heart and the cart button (pinned to the bottom of the card) */}
+        <div className="mt-2 w-full border-t border-cream-200 pt-2.5">
+          {item.price ? (
+            <CardBuyBar
+              stacked
+              product={item.card}
+              priceLabel={item.price}
+              oldPriceLabel={item.oldPrice}
+            />
+          ) : (
+            <ProductActions product={item.card} compact />
+          )}
         </div>
       </div>
     </div>
