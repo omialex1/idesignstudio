@@ -106,7 +106,8 @@
     "maxAvailable": "Maximum {max} buc disponibile acum.",
     "minOrder": "Comandă minimă: {min} buc.",
     "perPiece": "/ buc",
-    "limitedEdition": "Ediție limitată"
+    "limitedEdition": "Ediție limitată",
+    "aboutProduct": "Despre acest produs"
   },
   "Favorites": {
     "label": "Favorite",

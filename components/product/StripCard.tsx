@@ -56,7 +56,10 @@ export default function StripCard({ item }: { item: StripItem }) {
       </Link>
 
       <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded-2xl border border-cream-200 bg-paper px-2 pt-2.5 pb-2.5 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
-        <Link href={item.href} className="flex flex-1 flex-col items-center">
+        <Link
+          href={item.href}
+          className="flex w-full flex-1 flex-col items-center justify-center py-1"
+        >
           <h3 className="line-clamp-3 font-display text-[19px] leading-tight font-bold text-taupe-800 sm:text-[20px]">
             {item.name}
           </h3>

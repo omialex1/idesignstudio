@@ -106,7 +106,8 @@
     "maxAvailable": "Up to {max} pcs available right now.",
     "minOrder": "Minimum order: {min} pcs.",
     "perPiece": "/ pc",
-    "limitedEdition": "Limited edition"
+    "limitedEdition": "Limited edition",
+    "aboutProduct": "About this product"
   },
   "Favorites": {
     "label": "Favorites",

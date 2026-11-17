@@ -60,7 +60,7 @@ export default function ProductTile({
           </div>
           {limitedLabel && <LimitedBadge label={limitedLabel} />}
         </div>
-        <div className="flex flex-1 flex-col items-center justify-center px-0.5 pt-2 sm:pt-2.5">
+        <div className="flex flex-1 flex-col items-center justify-center px-0.5 py-2 sm:py-2.5">
           <h3 className="font-display text-base leading-tight font-bold text-taupe-800 sm:text-[17px]">
             {name}
           </h3>

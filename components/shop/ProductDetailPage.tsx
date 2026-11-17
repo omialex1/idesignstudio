@@ -161,9 +161,9 @@ export default async function ProductDetailPage({
       <Breadcrumbs
         label={t("breadcrumbLabel")}
         items={crumbs}
-        className="mx-auto mb-6 w-full max-w-5xl"
+        className="mx-auto mb-6 w-full max-w-6xl"
       />
-      <div className="mx-auto grid w-full max-w-5xl gap-10 sm:grid-cols-2">
+      <div className="mx-auto grid w-full max-w-6xl gap-10 sm:grid-cols-2">
         {product.images.length > 0 ? (
           <ProductGallery
             images={product.images.map((i) => i.url)}
@@ -219,7 +219,7 @@ export default async function ProductDetailPage({
         </div>
       </div>
       {recommended.length > 0 && (
-        <div className="mx-auto mt-8 w-full max-w-5xl">
+        <div className="mx-auto mt-8 w-full max-w-6xl">
           <RecommendedStrip
             title={t("goesWith")}
             prevLabel={t("previous")}
@@ -267,10 +267,22 @@ export default async function ProductDetailPage({
         </div>
       )}
       {product.longDescription && (
-        <Reveal className="mx-auto mt-12 w-full max-w-5xl border-t border-cream-200 pt-10">
-          <p className="max-w-2xl leading-relaxed whitespace-pre-line text-taupe-600">
-            {renderRichText(product.longDescription)}
-          </p>
+        <Reveal className="mx-auto mt-12 w-full max-w-6xl">
+          {/* a paper card with a fine double gold frame, the text in one column */}
+          <div className="rounded-3xl border border-gold-600/40 bg-paper p-4 shadow-[0_8px_30px_rgba(60,40,25,0.08)] sm:p-10">
+            <div className="rounded-2xl border border-gold-600/25 p-5 sm:p-10">
+              <h2 className="font-display text-2xl text-taupe-800 sm:text-3xl">
+                {t("aboutProduct")}
+              </h2>
+              <span
+                className="mt-2 mb-5 block h-px w-12 bg-gold-600"
+                aria-hidden="true"
+              />
+              <p className="leading-relaxed whitespace-pre-line text-taupe-600 sm:text-lg">
+                {renderRichText(product.longDescription)}
+              </p>
+            </div>
+          </div>
         </Reveal>
       )}
     </div>
