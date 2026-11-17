@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import ProductPhoto from "@/components/product/ProductPhoto";
+import LimitedBadge from "@/components/product/LimitedBadge";
 import ProductActions from "@/components/product/ProductActions";
 import type { CardProduct } from "@/lib/product-card";
 
@@ -33,7 +34,7 @@ export default function StripCard({ item }: { item: StripItem }) {
       <Link
         href={item.href}
         aria-label={item.name}
-        className="block shrink-0 rounded-full"
+        className="relative block shrink-0 rounded-full"
       >
         <span className="relative block h-[130px] w-[130px] overflow-hidden rounded-full shadow-[0_8px_18px_-2px_rgba(60,40,25,0.28),0_0_18px_3px_rgba(210,168,104,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:h-[144px] sm:w-[144px]">
           {item.imageUrl ? (
@@ -51,6 +52,7 @@ export default function StripCard({ item }: { item: StripItem }) {
             </span>
           )}
         </span>
+        {item.limitedLabel && <LimitedBadge label={item.limitedLabel} />}
       </Link>
 
       <div className="mt-3.5 flex w-full flex-1 flex-col items-center rounded-2xl border border-cream-200 bg-paper px-1.5 pt-2 pb-2.5 text-center shadow-[0_3px_10px_rgba(60,40,25,0.10)]">
@@ -61,11 +63,6 @@ export default function StripCard({ item }: { item: StripItem }) {
           {item.badge && (
             <span className="mt-1 rounded-full bg-salamander-500 px-1.5 py-0.5 text-[9px] font-semibold text-cream-50">
               {item.badge}
-            </span>
-          )}
-          {item.limitedLabel && (
-            <span className="mt-1 rounded-full bg-gold-300/70 px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-taupe-800 ring-1 ring-gold-600/40 sm:text-[10px]">
-              {item.limitedLabel}
             </span>
           )}
           {item.note && (

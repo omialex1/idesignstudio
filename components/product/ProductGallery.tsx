@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import ProductPhoto from "@/components/product/ProductPhoto";
+import LimitedBadge from "@/components/product/LimitedBadge";
 
 const SWIPE_THRESHOLD_PX = 50;
 const DRAG_CLICK_TOLERANCE_PX = 5;
@@ -16,9 +17,12 @@ const MAX_ZOOM = ZOOM_STEPS[ZOOM_STEPS.length - 1];
 export default function ProductGallery({
   images,
   alt,
+  badge,
 }: {
   images: string[];
   alt: string;
+  // small label on the photo (e.g. "Limited edition")
+  badge?: string;
 }) {
   const track = useRef<HTMLDivElement>(null);
   const panArea = useRef<HTMLDivElement>(null);
@@ -219,6 +223,8 @@ export default function ProductGallery({
             </button>
           ))}
         </div>
+
+        {badge && <LimitedBadge label={badge} position="top-left" />}
 
         {many && (
           <>

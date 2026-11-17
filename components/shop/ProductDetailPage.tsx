@@ -168,6 +168,9 @@ export default async function ProductDetailPage({
           <ProductGallery
             images={product.images.map((i) => i.url)}
             alt={product.name}
+            badge={
+              isLimitedEdition(subcategory) ? t("limitedEdition") : undefined
+            }
           />
         ) : (
           <div
@@ -193,11 +196,6 @@ export default async function ProductDetailPage({
             >
               {inStock ? t("inStock") : t("outOfStock")}
             </span>
-            {isLimitedEdition(subcategory) && (
-              <span className="w-fit rounded-full bg-gold-300/70 px-3 py-1 text-xs font-semibold tracking-wide text-taupe-800 ring-1 ring-gold-600/40">
-                {t("limitedEdition")}
-              </span>
-            )}
           </div>
           <ProductPurchase
             productId={product.id}

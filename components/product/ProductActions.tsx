@@ -16,8 +16,8 @@ const HEART_PATH =
 
 const roundBase =
   "flex shrink-0 items-center justify-center rounded-full transition-colors";
-const sizeMd = "h-9 w-9 sm:h-10 sm:w-10";
-const sizeSm = "h-7 w-7 sm:h-8 sm:w-8";
+const sizeMd = "h-11 w-11";
+const sizeSm = "h-10 w-10";
 
 // The heart on the product page: a pill with the words, next to "Add to cart".
 export function FavoriteButton({ productId }: { productId: string }) {
@@ -72,11 +72,7 @@ function Icon({
       strokeWidth={1.8}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={
-        small
-          ? "h-4 w-4 sm:h-[17px] sm:w-[17px]"
-          : "h-[19px] w-[19px] sm:h-5 sm:w-5"
-      }
+      className={small ? "h-5 w-5" : "h-[22px] w-[22px]"}
       aria-hidden="true"
     >
       {children}
@@ -151,7 +147,7 @@ export default function ProductActions({
   const heartLabel = favorite ? t("removeFromFavorites") : t("addToFavorites");
 
   return (
-    <span className="flex items-center gap-2">
+    <span className="flex items-center gap-2.5">
       <button
         type="button"
         aria-pressed={favorite}
@@ -161,7 +157,7 @@ export default function ProductActions({
         className={`${base} ${
           favorite
             ? "bg-salamander-500 text-cream-50 hover:bg-salamander-600"
-            : "bg-cream-100 text-choc hover:bg-cream-200"
+            : "border border-salamander-500/40 bg-cream-100 text-salamander-600 hover:bg-cream-200"
         }`}
       >
         <Icon filled={favorite} small={compact}>
@@ -175,7 +171,7 @@ export default function ProductActions({
           aria-label={justAdded ? tCart("added") : tCart("addToCart")}
           title={tCart("addToCart")}
           onClick={add}
-          className={`${base} bg-choc text-cream-50 hover:bg-gold-400 hover:text-choc`}
+          className={`${base} bg-salamander-500 text-cream-50 shadow-sm hover:bg-salamander-600`}
         >
           <Icon small={compact}>
             {justAdded ? (
@@ -196,7 +192,7 @@ export default function ProductActions({
           href={product.href}
           aria-label={t("chooseOptions")}
           title={t("chooseOptions")}
-          className={`${base} bg-choc text-cream-50 hover:bg-gold-400 hover:text-choc`}
+          className={`${base} bg-salamander-500 text-cream-50 shadow-sm hover:bg-salamander-600`}
         >
           <Icon small={compact}>
             <path d="M4 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />

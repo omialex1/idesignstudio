@@ -106,7 +106,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       >
         <GoldFrame horizontal={false}>
         <Reveal>
-          <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl [text-shadow:0_0_16px_rgba(251,245,233,0.95),0_0_6px_rgba(251,245,233,0.9)]">
+          <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
             {t("discover")}
           </h2>
           <span
@@ -156,7 +156,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           <GoldDot className="-top-[7.5px]" />
           <GoldFrame horizontal={false}>
           <Reveal>
-            <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl [text-shadow:0_0_16px_rgba(251,245,233,0.95),0_0_6px_rgba(251,245,233,0.9)]">
+            <h2 className="text-center font-display text-3xl text-taupe-800 italic sm:text-4xl">
               {t("newTitle")}
             </h2>
             <span
@@ -220,7 +220,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             <GoldDot className="-top-[7.5px]" />
             <GoldFrame horizontal={false}>
             <Reveal>
-              <h2 className="text-center font-display text-4xl text-taupe-800 italic [text-shadow:0_0_16px_rgba(251,245,233,0.95),0_0_6px_rgba(251,245,233,0.9)]">
+              <h2 className="text-center font-display text-4xl text-taupe-800 italic">
                 {main.name}
               </h2>
               <span
