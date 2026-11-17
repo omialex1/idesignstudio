@@ -25,6 +25,7 @@ import Reveal from "@/components/layout/Reveal";
 import { COMPANY, pageAlternates, siteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import { isLimitedEdition } from "@/lib/limited-edition";
+import { socialUrls } from "@/lib/social";
 
 export async function generateMetadata({
   params,
@@ -65,6 +66,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             name: COMPANY.brand,
             legalName: COMPANY.name,
             url: siteUrl(),
+            sameAs: socialUrls(),
             email: COMPANY.email,
             telephone: COMPANY.phone,
             address: {

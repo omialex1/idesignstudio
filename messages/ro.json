@@ -415,7 +415,13 @@
     "backToTerms": "Înapoi la Termeni și Condiții"
   },
   "Footer": {
-    "rights": "Toate drepturile rezervate."
+    "rights": "Toate drepturile rezervate.",
+    "shop": "Magazin",
+    "info": "Informații",
+    "contact": "Contact",
+    "follow": "Urmărește-ne",
+    "hours": "Luni–vineri, 09:00–17:00",
+    "tagline": "Obiecte cu suflet pentru casă, birou și zile speciale."
   },
   "Address": {
     "localityPlaceholder": "Scrie și alege din listă",

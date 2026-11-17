@@ -415,7 +415,13 @@
     "backToTerms": "Back to Terms & Conditions"
   },
   "Footer": {
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "shop": "Shop",
+    "info": "Information",
+    "contact": "Contact",
+    "follow": "Follow us",
+    "hours": "Monday–Friday, 09:00–17:00",
+    "tagline": "Objects with soul for home, office and special days."
   },
   "Address": {
     "localityPlaceholder": "Type and pick from the list",
