@@ -17,6 +17,8 @@ export type StripItem = {
   price?: string;
   oldPrice?: string;
   badge?: string;
+  // small "Limited edition" label
+  limitedLabel?: string;
   // what the heart and cart buttons need
   card: CardProduct;
   // mixed into a new random order at every visit (the others keep their place)
@@ -59,6 +61,11 @@ export default function StripCard({ item }: { item: StripItem }) {
           {item.badge && (
             <span className="mt-1 rounded-full bg-salamander-500 px-1.5 py-0.5 text-[9px] font-semibold text-cream-50">
               {item.badge}
+            </span>
+          )}
+          {item.limitedLabel && (
+            <span className="mt-1 rounded-full bg-gold-300/70 px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-taupe-800 ring-1 ring-gold-600/40 sm:text-[10px]">
+              {item.limitedLabel}
             </span>
           )}
           {item.note && (

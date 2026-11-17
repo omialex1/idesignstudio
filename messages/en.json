@@ -88,6 +88,8 @@
     "next": "Next",
     "previousPrice": "Previous price: {price} (lowest price in the last 30 days)",
     "goesWith": "Goes well with…",
+    "breadcrumbHome": "Home",
+    "breadcrumbLabel": "Breadcrumb",
     "fromPrice": "from {price}",
     "colorsFor": "Colours for {name}",
     "colorsHintOne": "Choose one colour.",
@@ -103,7 +105,8 @@
     "totalFor": "Total for {qty} pcs: {total}",
     "maxAvailable": "Up to {max} pcs available right now.",
     "minOrder": "Minimum order: {min} pcs.",
-    "perPiece": "/ pc"
+    "perPiece": "/ pc",
+    "limitedEdition": "Limited edition"
   },
   "Favorites": {
     "label": "Favorites",

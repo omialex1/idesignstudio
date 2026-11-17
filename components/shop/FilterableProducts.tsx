@@ -6,6 +6,7 @@ import ProductTile, { shortName } from "@/components/product/ProductTile";
 import ProductActions from "@/components/product/ProductActions";
 import { formatPrice } from "@/lib/format";
 import CenteredGrid from "@/components/layout/CenteredGrid";
+import { isLimitedEdition } from "@/lib/limited-edition";
 import {
   NO_FILTERS,
   PRICE_RANGES,
@@ -324,6 +325,9 @@ export default function FilterableProducts({
               <ProductTile
                 key={p.id}
                 priority={i < 4}
+                limitedLabel={
+                  isLimitedEdition(p.categorySlug) ? t("limitedEdition") : undefined
+                }
                 href={p.href}
                 name={shortName(p.name)}
                 imageUrl={p.imageUrl}

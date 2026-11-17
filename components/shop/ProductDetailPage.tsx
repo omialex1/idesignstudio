@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { getProductDetail, getRecommendedProducts } from "@/lib/db/products";
 import { shortName } from "@/components/product/ProductTile";
 import RecommendedStrip from "@/components/product/RecommendedStrip";
@@ -12,6 +11,8 @@ import { COMPANY, shortText, siteUrl } from "@/lib/seo";
 import { renderRichText } from "@/lib/rich-text";
 import { formatPrice } from "@/lib/format";
 import Reveal from "@/components/layout/Reveal";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import { isLimitedEdition } from "@/lib/limited-edition";
 import { calculateShippingCents } from "@/lib/shipping";
 import type { MainCategory } from "@/lib/main-categories";
 
@@ -125,6 +126,26 @@ export default async function ProductDetailPage({
           },
   };
 
+  // the path shown above the photo: Home > main category > subcategory > this product
+  const crumbs = [
+    { label: t("breadcrumbHome"), href: "/" },
+    { label: main.name, href: basePath },
+    { label: product.category.name, href: `${basePath}/${subcategory}` },
+    { label: shortName(product.name) },
+  ];
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.label,
+      item: c.href
+        ? `${siteUrl()}/${locale}${c.href === "/" ? "" : c.href}`
+        : url,
+    })),
+  };
+
   const recommended = await getRecommendedProducts(product.id, locale);
 
   return (
@@ -132,6 +153,15 @@ export default async function ProductDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <Breadcrumbs
+        label={t("breadcrumbLabel")}
+        items={crumbs}
+        className="mx-auto mb-6 w-full max-w-5xl"
       />
       <div className="mx-auto grid w-full max-w-5xl gap-10 sm:grid-cols-2">
         {product.images.length > 0 ? (
@@ -147,27 +177,28 @@ export default async function ProductDetailPage({
           </div>
         )}
         <div className="flex flex-col gap-4">
-          <Link
-            href={`${basePath}/${subcategory}`}
-            className="text-sm font-medium text-salamander-600 hover:underline"
-          >
-            {product.category.name}
-          </Link>
           <h1 className="font-display text-3xl text-taupe-800">
             {product.name}
           </h1>
           {product.description && (
             <p className="text-taupe-600">{product.description}</p>
           )}
-          <span
-            className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
-              inStock
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-600"
-            }`}
-          >
-            {inStock ? t("inStock") : t("outOfStock")}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
+                inStock
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-600"
+              }`}
+            >
+              {inStock ? t("inStock") : t("outOfStock")}
+            </span>
+            {isLimitedEdition(subcategory) && (
+              <span className="w-fit rounded-full bg-gold-300/70 px-3 py-1 text-xs font-semibold tracking-wide text-taupe-800 ring-1 ring-gold-600/40">
+                {t("limitedEdition")}
+              </span>
+            )}
+          </div>
           <ProductPurchase
             productId={product.id}
             slug={product.slug}
@@ -208,6 +239,9 @@ export default async function ProductDetailPage({
               })(),
               oldPrice: p.oldPriceCents
                 ? formatPrice(p.oldPriceCents, p.currency, locale)
+                : undefined,
+              limitedLabel: isLimitedEdition(p.categorySlug)
+                ? t("limitedEdition")
                 : undefined,
               badge:
                 p.oldPriceCents && p.percentOff

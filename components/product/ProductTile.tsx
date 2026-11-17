@@ -20,6 +20,7 @@ export default function ProductTile({
   oldPriceLabel,
   badge,
   note,
+  limitedLabel,
   actions,
   priority = false,
 }: {
@@ -32,6 +33,8 @@ export default function ProductTile({
   oldPriceLabel?: string;
   badge?: string;
   note?: string;
+  // small "Limited edition" label (products of the Season and gifts subcategory)
+  limitedLabel?: string;
   actions: React.ReactNode;
   // the first cards of a page: their photo is loaded first
   priority?: boolean;
@@ -66,6 +69,11 @@ export default function ProductTile({
           {badge && (
             <span className="mt-1 rounded-full bg-salamander-500 px-1.5 py-0.5 text-[9px] font-semibold text-cream-50 sm:text-[10px]">
               {badge}
+            </span>
+          )}
+          {limitedLabel && (
+            <span className="mt-1 rounded-full bg-gold-300/70 px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-taupe-800 ring-1 ring-gold-600/40 sm:text-[10px]">
+              {limitedLabel}
             </span>
           )}
           {note && (

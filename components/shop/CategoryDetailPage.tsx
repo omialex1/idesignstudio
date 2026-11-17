@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { getProductsByCategorySlug } from "@/lib/db/products";
 import FilterableProducts from "@/components/shop/FilterableProducts";
 import GoldFrame from "@/components/layout/GoldFrame";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { categoryColorClass } from "@/lib/category-colors";
 import { canQuickAdd } from "@/lib/product-card";
 import type { ShopProduct } from "@/lib/shop-filters";
@@ -53,6 +54,15 @@ export default async function CategoryDetailPage({
   return (
     <div className="flex flex-1 flex-col px-6 py-16">
       <div className="mx-auto w-full max-w-7xl">
+        <Breadcrumbs
+          label={t("breadcrumbLabel")}
+          items={[
+            { label: t("breadcrumbHome"), href: "/" },
+            { label: main.name, href: `/${main.slug}` },
+            { label: category.name },
+          ]}
+          className="mb-4"
+        />
         <h1 className="font-display text-3xl text-taupe-800">
           {category.name}
         </h1>

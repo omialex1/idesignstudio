@@ -10,6 +10,7 @@ import { useFavoritesStore } from "@/lib/favorites/store";
 import { formatPrice } from "@/lib/format";
 import { categoryColorClass } from "@/lib/category-colors";
 import CenteredGrid from "@/components/layout/CenteredGrid";
+import { isLimitedEdition } from "@/lib/limited-edition";
 import type { FavoriteProduct } from "@/lib/db/products";
 
 // The page of the products marked with the heart. The ids are in the browser; the
@@ -97,6 +98,11 @@ export default function FavoritesView() {
                       : (p.promoLabel ?? undefined)
                   }
                   note={p.inStock ? undefined : tShop("outOfStock")}
+                  limitedLabel={
+                    isLimitedEdition(p.categorySlug)
+                      ? tShop("limitedEdition")
+                      : undefined
+                  }
                   actions={<ProductActions product={p} compact />}
                 />
                 <button

@@ -19,7 +19,7 @@ export function orderCanceledEmail(input: OrderCanceledInput) {
   const amount = formatPrice(totalCents, currency, locale);
 
   const subject = isRo
-    ? `Comanda ta #${shortId} a fost anulata`
+    ? `Comanda ta #${shortId} a fost anulată`
     : `Your order #${shortId} has been canceled`;
 
   const heading = isRo ? "Comanda a fost anulată" : "Your order was canceled";

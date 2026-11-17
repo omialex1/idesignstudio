@@ -1,4 +1,6 @@
+import { getTranslations } from "next-intl/server";
 import { getSubcategoryShowcase } from "@/lib/db/products";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import CategoryFeed from "@/components/landing/CategoryFeed";
 import MidBackdrop from "@/components/layout/MidBackdrop";
 import type { MainCategory } from "@/lib/main-categories";
@@ -11,10 +13,20 @@ export default async function CategoryIndexPage({
   locale: string;
 }) {
   const subcategories = await getSubcategoryShowcase(main.id, locale);
+  const t = await getTranslations("Shop");
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="px-6 py-16 text-center">
+      <div className="px-6 pt-12 pb-16 text-center">
+        <Breadcrumbs
+          label={t("breadcrumbLabel")}
+          items={[
+            { label: t("breadcrumbHome"), href: "/" },
+            { label: main.name },
+          ]}
+          align="center"
+          className="mb-8"
+        />
         <p className="text-sm font-semibold tracking-[0.2em] text-salamander-600 uppercase">
           {main.name}
         </p>

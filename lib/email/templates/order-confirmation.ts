@@ -31,8 +31,8 @@ export function orderConfirmationEmail(input: OrderConfirmationInput) {
 
   const subject = isRo
     ? isCod
-      ? `Comanda ta #${shortId} a fost inregistrata`
-      : `Comanda ta #${shortId} a fost confirmata`
+      ? `Comanda ta #${shortId} a fost înregistrată`
+      : `Comanda ta #${shortId} a fost confirmată`
     : isCod
       ? `Your order #${shortId} has been received`
       : `Your order #${shortId} is confirmed`;
@@ -52,7 +52,7 @@ export function orderConfirmationEmail(input: OrderConfirmationInput) {
     shippingCents === 0 ? (isRo ? "Gratuit" : "Free") : money(shippingCents);
   const codRow =
     codFeeCents > 0
-      ? `<tr><td style="padding:8px 0;">${isRo ? "Taxa ramburs" : "Cash on delivery fee"}</td><td style="padding:8px 0;text-align:right;">${money(codFeeCents)}</td></tr>`
+      ? `<tr><td style="padding:8px 0;">${isRo ? "Taxă ramburs" : "Cash on delivery fee"}</td><td style="padding:8px 0;text-align:right;">${money(codFeeCents)}</td></tr>`
       : "";
 
   const tableBody = `${rows}
@@ -62,14 +62,14 @@ export function orderConfirmationEmail(input: OrderConfirmationInput) {
 
   const intro = isRo
     ? isCod
-      ? `Comanda #${shortId} a fost inregistrata. Platesti curierului, in numerar, ${money(totalCents)} la primirea coletului. Produsele sunt facute la comanda; te vom anunta cand pleaca spre tine.`
-      : `Comanda #${shortId} a fost confirmata. Produsele sunt facute la comanda; te vom anunta cand pleaca spre tine.`
+      ? `Comanda #${shortId} a fost înregistrată. Plătești curierului, în numerar, ${money(totalCents)} la primirea coletului. Produsele sunt făcute la comandă; te vom anunța când pleacă spre tine.`
+      : `Comanda #${shortId} a fost confirmată. Produsele sunt făcute la comandă; te vom anunța când pleacă spre tine.`
     : isCod
       ? `Order #${shortId} has been received. You pay the courier ${money(totalCents)} in cash when the parcel arrives. Items are made to order; we will let you know when they ship.`
       : `Order #${shortId} is confirmed. Items are made to order; we will let you know when they ship.`;
 
   const heading = isRo
-    ? "Multumim pentru comanda!"
+    ? "Mulțumim pentru comandă!"
     : "Thank you for your order!";
 
   const site = (

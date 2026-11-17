@@ -24,6 +24,7 @@ import CategoryFeatureCard from "@/components/landing/CategoryFeatureCard";
 import Reveal from "@/components/layout/Reveal";
 import { COMPANY, pageAlternates, siteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
+import { isLimitedEdition } from "@/lib/limited-edition";
 
 export async function generateMetadata({
   params,
@@ -184,6 +185,9 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                         imageUrl: p.imageUrl,
                         placeholderClass: categoryColorClass(p.colorKey),
                         note: p.inStock ? undefined : tShop("outOfStock"),
+                        limitedLabel: isLimitedEdition(p.categorySlug)
+                          ? tShop("limitedEdition")
+                          : undefined,
                         price: p.hasVariants
                           ? tShop("fromPrice", { price })
                           : price,

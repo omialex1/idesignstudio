@@ -16,9 +16,9 @@ const MAIN_CATEGORIES = [
     color: "salamander",
     ro: {
       name: "Evenimente",
-      headline: "Alege categoria potrivita pentru evenimentul tau.",
+      headline: "Alege categoria potrivită pentru evenimentul tău.",
       description:
-        "Descopera colectiile noastre de decor si organizare pentru evenimente memorabile.",
+        "Descoperă colecțiile noastre de decor și organizare pentru evenimente memorabile.",
     },
     en: {
       name: "Events",
@@ -48,9 +48,9 @@ const MAIN_CATEGORIES = [
     color: "cream",
     ro: {
       name: "Papetărie",
-      headline: "Papetarie personalizata pentru fiecare ocazie.",
+      headline: "Papetărie personalizată pentru fiecare ocazie.",
       description:
-        "Descopera colectiile noastre de invitatii, meniuri si accesorii de hartie.",
+        "Descoperă colecțiile noastre de invitații, meniuri și accesorii de hârtie.",
     },
     en: {
       name: "Stationery",
