@@ -174,8 +174,9 @@ export default function ProductPurchase({
   const qtyValid =
     Number.isInteger(qtyNumber) && qtyNumber >= minQty && qtyNumber <= maxQty;
   const quantity = qtyValid ? qtyNumber : minQty;
-  // Ordinary products: an optional quantity. Left at 0, the button adds one piece.
-  const [customQty, setCustomQty] = useState("0");
+  // Ordinary products: the quantity starts at 1. Emptied or set to 0, the button still
+  // adds one piece.
+  const [customQty, setCustomQty] = useState("1");
   const customNumber = Number(customQty) || 0;
   const maxCustom = Math.max(1, availableQuantity);
   const overStock = !tiered && customNumber > maxCustom;
@@ -287,7 +288,7 @@ export default function ProductPurchase({
       },
       addQuantity,
     );
-    if (!tiered) setCustomQty("0");
+    if (!tiered) setCustomQty("1");
     window.dispatchEvent(
       new CustomEvent<CartAddedDetail>(CART_ADDED_EVENT, {
         detail: {
@@ -612,7 +613,7 @@ export default function ProductPurchase({
                   setCustomQty(e.target.value.replace(/\D/g, "").slice(0, 4))
                 }
                 onFocus={(e) => e.target.select()}
-                onBlur={() => setCustomQty(String(customNumber))}
+                onBlur={() => setCustomQty(String(Math.max(1, customNumber)))}
                 aria-invalid={overStock}
                 className={`h-12 w-24 rounded-full border bg-white px-4 text-center text-lg text-taupe-800 focus:outline-none ${
                   overStock
@@ -655,11 +656,9 @@ export default function ProductPurchase({
         </div>
         {/* with one thing to colour the heading above is enough; with several
             pieces, say what is still missing */}
-        {inStock && !tiered && (
-          <p className={`text-xs ${overStock ? "text-red-600" : "text-taupe-500"}`}>
-            {overStock
-              ? t("maxAvailable", { max: maxCustom })
-              : t("quantityZeroHint")}
+        {inStock && !tiered && overStock && (
+          <p className="text-xs text-red-600">
+            {t("maxAvailable", { max: maxCustom })}
           </p>
         )}
         {inStock && missingColors && targets.length > 1 && (
