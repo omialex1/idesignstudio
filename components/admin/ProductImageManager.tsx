@@ -4,6 +4,10 @@ import AdminCard from "@/components/admin/AdminCard";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { compressImage } from "@/lib/images/client-compress";
+import VariantNameList, {
+  useVariantListId,
+  useVariantNames,
+} from "@/components/admin/VariantNameList";
 
 const MAX_IMAGES = 6;
 
@@ -19,9 +23,12 @@ const ERRORS: Record<string, string> = {
 export default function ProductImageManager({
   productId,
   images,
+  variantNames = [],
 }: {
   productId: string;
   images: Image[];
+  // the names of the variants the product has (suggested as photo titles)
+  variantNames?: string[];
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +36,8 @@ export default function ProductImageManager({
   const [error, setError] = useState<string | null>(null);
   // the titles as typed (saved when the field is left)
   const [titles, setTitles] = useState<Record<string, string>>({});
+  const suggestions = useVariantNames(variantNames);
+  const listId = useVariantListId();
 
   // Order shown while a photo is dragged and until the server answers. It only
   // counts while the saved order is still the one it was made from.
@@ -151,6 +160,8 @@ export default function ProductImageManager({
         </p>
       </div>
 
+      <VariantNameList id={listId} names={suggestions} />
+
       {images.length > 0 && (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {shown.map((img, index) => (
@@ -196,6 +207,8 @@ export default function ProductImageManager({
                 maxLength={80}
                 placeholder="Titlu poză (opțional)"
                 aria-label="Titlu poză"
+                list={listId}
+                autoComplete="off"
                 draggable={false}
                 onChange={(e) =>
                   setTitles((t) => ({ ...t, [img.id]: e.target.value }))

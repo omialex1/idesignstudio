@@ -5,6 +5,7 @@ import AdminCard from "@/components/admin/AdminCard";
 import type { PaletteOption } from "@/lib/admin/queries";
 import { swatchStyle } from "@/lib/colors-shared";
 import { useEffect, useRef, useState } from "react";
+import { VARIANT_NAMES_EVENT } from "@/components/admin/VariantNameList";
 import {
   apply as applyDraft,
   clearDraft,
@@ -161,6 +162,15 @@ export default function ProductForm({
       (_, i) => d.variants[i]?.nameRo ?? "",
     ),
   );
+
+  // the photo titles offer these names while someone types
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent<string[]>(VARIANT_NAMES_EVENT, {
+        detail: variantNames.map((n) => n.trim()).filter(Boolean),
+      }),
+    );
+  }, [variantNames]);
 
   // How many variant rows and piece rows are shown. They start at the usual
   // number (or at what the product already has) and the "Adaugă" buttons add more.

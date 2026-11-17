@@ -4,6 +4,10 @@ import AdminCard from "@/components/admin/AdminCard";
 import { useRef, useState } from "react";
 import { compressImage } from "@/lib/images/client-compress";
 import { MAX_IMAGES_PER_PRODUCT } from "@/lib/images/product-images";
+import VariantNameList, {
+  useVariantListId,
+  useVariantNames,
+} from "@/components/admin/VariantNameList";
 
 export type PickedPhoto = {
   id: string;
@@ -25,6 +29,8 @@ export default function PhotoPicker({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const suggestions = useVariantNames([]);
+  const listId = useVariantListId();
   // drag to reorder: the photo being dragged and the one it is over
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -95,6 +101,8 @@ export default function PhotoPicker({
         </p>
       </div>
 
+      <VariantNameList id={listId} names={suggestions} />
+
       {photos.length > 0 && (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {photos.map((photo, index) => (
@@ -142,6 +150,8 @@ export default function PhotoPicker({
                 maxLength={80}
                 placeholder="Titlu poză (opțional)"
                 aria-label="Titlu poză"
+                list={listId}
+                autoComplete="off"
                 draggable={false}
                 onChange={(e) =>
                   onChange(

@@ -106,7 +106,13 @@ export default async function EditProductPage({
         }}
       />
 
-      <ProductImageManager productId={product.id} images={product.images} />
+      <ProductImageManager
+        productId={product.id}
+        images={product.images}
+        variantNames={
+          product.tieredPricing ? [] : product.variants.map((v) => v.nameRo)
+        }
+      />
 
       <ProductGroupsCard productId={product.id} />
 
