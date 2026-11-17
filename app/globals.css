@@ -82,6 +82,9 @@ body {
   h2,
   h3 {
     font-weight: 500;
+    /* Cormorant's default figures are old-style: a 1 looks like a capital I. Lining
+       figures read as numbers. */
+    font-variant-numeric: lining-nums;
   }
 }
 

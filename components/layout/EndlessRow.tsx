@@ -120,6 +120,73 @@ export default function EndlessRow({
     };
   }, [resetKey, copies]);
 
+  // Grab and drag with the mouse (touch screens already scroll by swiping). The row follows
+  // the mouse; on release it settles on the nearest card. A click that ends a drag does
+  // not open the card under the mouse.
+  const [dragging, setDragging] = useState(false);
+  const drag = useRef<{
+    x: number;
+    left: number;
+    id: number;
+    moved: boolean;
+  } | null>(null);
+  const justDragged = useRef(false);
+  const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function onPointerDown(e: React.PointerEvent<HTMLUListElement>) {
+    const el = track.current;
+    if (!el || e.pointerType !== "mouse" || e.button !== 0 || !edges.overflow)
+      return;
+    if (settleTimer.current) {
+      clearTimeout(settleTimer.current);
+      el.style.scrollSnapType = "";
+    }
+    drag.current = { x: e.clientX, left: el.scrollLeft, id: e.pointerId, moved: false };
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLUListElement>) {
+    const d = drag.current;
+    const el = track.current;
+    if (!d || !el) return;
+    const dx = e.clientX - d.x;
+    if (!d.moved) {
+      if (Math.abs(dx) < 6) return;
+      d.moved = true;
+      el.setPointerCapture(d.id);
+      // no snapping while the row follows the mouse
+      el.style.scrollSnapType = "none";
+      setDragging(true);
+    }
+    el.scrollLeft = d.left - dx;
+  }
+
+  function endDrag() {
+    const d = drag.current;
+    const el = track.current;
+    drag.current = null;
+    if (!d || !el || !d.moved) return;
+    justDragged.current = true;
+    setTimeout(() => {
+      justDragged.current = false;
+    }, 0);
+    setDragging(false);
+    // settle on the nearest card, smoothly, then give the snapping back
+    const start = el.getBoundingClientRect().left + 32;
+    let best = 0;
+    let bestDistance = Infinity;
+    for (const li of Array.from(el.children)) {
+      const delta = li.getBoundingClientRect().left - start;
+      if (Math.abs(delta) < bestDistance) {
+        bestDistance = Math.abs(delta);
+        best = delta;
+      }
+    }
+    el.scrollTo({ left: el.scrollLeft + best, behavior: "smooth" });
+    settleTimer.current = setTimeout(() => {
+      el.style.scrollSnapType = "";
+    }, 450);
+  }
+
   function move(direction: 1 | -1) {
     const el = track.current;
     if (!el) return;
@@ -132,7 +199,24 @@ export default function EndlessRow({
     <div className="relative">
       <ul
         ref={track}
-        className={`flex snap-x snap-mandatory scroll-px-8 gap-3 overflow-x-auto overflow-y-hidden px-8 -mx-6 [mask-image:linear-gradient(to_right,transparent,black_28px,black_calc(100%-28px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${trackClassName} ${
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onDragStart={(e) => e.preventDefault()}
+        onClickCapture={(e) => {
+          if (justDragged.current) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+        className={`${
+          dragging
+            ? "cursor-grabbing select-none"
+            : edges.overflow
+              ? "cursor-grab"
+              : ""
+        } flex snap-x snap-mandatory scroll-px-8 gap-3 overflow-x-auto overflow-y-hidden px-8 -mx-6 [mask-image:linear-gradient(to_right,transparent,black_28px,black_calc(100%-28px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${trackClassName} ${
           centered ? "[&>li:first-child]:ml-auto [&>li:last-child]:mr-auto" : ""
         }`}
       >
