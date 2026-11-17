@@ -167,6 +167,7 @@ export default async function ProductDetailPage({
         {product.images.length > 0 ? (
           <ProductGallery
             images={product.images.map((i) => i.url)}
+            titles={product.images.map((i) => i.altText ?? "")}
             alt={product.name}
             badge={
               isLimitedEdition(subcategory) ? t("limitedEdition") : undefined

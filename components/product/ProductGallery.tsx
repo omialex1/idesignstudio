@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  VARIANT_SELECTED_EVENT,
+  normalizeTitle,
+  type VariantSelectedDetail,
+} from "@/lib/product-events";
 import ProductPhoto from "@/components/product/ProductPhoto";
 import LimitedBadge from "@/components/product/LimitedBadge";
 
@@ -16,10 +21,14 @@ const MAX_ZOOM = ZOOM_STEPS[ZOOM_STEPS.length - 1];
 // 150%.
 export default function ProductGallery({
   images,
+  titles,
   alt,
   badge,
 }: {
   images: string[];
+  // the title of each photo (same order); a photo titled like a variant is shown when
+  // the customer picks that variant
+  titles?: string[];
   alt: string;
   // small label on the photo (e.g. "Limited edition")
   badge?: string;
@@ -53,6 +62,26 @@ export default function ProductGallery({
     el.scrollTo({ left: target * el.clientWidth, behavior: "smooth" });
     setActive(target);
   }
+
+  // the customer picks a variant: show the photo with the same title, if there is one
+  const goToRef = useRef(goTo);
+  useEffect(() => {
+    goToRef.current = goTo;
+  });
+  useEffect(() => {
+    if (!titles?.some(Boolean)) return;
+    function onVariant(e: Event) {
+      const names = (e as CustomEvent<VariantSelectedDetail>).detail.names.map(
+        normalizeTitle,
+      );
+      const index = (titles ?? []).findIndex(
+        (title) => title && names.includes(normalizeTitle(title)),
+      );
+      if (index >= 0) goToRef.current(index);
+    }
+    window.addEventListener(VARIANT_SELECTED_EVENT, onVariant);
+    return () => window.removeEventListener(VARIANT_SELECTED_EVENT, onVariant);
+  }, [titles]);
 
   function handleScroll() {
     const el = track.current;
@@ -215,7 +244,10 @@ export default function ProductGallery({
             >
               <ProductPhoto
                 src={url}
-                alt={many ? `${alt} (${index + 1}/${images.length})` : alt}
+                alt={
+                  titles?.[index] ||
+                  (many ? `${alt} (${index + 1}/${images.length})` : alt)
+                }
                 sizes="(min-width: 1024px) 480px, (min-width: 640px) 45vw, 100vw"
                 priority={index === 0}
                 className="object-cover"

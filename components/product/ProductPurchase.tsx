@@ -9,6 +9,10 @@ import {
   type CartAddedDetail,
 } from "@/components/cart/CartToast";
 import { formatPrice } from "@/lib/format";
+import {
+  VARIANT_SELECTED_EVENT,
+  type VariantSelectedDetail,
+} from "@/lib/product-events";
 import { priceView, type ProductPromo } from "@/lib/discount-math";
 import {
   ALL_COMPONENTS_ID,
@@ -59,6 +63,8 @@ type ColorComponent = { id: string; name: string | null; maxColors: number };
 type Variant = {
   id: string;
   name: string;
+  // the Romanian and English names (to find the photo titled like the variant)
+  matchNames?: string[];
   priceCents: number;
   fullPriceCents: number;
   discountPercent: number;
@@ -159,6 +165,12 @@ export default function ProductPurchase({
   const qtyValid =
     Number.isInteger(qtyNumber) && qtyNumber >= minQty && qtyNumber <= maxQty;
   const quantity = qtyValid ? qtyNumber : minQty;
+  // Ordinary products: an optional quantity. Left at 0, the button adds one piece.
+  const [customQty, setCustomQty] = useState("0");
+  const customNumber = Number(customQty) || 0;
+  const maxCustom = Math.max(1, availableQuantity);
+  const overStock = !tiered && customNumber > maxCustom;
+  const addQuantity = tiered ? quantity : Math.max(1, customNumber);
   const activeTier = tiered ? tierFor(tiers, quantity) : null;
   const ranges = tiered ? tierRanges(tiers) : [];
   const activeRange = activeTier
@@ -224,7 +236,7 @@ export default function ProductPurchase({
   }
 
   function handleAdd() {
-    if (missingColors || (tiered && !qtyValid)) return;
+    if (missingColors || (tiered && !qtyValid) || overStock) return;
     addItem(
       {
         productId,
@@ -258,8 +270,9 @@ export default function ProductPurchase({
         imageUrl,
         ...(tiered ? { tiers, tierRange: activeRange } : {}),
       },
-      tiered ? quantity : 1,
+      addQuantity,
     );
+    if (!tiered) setCustomQty("0");
     window.dispatchEvent(
       new CustomEvent<CartAddedDetail>(CART_ADDED_EVENT, {
         detail: {
@@ -385,7 +398,15 @@ export default function ProductPurchase({
                 key={v.id}
                 type="button"
                 aria-pressed={v.id === variantId}
-                onClick={() => setVariantId(v.id)}
+                onClick={() => {
+                  setVariantId(v.id);
+                  window.dispatchEvent(
+                    new CustomEvent<VariantSelectedDetail>(
+                      VARIANT_SELECTED_EVENT,
+                      { detail: { names: v.matchNames ?? [v.name] } },
+                    ),
+                  );
+                }}
                 className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                   v.id === variantId
                     ? "border-salamander-500 bg-salamander-50 font-semibold text-salamander-700"
@@ -558,12 +579,39 @@ export default function ProductPurchase({
       )}
 
       <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-end gap-3">
+          {inStock && !tiered && (
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="custom-quantity"
+                className="text-xs font-medium text-taupe-600"
+              >
+                {t("quantityField")}
+              </label>
+              <input
+                id="custom-quantity"
+                type="text"
+                inputMode="numeric"
+                value={customQty}
+                onChange={(e) =>
+                  setCustomQty(e.target.value.replace(/\D/g, "").slice(0, 4))
+                }
+                onFocus={(e) => e.target.select()}
+                onBlur={() => setCustomQty(String(customNumber))}
+                aria-invalid={overStock}
+                className={`h-12 w-24 rounded-full border bg-white px-4 text-center text-lg text-taupe-800 focus:outline-none ${
+                  overStock
+                    ? "border-red-400"
+                    : "border-cream-300 focus:border-salamander-400"
+                }`}
+              />
+            </div>
+          )}
           {inStock && (
             <button
               type="button"
               onClick={handleAdd}
-              disabled={missingColors || (tiered && !qtyValid)}
+              disabled={missingColors || (tiered && !qtyValid) || overStock}
               className="w-fit rounded-full bg-salamander-500 px-8 py-3 text-sm font-semibold text-cream-50 transition-colors hover:bg-salamander-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {justAdded ? tCart("added") : tCart("addToCart")}
@@ -573,6 +621,13 @@ export default function ProductPurchase({
         </div>
         {/* with one thing to colour the heading above is enough; with several
             pieces, say what is still missing */}
+        {inStock && !tiered && (
+          <p className={`text-xs ${overStock ? "text-red-600" : "text-taupe-500"}`}>
+            {overStock
+              ? t("maxAvailable", { max: maxCustom })
+              : t("quantityZeroHint")}
+          </p>
+        )}
         {inStock && missingColors && targets.length > 1 && (
           <p className="text-xs text-taupe-500">{t("pickColorAll")}</p>
         )}

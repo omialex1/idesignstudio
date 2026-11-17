@@ -5,7 +5,13 @@ import { useRef, useState } from "react";
 import { compressImage } from "@/lib/images/client-compress";
 import { MAX_IMAGES_PER_PRODUCT } from "@/lib/images/product-images";
 
-export type PickedPhoto = { id: string; blob: Blob; previewUrl: string };
+export type PickedPhoto = {
+  id: string;
+  blob: Blob;
+  previewUrl: string;
+  // optional title; one identical to a variant name shows this photo when that variant is picked
+  title?: string;
+};
 
 // Photo chooser for the "new product" form: photos are resized in the browser
 // right away and uploaded once the product has been created.
@@ -81,7 +87,9 @@ export default function PhotoPicker({
         <p className="text-xs text-taupe-400">
           Până la {MAX_IMAGES_PER_PRODUCT} fotografii (JPG, PNG sau WebP). Se
           redimensionează automat și se încarcă după ce salvezi produsul. Prima
-          fotografie apare pe cardul produsului.
+          fotografie apare pe cardul produsului. Titlul unei poze poate fi numele
+          unei variante (de exemplu „Brad mic”): clientul vede poza când alege
+          varianta.
           {photos.length > 1 &&
             " Trage o fotografie peste alta ca să schimbi ordinea."}
         </p>
@@ -127,6 +135,22 @@ export default function PhotoPicker({
                 alt=""
                 draggable={false}
                 className="aspect-square w-full rounded-lg object-cover"
+              />
+              <input
+                type="text"
+                value={photo.title ?? ""}
+                maxLength={80}
+                placeholder="Titlu poză (opțional)"
+                aria-label="Titlu poză"
+                draggable={false}
+                onChange={(e) =>
+                  onChange(
+                    photos.map((p) =>
+                      p.id === photo.id ? { ...p, title: e.target.value } : p,
+                    ),
+                  )
+                }
+                className="w-full rounded-lg border border-cream-300 px-2 py-1.5 text-xs text-taupe-800 focus:border-salamander-400 focus:outline-none"
               />
               <div className="flex items-center justify-between text-xs">
                 {index === 0 ? (

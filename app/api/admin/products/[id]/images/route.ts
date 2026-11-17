@@ -38,6 +38,9 @@ export async function POST(
     return NextResponse.json({ error: "too_large" }, { status: 413 });
   }
 
+  // the title of the photo (optional); it also works as its description for screen readers
+  const title = String(form?.get("title") ?? "").trim().slice(0, 80);
+
   const bytes = new Uint8Array(await file.arrayBuffer());
   const contentType = detectImageType(bytes);
   if (!contentType) {
@@ -62,6 +65,7 @@ export async function POST(
       id: imageId,
       productId,
       url: productImageUrl(imageId),
+      altText: title || null,
       sortOrder: nextOrder,
       data: { create: { contentType, data: bytes } },
     },

@@ -107,7 +107,10 @@
     "minOrder": "Minimum order: {min} pcs.",
     "perPiece": "/ pc",
     "limitedEdition": "Limited edition",
-    "aboutProduct": "About this product"
+    "aboutProduct": "About this product",
+    "quantityField": "Quantity",
+    "quantityZeroHint": "Leave 0 for 1 piece.",
+    "imageTitleLabel": "Photo title"
   },
   "Favorites": {
     "label": "Favorites",

@@ -7,7 +7,7 @@ import { compressImage } from "@/lib/images/client-compress";
 
 const MAX_IMAGES = 6;
 
-type Image = { id: string; url: string };
+type Image = { id: string; url: string; altText?: string | null };
 
 const ERRORS: Record<string, string> = {
   limit_reached: `Maximum ${MAX_IMAGES} fotografii per produs.`,
@@ -27,6 +27,8 @@ export default function ProductImageManager({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // the titles as typed (saved when the field is left)
+  const [titles, setTitles] = useState<Record<string, string>>({});
 
   // Order shown while a photo is dragged and until the server answers. It only
   // counts while the saved order is still the one it was made from.
@@ -105,6 +107,19 @@ export default function ProductImageManager({
     router.refresh();
   }
 
+  async function saveTitle(img: Image) {
+    const typed = (titles[img.id] ?? img.altText ?? "").trim();
+    if (typed === (img.altText ?? "")) return;
+    setError(null);
+    const res = await fetch(`/api/admin/products/${productId}/images/${img.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: typed }),
+    }).catch(() => null);
+    if (!res?.ok) setError("Nu am putut salva titlul. Încearcă din nou.");
+    router.refresh();
+  }
+
   async function call(imageId: string, method: "DELETE" | "PATCH") {
     setBusy(true);
     setError(null);
@@ -128,6 +143,11 @@ export default function ProductImageManager({
           Până la {MAX_IMAGES} fotografii (JPG, PNG sau WebP). Se redimensionează
           automat. Prima fotografie apare pe cardul produsului. Trage o
           fotografie peste alta ca să schimbi ordinea.
+        </p>
+        <p className="mt-1 text-xs text-taupe-400">
+          Titlul poate fi numele unei variante (de exemplu „Brad mic”). Dacă e
+          identic cu numele variantei, când clientul alege acea variantă pe pagina
+          produsului se arată automat poza respectivă.
         </p>
       </div>
 
@@ -169,6 +189,22 @@ export default function ProductImageManager({
                 alt=""
                 draggable={false}
                 className="aspect-square w-full rounded-lg object-cover"
+              />
+              <input
+                type="text"
+                value={titles[img.id] ?? img.altText ?? ""}
+                maxLength={80}
+                placeholder="Titlu poză (opțional)"
+                aria-label="Titlu poză"
+                draggable={false}
+                onChange={(e) =>
+                  setTitles((t) => ({ ...t, [img.id]: e.target.value }))
+                }
+                onBlur={() => saveTitle(img)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") e.currentTarget.blur();
+                }}
+                className="w-full rounded-lg border border-cream-300 px-2 py-1.5 text-xs text-taupe-800 focus:border-salamander-400 focus:outline-none"
               />
               <div className="flex items-center justify-between text-xs">
                 {index === 0 ? (

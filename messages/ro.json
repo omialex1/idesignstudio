@@ -107,7 +107,10 @@
     "minOrder": "Comandă minimă: {min} buc.",
     "perPiece": "/ buc",
     "limitedEdition": "Ediție limitată",
-    "aboutProduct": "Despre acest produs"
+    "aboutProduct": "Despre acest produs",
+    "quantityField": "Cantitate",
+    "quantityZeroHint": "Lasă 0 pentru 1 bucată.",
+    "imageTitleLabel": "Titlu poză"
   },
   "Favorites": {
     "label": "Favorite",

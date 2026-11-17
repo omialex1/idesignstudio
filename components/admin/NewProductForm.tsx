@@ -36,6 +36,7 @@ export default function NewProductForm({
     for (const photo of photos) {
       const body = new FormData();
       body.append("file", photo.blob, "photo");
+      if (photo.title?.trim()) body.append("title", photo.title.trim());
       const res = await fetch(`/api/admin/products/${result.id}/images`, {
         method: "POST",
         body,

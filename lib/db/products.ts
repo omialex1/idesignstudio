@@ -188,6 +188,8 @@ export async function getProductDetail(productSlug: string, locale: string) {
     variants: (product.tieredPricing ? [] : product.variants).map((v, i, all) => ({
       id: v.id,
       name: locale === "en" ? (v.nameEn ?? v.nameRo) : v.nameRo,
+      // both names, to find the photo with this title (photo titles are written once)
+      matchNames: [v.nameRo, v.nameEn].filter((n): n is string => Boolean(n)),
       // What the customer pays, after the variant's discount.
       priceCents: variantPricing(all)[i].finalCents,
       fullPriceCents: variantPricing(all)[i].fullCents,
