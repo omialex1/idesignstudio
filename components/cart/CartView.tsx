@@ -8,6 +8,7 @@ import { categoryColorClass } from "@/lib/category-colors";
 import { itemDetails } from "@/lib/orders/item-details";
 import { maxQuantityFor, rangeLabel } from "@/lib/tiers";
 import QuantityControl from "./QuantityControl";
+import FreeShippingProgress from "./FreeShippingProgress";
 
 export default function CartView() {
   const t = useTranslations("Cart");
@@ -140,7 +141,13 @@ export default function CartView() {
           })}
         </div>
 
-        <div className="mt-8 flex flex-col items-end gap-2 border-t border-cream-200 pt-6">
+        <FreeShippingProgress
+          subtotalCents={total}
+          currency={currency}
+          className="mt-8"
+        />
+
+        <div className="mt-6 flex flex-col items-end gap-2 border-t border-cream-200 pt-6">
           <div className="flex items-center gap-4 text-lg font-semibold text-taupe-800">
             <span>{t("total")}</span>
             <span>{formatPrice(total, currency, locale)}</span>

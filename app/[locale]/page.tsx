@@ -7,6 +7,7 @@ import { categoryColorClass } from "@/lib/category-colors";
 import {
   getMainImageUrl,
   getMainProductCount,
+  getMainProducts,
   getNewestProducts,
   getSubcategoryShowcase,
 } from "@/lib/db/products";
@@ -15,10 +16,14 @@ import HeroSlideshow from "@/components/landing/HeroSlideshow";
 import { HERO_SLIDES } from "@/lib/hero-slides";
 import StripCard from "@/components/product/StripCard";
 import { shortName } from "@/components/product/ProductTile";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatPriceShort } from "@/lib/format";
+import { FREE_SHIPPING_THRESHOLD_CENTS } from "@/lib/shipping";
+import { showsProductsRow } from "@/lib/home-sections";
+import type { FavoriteProduct } from "@/lib/db/products";
 import EndlessRow from "@/components/layout/EndlessRow";
 import GoldFrame from "@/components/layout/GoldFrame";
 import GoldDot from "@/components/layout/GoldDot";
+import TrustStrip from "@/components/landing/TrustStrip";
 import MidBackdrop from "@/components/layout/MidBackdrop";
 import CategoryFeatureCard from "@/components/landing/CategoryFeatureCard";
 import Reveal from "@/components/layout/Reveal";
@@ -52,8 +57,45 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       imageUrl: await getMainImageUrl(main.id),
       count: await getMainProductCount(main.id),
       subcategories: await getSubcategoryShowcase(main.id, locale),
+      // a main category set to show its products directly (Handmade)
+      products: showsProductsRow(main.slug)
+        ? await getMainProducts(main.id, locale)
+        : [],
     })),
   );
+
+  // one card of the rows of products ("Noutăți", Handmade)
+  const stripItems = (list: FavoriteProduct[]) =>
+    list.map((p) => {
+      const price = formatPrice(p.priceCents, p.currency, locale);
+      return {
+        key: p.id,
+        node: (
+          <StripCard
+            item={{
+              id: p.id,
+              href: p.href,
+              name: shortName(p.name),
+              imageUrl: p.imageUrl,
+              placeholderClass: categoryColorClass(p.colorKey),
+              note: p.inStock ? undefined : tShop("outOfStock"),
+              limitedLabel: isLimitedEdition(p.categorySlug)
+                ? tShop("limitedEdition")
+                : undefined,
+              price: p.hasVariants ? tShop("fromPrice", { price }) : price,
+              oldPrice: p.oldPriceCents
+                ? formatPrice(p.oldPriceCents, p.currency, locale)
+                : undefined,
+              badge:
+                p.oldPriceCents && p.percentOff
+                  ? `−${p.percentOff}%${p.promoLabel ? ` · ${p.promoLabel}` : ""}`
+                  : (p.promoLabel ?? undefined),
+              card: p,
+            }}
+          />
+        ),
+      };
+    });
 
   return (
     <div className="flex flex-1 flex-col">
@@ -100,6 +142,8 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           />
         </div>
       </section>
+
+      <TrustStrip />
 
       <MidBackdrop src="/images/bg-interior.jpg">
       <section
@@ -174,38 +218,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               prevLabel={tShop("previous")}
               nextLabel={tShop("next")}
               itemClassName="w-[150px] shrink-0 sm:w-[170px]"
-              items={newest.map((p) => {
-                const price = formatPrice(p.priceCents, p.currency, locale);
-                return {
-                  key: p.id,
-                  node: (
-                    <StripCard
-                      item={{
-                        id: p.id,
-                        href: p.href,
-                        name: shortName(p.name),
-                        imageUrl: p.imageUrl,
-                        placeholderClass: categoryColorClass(p.colorKey),
-                        note: p.inStock ? undefined : tShop("outOfStock"),
-                        limitedLabel: isLimitedEdition(p.categorySlug)
-                          ? tShop("limitedEdition")
-                          : undefined,
-                        price: p.hasVariants
-                          ? tShop("fromPrice", { price })
-                          : price,
-                        oldPrice: p.oldPriceCents
-                          ? formatPrice(p.oldPriceCents, p.currency, locale)
-                          : undefined,
-                        badge:
-                          p.oldPriceCents && p.percentOff
-                            ? `−${p.percentOff}%${p.promoLabel ? ` · ${p.promoLabel}` : ""}`
-                            : (p.promoLabel ?? undefined),
-                        card: p,
-                      }}
-                    />
-                  ),
-                };
-              })}
+              items={stripItems(newest)}
             />
           </div>
           </GoldFrame>
@@ -214,7 +227,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       {sections
         .filter(({ subcategories }) => subcategories.length > 0)
-        .map(({ main, subcategories }) => (
+        .map(({ main, subcategories, products }) => (
           <section
             key={main.id}
             className="relative mx-auto w-full max-w-7xl px-6 py-12"
@@ -232,6 +245,20 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             </Reveal>
             {/* one card per subcategory (a new one shows up by itself), endlessly to the
                 right; the photo is only an example product of that subcategory */}
+            {showsProductsRow(main.slug) && products.length > 0 ? (
+              // the products themselves, like "Noutăți"; arrows when they do not all fit
+              <div className="mt-8">
+                <EndlessRow
+                  centered
+                  arrowsInside
+                  resetKey={products.map((p) => p.id).join(",")}
+                  prevLabel={tShop("previous")}
+                  nextLabel={tShop("next")}
+                  itemClassName="w-[150px] shrink-0 sm:w-[170px]"
+                  items={stripItems(products)}
+                />
+              </div>
+            ) : (
             <div className="mt-10">
               <EndlessRow
                 centered
@@ -257,8 +284,12 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 }))}
               />
             </div>
-            {/* with a single subcategory its card already leads to everything */}
-            {subcategories.length > 1 && (
+            )}
+            {/* with a single subcategory its card already leads to everything; a row of
+                products gets the button only when it is long */}
+            {(showsProductsRow(main.slug) && products.length > 0
+              ? products.length > 6
+              : subcategories.length > 1) && (
               <Reveal className="mt-10 text-center">
                 <Link
                   href={`/${main.slug}`}
@@ -284,11 +315,13 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           />
         </Reveal>
         {/* numbered, with fine lines and no icons: plainly information, not buttons */}
-        <ol className="mt-10 grid grid-cols-2 border-y border-gold-600/40 lg:grid-cols-4">
-          {(["step1", "step2", "step3", "step4"] as const).map((key, i) => (
+        <ol className="mt-10 grid grid-cols-2 border-y border-gold-600/40 lg:grid-cols-5">
+          {(["step1", "step2", "step3", "step4", "step5"] as const).map((key, i) => (
             <li
               key={key}
               className={`px-4 py-6 text-center ${
+                key === "step5" ? "col-span-2 lg:col-span-1" : ""
+              } ${
                 i % 2 === 1 ? "border-l border-gold-600/30" : ""
               } ${i >= 2 ? "border-t border-gold-600/30 lg:border-t-0" : ""} ${
                 i > 0 ? "lg:border-l lg:border-gold-600/30" : ""
@@ -304,7 +337,15 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 {t(`${key}Title`)}
               </span>
               <span className="mt-0.5 block text-xs text-taupe-600">
-                {t(`${key}Body`)}
+                {key === "step5"
+                  ? t("step5Body", {
+                      amount: formatPriceShort(
+                        FREE_SHIPPING_THRESHOLD_CENTS,
+                        "RON",
+                        locale,
+                      ),
+                    })
+                  : t(`${key}Body`)}
               </span>
             </li>
           ))}

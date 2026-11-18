@@ -26,6 +26,17 @@
     "step3Body": "în România",
     "step4Title": "Primești prin curier",
     "step4Body": "rapid, în toată România",
+    "step5Title": "Transport gratuit",
+    "step5Body": "la comenzi de la {amount}",
+    "trustLabel": "De ce să ai încredere în noi",
+    "trust1Title": "Plată securizată",
+    "trust1Body": "prin NETOPIA Payments",
+    "trust2Title": "Retur în 14 zile",
+    "trust2Body": "la produsele nepersonalizate",
+    "trust3Title": "Garanție 2 ani",
+    "trust3Body": "legală, pentru orice defect",
+    "trust4Title": "Firmă din România",
+    "trust4Body": "Râmnicu Vâlcea",
     "heroCaption1Title": "Acasă",
     "heroCaption1Sub": "în culorile tale",
     "heroCaption2Title": "Ordine",
@@ -136,6 +147,11 @@
     "close": "Închide",
     "viewCart": "Vezi coșul",
     "quantity": "Cantitate"
+  },
+  "Shipping": {
+    "freeFrom": "Transport gratuit pentru comenzi de la {amount}",
+    "remaining": "Mai ai <b>{amount}</b> până la transport gratuit",
+    "reached": "Ai transport gratuit la această comandă"
   },
   "Account": {
     "accountLabel": "Cont",

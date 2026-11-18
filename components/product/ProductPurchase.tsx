@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/cart/store";
 import { FavoriteButton } from "@/components/product/ProductActions";
+import ShippingHint from "@/components/product/ShippingHint";
 import {
   CART_ADDED_EVENT,
   type CartAddedDetail,
@@ -165,6 +167,39 @@ export default function ProductPurchase({
   const [colorHint, setColorHint] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // On every screen size the real button can be far below the photo and the colours, so a
+  // glass bar (same style as the navigation bar) with the price and the button stays at the
+  // bottom of the screen while the real button is out of view (and the footer is not).
+  const buyRowRef = useRef<HTMLDivElement>(null);
+  const colorsRef = useRef<HTMLFieldSetElement>(null);
+  const [barVisible, setBarVisible] = useState(false);
+  const canPortal = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  useEffect(() => {
+    const row = buyRowRef.current;
+    if (!row) return;
+    let rowIn = true;
+    let footerIn = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.target === row) rowIn = entry.isIntersecting;
+          else footerIn = entry.isIntersecting;
+        }
+        setBarVisible(!rowIn && !footerIn);
+      },
+      // the part under the sticky navigation bar does not count as visible
+      { rootMargin: "-90px 0px 0px 0px" },
+    );
+    observer.observe(row);
+    const footer = document.querySelector("footer");
+    if (footer) observer.observe(footer);
+    return () => observer.disconnect();
+  }, [inStock]);
+
   // Tiered products: the customer types a quantity, the price follows it.
   const tiered = tiers.length > 0;
   const minQty = tiered ? firstTierMin(tiers) : 1;
@@ -243,6 +278,14 @@ export default function ProductPurchase({
         }
       }
     }
+  }
+
+  // Pressed in the bottom bar: with a colour missing, take the customer to the colours.
+  function handleBarAdd() {
+    if (missingColors) {
+      colorsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    handleAdd();
   }
 
   function handleAdd() {
@@ -333,6 +376,7 @@ export default function ProductPurchase({
             })}
           </p>
         )}
+        <ShippingHint currency={currency} />
       </div>
 
       {tiered && (
@@ -473,7 +517,7 @@ export default function ProductPurchase({
       )}
 
       {inStock && active && (
-        <fieldset className="flex flex-col gap-3">
+        <fieldset ref={colorsRef} className="flex flex-col gap-3">
           <legend className="text-sm font-medium text-taupe-700">
             {targets.length <= 1 && active.maxColors === 1
               ? t("chooseColor")
@@ -594,7 +638,7 @@ export default function ProductPurchase({
         </fieldset>
       )}
 
-      <div className="flex flex-col gap-2">
+      <div ref={buyRowRef} className="flex flex-col gap-2">
         <div className="flex flex-wrap items-end gap-3">
           {inStock && !tiered && (
             <div className="flex flex-col gap-1">
@@ -665,6 +709,66 @@ export default function ProductPurchase({
           <p className="text-xs text-taupe-500">{t("pickColorAll")}</p>
         )}
       </div>
+      {canPortal &&
+        inStock &&
+        createPortal(
+          <div
+            inert={!barVisible}
+            aria-hidden={!barVisible}
+            className={`fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 transition duration-300 ${
+              barVisible
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none translate-y-6 opacity-0"
+            }`}
+          >
+            <div className="mx-auto flex max-w-xl items-center gap-3 rounded-full border border-gold-600/50 bg-paper/60 py-2 pr-2 pl-5 text-taupe-800 shadow-[0_8px_30px_rgba(60,40,25,0.12)] backdrop-blur-xl backdrop-saturate-150">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs text-taupe-600">{name}</p>
+                <p className="flex items-baseline gap-2 font-display text-lg leading-tight">
+                  <span>{formatPrice(unitPrice, currency, locale)}</span>
+                  {view?.priorCents && (
+                    <span className="text-sm text-taupe-400 line-through">
+                      {formatPrice(view.priorCents, currency, locale)}
+                    </span>
+                  )}
+                  {tiered && (
+                    <span className="font-sans text-xs text-taupe-500">
+                      {t("perPiece")}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="group relative shrink-0">
+                <button
+                  type="button"
+                  onClick={handleBarAdd}
+                  disabled={(tiered && !qtyValid) || overStock}
+                  aria-disabled={missingColors || undefined}
+                  className={`rounded-full bg-salamander-500 px-6 py-3 text-sm font-semibold text-cream-50 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                    missingColors
+                      ? "cursor-not-allowed opacity-50"
+                      : "hover:bg-salamander-600"
+                  }`}
+                >
+                  {justAdded ? tCart("added") : tCart("addToCart")}
+                </button>
+                {missingColors && (
+                  <span
+                    role="status"
+                    className={`pointer-events-none absolute right-0 bottom-full z-20 mb-3 rounded-full border border-gold-600/50 bg-paper/60 px-4 py-2 text-sm font-medium whitespace-nowrap text-taupe-800 shadow-[0_8px_30px_rgba(60,40,25,0.12)] backdrop-blur-xl backdrop-saturate-150 transition-opacity duration-200 ${
+                      colorHint ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    {targets.length > 1
+                      ? t("pickColorsFirstPopup")
+                      : t("pickColorFirstPopup")}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

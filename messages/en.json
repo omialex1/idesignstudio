@@ -26,6 +26,17 @@
     "step3Body": "in Romania",
     "step4Title": "Get it by courier",
     "step4Body": "fast, across Romania",
+    "step5Title": "Free shipping",
+    "step5Body": "on orders from {amount}",
+    "trustLabel": "Why you can trust us",
+    "trust1Title": "Secure payment",
+    "trust1Body": "via NETOPIA Payments",
+    "trust2Title": "14-day returns",
+    "trust2Body": "on non-personalised items",
+    "trust3Title": "2-year guarantee",
+    "trust3Body": "legal, for any defect",
+    "trust4Title": "Romanian company",
+    "trust4Body": "Râmnicu Vâlcea",
     "heroCaption1Title": "At home",
     "heroCaption1Sub": "in your colours",
     "heroCaption2Title": "Order",
@@ -136,6 +147,11 @@
     "close": "Close",
     "viewCart": "View cart",
     "quantity": "Quantity"
+  },
+  "Shipping": {
+    "freeFrom": "Free shipping on orders from {amount}",
+    "remaining": "<b>{amount}</b> left until free shipping",
+    "reached": "You get free shipping on this order"
   },
   "Account": {
     "accountLabel": "Account",

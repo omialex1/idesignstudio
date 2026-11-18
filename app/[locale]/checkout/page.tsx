@@ -10,6 +10,7 @@ import { formatPrice } from "@/lib/format";
 import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
 import { maxQuantityFor, rangeLabel } from "@/lib/tiers";
 import QuantityControl from "@/components/cart/QuantityControl";
+import FreeShippingProgress from "@/components/cart/FreeShippingProgress";
 import { POSTAL_CODE_PATTERN, normalizePhone } from "@/lib/validation/phone";
 import { RO_COUNTIES } from "@/lib/geo/ro-counties";
 import LocalityField from "@/components/address/LocalityField";
@@ -478,6 +479,14 @@ export default function CheckoutPage() {
                     : formatPrice(shipping, currency, locale)}
                 </span>
               </div>
+              {shipping > 0 && (
+                <FreeShippingProgress
+                  subtotalCents={subtotal}
+                  currency={currency}
+                  compact
+                  className="my-1"
+                />
+              )}
               {codFee > 0 && (
                 <div className="flex justify-between">
                   <span>{t("codFee")}</span>

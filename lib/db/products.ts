@@ -518,6 +518,28 @@ export async function getProductsByIds(
   });
 }
 
+// The active products of a main category, newest first (the homepage row of a category that
+// shows its products directly).
+export async function getMainProducts(
+  mainCategoryId: string,
+  locale: string,
+  take = 24,
+): Promise<FavoriteProduct[]> {
+  const rows = await prisma.product.findMany({
+    where: {
+      isActive: true,
+      category: { ...categoryShown, mainCategoryId },
+    },
+    orderBy: { createdAt: "desc" },
+    take,
+    select: { id: true },
+  });
+  return getProductsByIds(
+    rows.map((r) => r.id),
+    locale,
+  );
+}
+
 // The most recently added active products (for "Noutăți" on the homepage), newest first,
 // with what a card needs.
 export async function getNewestProducts(
