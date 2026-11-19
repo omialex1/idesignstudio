@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/db/client";
 import { orderCharges } from "@/lib/shipping";
 import { variantPricing } from "@/lib/pricing";
+import { activeDiscounts } from "@/lib/discounts";
+import { discountedCents } from "@/lib/discount-math";
+import { ALL_COMPONENTS_ID, DEFAULT_COMPONENT_ID, MAX_COLORS } from "@/lib/colors";
 import type { Order, OrderItem } from "@/lib/generated/prisma";
 
 // Editing the products of an order from the admin (a customer phones to add or remove
@@ -44,7 +47,9 @@ export type EditLine = {
   variantId?: string | null;
   quantity: number;
   unitPriceCents?: number;
-  // colours / remarks for a new line, free text
+  // the colour picked for each piece (componentId = the piece, or "all" for the whole set)
+  colorChoices?: { componentId: string; colors: string[] }[];
+  // extra remarks for a new line, free text
   note?: string | null;
 };
 
@@ -95,6 +100,8 @@ export async function editOrderItems(
         variantName: string | null;
         quantity: number;
         unitPriceCents: number;
+        colors: string[];
+        colorChoices: unknown;
         note: string | null;
       }[] = [];
 
@@ -129,24 +136,101 @@ export async function editOrderItems(
         const product = line.productId
           ? await tx.product.findUnique({
               where: { id: line.productId },
-              include: { translations: true, variants: true },
+              include: {
+                translations: true,
+                variants: true,
+                components: true,
+                category: true,
+              },
             })
           : null;
         if (!product) throw new EditError("Un produs adăugat nu mai există.");
+        const productLabel = (
+          product.translations.find((t) => t.locale === "ro")?.name ?? product.slug
+        ).split(" – ")[0];
         if (product.tieredPricing) {
           throw new EditError(
-            `„${product.slug}” are preț pe trepte (după cantitate) și nu se poate adăuga din admin.`,
+            `„${productLabel}” are preț pe trepte (după cantitate) și nu se poate adăuga din admin.`,
           );
         }
         const variant = line.variantId
           ? product.variants.find((v) => v.id === line.variantId)
           : null;
         if (product.variants.length > 0 && !variant) {
-          throw new EditError(`Alege varianta pentru „${product.slug}”.`);
+          throw new EditError(`Alege varianta pentru „${productLabel}”.`);
         }
         const translation =
           product.translations.find((t) => t.locale === order.locale) ??
           product.translations.find((t) => t.locale === "ro");
+
+        // the colours, checked like at the checkout: one per piece (or one for the whole set)
+        const palette = new Map<string, { ro: string; en: string }>();
+        if (product.hasColorOptions && product.category.mainCategoryId) {
+          const rows = await tx.color.findMany({
+            where: {
+              mainCategoryId: product.category.mainCategoryId,
+              isActive: true,
+              mainCategory: { usesColors: true },
+            },
+          });
+          for (const c of rows) {
+            if (!product.excludedColors.includes(c.slug)) {
+              palette.set(c.slug, { ro: c.nameRo, en: c.nameEn });
+            }
+          }
+        }
+        const pieces = product.components.filter((c) =>
+          variant ? c.variantId === variant.id : !c.variantId,
+        );
+        const expected =
+          palette.size > 0
+            ? pieces.length > 0
+              ? pieces.map((c) => ({
+                  id: c.id,
+                  name: order.locale === "en" ? (c.nameEn ?? c.nameRo) : c.nameRo,
+                }))
+              : [{ id: DEFAULT_COMPONENT_ID, name: null as string | null }]
+            : [];
+        const labelsFor = (ids: string[]) =>
+          Object.fromEntries(ids.map((id) => [id, palette.get(id)!]));
+        const picked = Array.isArray(line.colorChoices) ? line.colorChoices : [];
+        const orderChoices: {
+          component: string | null;
+          colors: string[];
+          labels: Record<string, { ro: string; en: string }>;
+        }[] = [];
+        const valid = (choice?: { colors: string[] }) =>
+          !!choice &&
+          choice.colors.length >= 1 &&
+          choice.colors.length <= MAX_COLORS &&
+          choice.colors.every((id) => palette.has(id));
+        if (expected.length > 0) {
+          const whole = picked.find((c) => c.componentId === ALL_COMPONENTS_ID);
+          if (expected.length >= 2 && whole) {
+            if (!valid(whole)) {
+              throw new EditError(`Alege culoarea pentru „${productLabel}”.`);
+            }
+            orderChoices.push({
+              component: order.locale === "en" ? "Whole set" : "Tot setul",
+              colors: whole.colors,
+              labels: labelsFor(whole.colors),
+            });
+          } else {
+            for (const piece of expected) {
+              const choice = picked.find((c) => c.componentId === piece.id);
+              if (!valid(choice)) {
+                throw new EditError(
+                  `Alege culoarea${piece.name ? ` pentru „${piece.name}”` : ""} la „${productLabel}”.`,
+                );
+              }
+              orderChoices.push({
+                component: piece.name,
+                colors: choice!.colors,
+                labels: labelsFor(choice!.colors),
+              });
+            }
+          }
+        }
         additions.push({
           productId: product.id,
           productName: translation?.name ?? product.slug,
@@ -157,6 +241,8 @@ export async function editOrderItems(
             : null,
           quantity,
           unitPriceCents: price,
+          colors: orderChoices.flatMap((c) => c.colors),
+          colorChoices: orderChoices,
           note: typeof line.note === "string" && line.note.trim()
             ? line.note.trim().slice(0, 200)
             : null,
@@ -250,7 +336,8 @@ export async function editOrderItems(
             productId: a.productId,
             productNameSnapshot: a.productName,
             variantName: a.variantName,
-            colors: [],
+            colors: a.colors,
+            colorChoices: a.colorChoices as object,
             colorNote: a.note,
             unitPriceCents: a.unitPriceCents,
             quantity: a.quantity,
@@ -336,12 +423,37 @@ export async function editOrderItems(
   }
 }
 
-// The products that can be added to an order, for the edit window.
-export type CatalogProduct = {
+// The products that can be added to an order, for the edit window, with the price as the site
+// shows it (variant price and any promotion in force) and the colours the product offers.
+export type CatalogColor = {
   id: string;
   name: string;
+  hex: string;
+  swatchUrl: string | null;
+};
+
+export type CatalogPiece = { id: string; name: string | null };
+
+export type CatalogProduct = {
+  id: string;
+  // the short title, as on the site
+  name: string;
+  // the price on the site now (with the promotion, if there is one)
   priceCents: number;
-  variants: { id: string; name: string; priceCents: number }[];
+  // the price before the promotion, when there is one
+  fullPriceCents: number | null;
+  promoLabel: string | null;
+  variants: {
+    id: string;
+    name: string;
+    priceCents: number;
+    fullPriceCents: number | null;
+    // the pieces of this variant, each with its own colour
+    pieces: CatalogPiece[];
+  }[];
+  // the pieces of a product without variants
+  pieces: CatalogPiece[];
+  colors: CatalogColor[];
 };
 
 export async function getEditCatalog(): Promise<CatalogProduct[]> {
@@ -350,21 +462,60 @@ export async function getEditCatalog(): Promise<CatalogProduct[]> {
     include: {
       translations: { where: { locale: "ro" } },
       variants: true,
+      components: { orderBy: { sortOrder: "asc" } },
+      category: true,
     },
     orderBy: { createdAt: "desc" },
   });
+  const discounts = await activeDiscounts(products.map((p) => p.id));
+  const palettes = await prisma.color.findMany({
+    where: { isActive: true, mainCategory: { usesColors: true } },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+  });
+  const paletteByMain = new Map<string, CatalogColor[]>();
+  for (const c of palettes) {
+    paletteByMain.set(c.mainCategoryId, [
+      ...(paletteByMain.get(c.mainCategoryId) ?? []),
+      {
+        id: c.slug,
+        name: c.nameRo,
+        hex: c.hex,
+        swatchUrl: c.swatchImage ? `/colors/${c.slug}.webp` : null,
+      },
+    ]);
+  }
+
   return products
     .map((p) => {
+      const discount = discounts.get(p.id);
+      // the price on the site: the regular price, then the promotion on top
+      const priced = (regular: number) => ({
+        priceCents: discount ? discountedCents(regular, discount.percent) : regular,
+        fullPriceCents: discount ? regular : null,
+      });
       const pricing = p.variants.length > 0 ? variantPricing(p.variants) : [];
+      const main = p.category.mainCategoryId ?? "";
       return {
         id: p.id,
-        name: p.translations[0]?.name ?? p.slug,
-        priceCents: p.priceCents,
+        name: (p.translations[0]?.name ?? p.slug).split(" – ")[0],
+        ...priced(p.priceCents),
+        promoLabel: discount ? (discount.label ?? `−${discount.percent}%`) : null,
         variants: p.variants.map((v, i) => ({
           id: v.id,
           name: v.nameRo,
-          priceCents: pricing[i]?.finalCents ?? v.priceCents,
+          ...priced(pricing[i]?.finalCents ?? v.priceCents),
+          pieces: p.components
+            .filter((c) => c.variantId === v.id)
+            .map((c) => ({ id: c.id, name: c.nameRo })),
         })),
+        pieces: p.components
+          .filter((c) => !c.variantId)
+          .map((c) => ({ id: c.id, name: c.nameRo })),
+        colors: p.hasColorOptions
+          ? (paletteByMain.get(main) ?? []).filter(
+              (c) => !p.excludedColors.includes(c.id),
+            )
+          : [],
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name, "ro"));

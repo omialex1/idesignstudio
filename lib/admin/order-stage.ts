@@ -137,3 +137,33 @@ export function filterOrders<
     return true;
   });
 }
+
+// The order of the list: first the orders still being worked on (paid or cash on delivery, not
+// finished), by deadline (earliest first, no deadline last), then by customer name, then by total
+// (largest first). Finished, canceled and unpaid orders come after, newest first.
+export function sortOrdersForAdmin<
+  T extends StageOrder & {
+    createdAt: Date;
+    dueDate: Date | null;
+    firstName: string;
+    lastName: string;
+    totalCents: number;
+  },
+>(orders: T[]): T[] {
+  const isOpen = (o: T) =>
+    (o.status === "COD" || o.status === "PAID") && !o.completedAt;
+  const name = (o: T) => `${o.lastName} ${o.firstName}`.trim();
+  return [...orders].sort((a, b) => {
+    const openA = isOpen(a);
+    const openB = isOpen(b);
+    if (openA !== openB) return openA ? -1 : 1;
+    if (!openA) return b.createdAt.getTime() - a.createdAt.getTime();
+    // deadline: the day in Romanian time, so a deadline "on the 25th" is one day for everybody
+    const dayA = a.dueDate ? a.dueDate.getTime() : Infinity;
+    const dayB = b.dueDate ? b.dueDate.getTime() : Infinity;
+    if (dayA !== dayB) return dayA < dayB ? -1 : 1;
+    const byName = name(a).localeCompare(name(b), "ro", { sensitivity: "base" });
+    if (byName !== 0) return byName;
+    return b.totalCents - a.totalCents;
+  });
+}

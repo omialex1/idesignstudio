@@ -13,11 +13,15 @@ import {
   filterOrders,
   orderStage,
   parseOrderFilter,
+  sortOrdersForAdmin,
   romanianDate,
 } from "@/lib/admin/order-stage";
 import { canInvoice } from "@/lib/orders/invoice";
-import EditOrderButton from "@/components/admin/EditOrderButton";
+import EditOrderButton, { type ItemColor } from "@/components/admin/EditOrderButton";
+import { shortName } from "@/components/product/ProductTile";
+import { colorLabel } from "@/lib/colors";
 import ContactButton from "@/components/admin/ContactButton";
+import OrderNotesButton from "@/components/admin/OrderNotesButton";
 import PickupReadyButton from "@/components/admin/PickupReadyButton";
 import { editBlockReason } from "@/lib/orders/edit";
 import { isPickupPlaceholder } from "@/lib/pickup";
@@ -78,6 +82,16 @@ function invoiceSummary(
   ].join("\n");
 }
 
+// a day as YYYY-MM-DD in Romanian time (to compare deadlines)
+const dayKey = (d: Date) =>
+  d.toLocaleDateString("sv-SE", { timeZone: "Europe/Bucharest" });
+const shortDay = new Intl.DateTimeFormat("ro-RO", {
+  timeZone: "Europe/Bucharest",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
 export default async function AdminOrdersPage({
   searchParams,
 }: {
@@ -95,18 +109,51 @@ export default async function AdminOrdersPage({
   const everything = await getOrdersForAdmin();
   const isUnfinished = isUnfinishedOrder;
   const unfinishedCount = everything.filter(isUnfinished).length;
-  const orders = filterOrders(everything, filter);
+  const orders = sortOrdersForAdmin(filterOrders(everything, filter));
   // does a discount code also waive the cash-on-delivery fee (needed when an order is edited)
   const codeRows = await prisma.discountCode.findMany({
     select: { code: true, removesCodFee: true },
   });
   const removesFee = new Map(codeRows.map((c) => [c.code, c.removesCodFee]));
+  // the colours as they look (for the little samples in the edit window)
+  const colorRows = await prisma.color.findMany({
+    select: { slug: true, nameRo: true, hex: true, swatchImage: true },
+  });
+  const colorBySlug = new Map(colorRows.map((c) => [c.slug, c]));
+  const itemColors = (item: { colors: string[]; colorChoices: unknown }): ItemColor[] => {
+    const choices = Array.isArray(item.colorChoices)
+      ? (item.colorChoices as { component?: string | null; colors?: string[] }[])
+      : [];
+    const listed =
+      choices.length > 0
+        ? choices.flatMap((c) =>
+            (c.colors ?? []).map((slug) => ({ slug, piece: c.component ?? null })),
+          )
+        : item.colors.map((slug) => ({ slug, piece: null as string | null }));
+    return listed.map(({ slug, piece }) => {
+      const row = colorBySlug.get(slug);
+      return {
+        name: row?.nameRo ?? colorLabel(slug, "ro"),
+        piece,
+        hex: row?.hex ?? "#CCCCCC",
+        swatchUrl: row?.swatchImage ? `/colors/${slug}.webp` : null,
+      };
+    });
+  };
 
   // years that have orders, plus the current one
   const thisYear = romanianDate(new Date()).y;
   const years = Array.from(
     new Set([thisYear, ...everything.map((o) => romanianDate(o.createdAt).y)]),
   ).sort((x, y) => y - x);
+
+  // open orders (paid or cash on delivery, not finished): what still needs attention
+  const today = dayKey(new Date());
+  const open = everything.filter(
+    (o) => (o.status === "COD" || o.status === "PAID") && !o.completedAt,
+  );
+  const toConfirm = open.filter((o) => !o.confirmedAt).length;
+  const overdue = open.filter((o) => o.dueDate && dayKey(o.dueDate) < today).length;
 
   const hasFilter = Boolean(
     filter.q || filter.stage || filter.year || filter.month || filter.day,
@@ -220,9 +267,25 @@ export default async function AdminOrdersPage({
         </form>
       </AdminCard>
 
+      {(toConfirm > 0 || overdue > 0) && (
+        <p className="-mt-3 flex flex-wrap gap-2 text-sm">
+          {toConfirm > 0 && (
+            <span className="rounded-full bg-amber-100 px-3 py-1 font-semibold text-amber-800">
+              {toConfirm} de confirmat cu clientul
+            </span>
+          )}
+          {overdue > 0 && (
+            <span className="rounded-full bg-red-100 px-3 py-1 font-semibold text-red-700">
+              {overdue} cu termenul depășit
+            </span>
+          )}
+        </p>
+      )}
+
       <p className="-mt-3 text-sm text-taupe-500">
         {orders.length === 1 ? "1 comandă" : `${orders.length} comenzi`}
-        {hasFilter ? " după filtre" : ""}.
+        {hasFilter ? " după filtre" : ""}. Ordinea: comenzile în lucru după termen, apoi alfabetic după
+        nume, apoi după total (cele mai mari întâi); finalizatele și anulatele la sfârșit.
         {unfinishedCount > 0 && !filter.stage && (
           <>
             {" "}
@@ -339,6 +402,25 @@ export default async function AdminOrdersPage({
                       Finalizată
                     </div>
                   )}
+                  {(o.status === "COD" || o.status === "PAID") && !o.completedAt && (
+                    <div
+                      className={`mt-1 w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${o.confirmedAt ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}
+                    >
+                      {o.confirmedAt ? "Confirmată cu clientul ✓" : "De confirmat cu clientul"}
+                    </div>
+                  )}
+                  {o.dueDate && (
+                    <div
+                      className={`mt-1 w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        !o.completedAt && dayKey(o.dueDate) < today
+                          ? "bg-red-100 text-red-700"
+                          : "bg-cream-200 text-taupe-700"
+                      }`}
+                    >
+                      Termen: {shortDay.format(o.dueDate)}
+                      {!o.completedAt && dayKey(o.dueDate) < today ? " (depășit)" : ""}
+                    </div>
+                  )}
                   {o.changes.length > 0 && (
                     <div className="mt-1 w-fit rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
                       Modificată ({o.changes.length})
@@ -370,6 +452,17 @@ export default async function AdminOrdersPage({
                       phone={o.phone}
                       email={o.customerEmail}
                       orderRef={o.id.slice(0, 8)}
+                    />
+                    <OrderNotesButton
+                      orderId={o.id}
+                      confirmedAt={o.confirmedAt ? timeFormat.format(o.confirmedAt) : null}
+                      dueDay={o.dueDate ? dayKey(o.dueDate) : ""}
+                      notes={o.orderNotes.map((n) => ({
+                        id: n.id,
+                        text: n.text,
+                        username: n.username,
+                        at: timeFormat.format(n.createdAt),
+                      }))}
                     />
                     {canInvoice(o) && (
                       <InvoiceButton
@@ -407,8 +500,10 @@ export default async function AdminOrdersPage({
                           : false,
                         items: o.items.map((item) => ({
                           id: item.id,
-                          name: item.productNameSnapshot,
-                          details: itemDetails(item, "ro"),
+                          title: shortName(item.productNameSnapshot),
+                          variant: item.variantName,
+                          colors: itemColors(item),
+                          note: item.colorNote,
                           unitPriceCents: item.unitPriceCents,
                           quantity: item.quantity,
                         })),

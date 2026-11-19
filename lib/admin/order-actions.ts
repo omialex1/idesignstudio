@@ -219,3 +219,77 @@ export async function markPickupReadyAction(
   );
   return { message: "Clientul a primit email că poate ridica comanda." };
 }
+
+// ---- notes, confirmation with the customer, deadline ----
+
+export async function addOrderNoteAction(
+  orderId: string,
+  text: string,
+): Promise<{ message: string; error?: boolean }> {
+  const admin = await requireAdmin();
+  const clean = typeof text === "string" ? text.trim().slice(0, 1000) : "";
+  if (!clean) return { error: true, message: "Scrie ceva în notiță." };
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return { error: true, message: "Comanda nu mai există." };
+  await prisma.orderNote.create({
+    data: { orderId, adminUserId: admin.id, username: admin.username, text: clean },
+  });
+  revalidatePath("/admin/orders");
+  await logAdminAction(admin, "Notiță pe comandă", `#${orderId.slice(0, 8)}`);
+  return { message: "Notița a fost salvată." };
+}
+
+// "Confirmată cu clientul": set when Bea has talked to the customer and the order is fine.
+export async function setOrderConfirmedAction(
+  orderId: string,
+  confirmed: boolean,
+): Promise<{ message: string; error?: boolean }> {
+  const admin = await requireAdmin();
+  const changed = await prisma.order.updateMany({
+    where: { id: orderId },
+    data: { confirmedAt: confirmed ? new Date() : null },
+  });
+  if (changed.count === 0) return { error: true, message: "Comanda nu mai există." };
+  revalidatePath("/admin/orders");
+  await logAdminAction(
+    admin,
+    confirmed ? "Comandă confirmată cu clientul" : "Confirmare anulată",
+    `#${orderId.slice(0, 8)}`,
+  );
+  return {
+    message: confirmed
+      ? "Comanda e marcată confirmată cu clientul."
+      : "Confirmarea a fost scoasă.",
+  };
+}
+
+// The deadline of an order, as a day (YYYY-MM-DD); empty removes it.
+export async function setOrderDueDateAction(
+  orderId: string,
+  day: string,
+): Promise<{ message: string; error?: boolean }> {
+  const admin = await requireAdmin();
+  let due: Date | null = null;
+  if (day) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+      return { error: true, message: "Data nu este validă." };
+    }
+    // noon UTC, so the day is the same in Romanian time
+    due = new Date(`${day}T12:00:00Z`);
+    if (Number.isNaN(due.getTime())) {
+      return { error: true, message: "Data nu este validă." };
+    }
+  }
+  const changed = await prisma.order.updateMany({
+    where: { id: orderId },
+    data: { dueDate: due },
+  });
+  if (changed.count === 0) return { error: true, message: "Comanda nu mai există." };
+  revalidatePath("/admin/orders");
+  await logAdminAction(
+    admin,
+    due ? "Termen pus pe comandă" : "Termen scos de pe comandă",
+    `#${orderId.slice(0, 8)}${day ? `: ${day}` : ""}`,
+  );
+  return { message: due ? "Termenul a fost salvat." : "Termenul a fost scos." };
+}

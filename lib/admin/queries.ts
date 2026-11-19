@@ -134,6 +134,7 @@ export async function getOrdersForAdmin() {
     include: {
       items: true,
       changes: { orderBy: { createdAt: "desc" } },
+      orderNotes: { orderBy: { createdAt: "desc" } },
     },
     orderBy: { createdAt: "desc" },
   });

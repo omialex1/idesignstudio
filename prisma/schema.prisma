@@ -335,6 +335,10 @@ model Order {
   deliveryMethod    DeliveryMethod      @default(COURIER)
   // when the "ready for pickup" e-mail was sent to the customer
   pickupReadyAt     DateTime?
+  // when the studio confirmed the order with the customer (null = still to be confirmed)
+  confirmedAt       DateTime?
+  // the deadline for the order (null = none)
+  dueDate           DateTime?
   // discount code used (free shipping) and the amount of shipping it waived
   discountCode      String?
   discountCents     Int                 @default(0)
@@ -342,6 +346,7 @@ model Order {
   updatedAt         DateTime            @updatedAt
   items             OrderItem[]
   changes           OrderChange[]
+  orderNotes        OrderNote[]
   redemption        DiscountRedemption?
 }
 
@@ -357,6 +362,19 @@ model OrderChange {
   oldTotalCents Int
   newTotalCents Int
   createdAt     DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// A note on an order, written by the studio (for example "the customer called, wants 2").
+model OrderNote {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  adminUserId String?
+  username    String
+  text        String
+  createdAt   DateTime @default(now())
 
   @@index([orderId, createdAt])
 }
