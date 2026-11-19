@@ -20,6 +20,18 @@ enum PaymentMethod {
   COD
 }
 
+// How the customer gets the order: the courier brings it, or they collect it from the
+// studio (no shipping, card payment only, no address needed).
+enum DeliveryMethod {
+  COURIER
+  PICKUP
+}
+
+// What a discount code does. For now only "free shipping".
+enum DiscountKind {
+  FREE_SHIPPING
+}
+
 // Top-level categories shown in the menu (Events, Handmade, ...). They own the
 // subcategories below. Managed from the admin.
 model MainCategory {
@@ -198,18 +210,18 @@ model ProductTranslation {
 // The kinds of group ("Merge bine cu", "Promoțional", ...): the name can be edited
 // and new kinds added. Two switches tell what a kind does.
 model ProductGroupType {
-  id          String         @id @default(cuid())
-  name        String
+  id                     String         @id @default(cuid())
+  name                   String
   // groups of this kind are shown to customers as "Merge bine cu" on product pages
-  showOnSite  Boolean        @default(false)
+  showOnSite             Boolean        @default(false)
   // groups of this kind carry a discount in percent
-  hasDiscount Boolean        @default(false)
+  hasDiscount            Boolean        @default(false)
   // when a discount of this kind is live, its name (e.g. "Black Friday") is shown by the price
-  showLabel   Boolean        @default(false)
+  showLabel              Boolean        @default(false)
   // the discount (percent) new groups of this kind start with; null: none
   defaultDiscountPercent Int?
-  sortOrder   Int            @default(0)
-  groups      ProductGroup[]
+  sortOrder              Int            @default(0)
+  groups                 ProductGroup[]
 }
 
 model ProductGroup {
@@ -280,11 +292,11 @@ model Inventory {
 }
 
 model Order {
-  id                String        @id @default(cuid())
-  ntpId             String?       @unique
+  id                String              @id @default(cuid())
+  ntpId             String?             @unique
   customerEmail     String
   customerId        String?
-  customer          Customer?     @relation(fields: [customerId], references: [id])
+  customer          Customer?           @relation(fields: [customerId], references: [id])
   firstName         String
   lastName          String
   phone             String
@@ -292,22 +304,22 @@ model Order {
   city              String
   county            String
   postalCode        String
-  country           String        @default("RO")
+  country           String              @default("RO")
   notes             String?
   companyName       String?
   companyCui        String?
-  paymentMethod     PaymentMethod @default(CARD)
-  status            OrderStatus   @default(PENDING)
+  paymentMethod     PaymentMethod       @default(CARD)
+  status            OrderStatus         @default(PENDING)
   subtotalCents     Int
   shippingCents     Int
-  codFeeCents       Int           @default(0)
+  codFeeCents       Int                 @default(0)
   totalCents        Int
-  currency          String        @default("RON")
+  currency          String              @default("RON")
   locale            String
   termsAcceptedAt   DateTime
   paidAt            DateTime?
   // True when the customer wrote a locality that is not in our list; Bea checks it before shipping
-  addressUnverified Boolean       @default(false)
+  addressUnverified Boolean             @default(false)
   // Oblio invoice made by hand from the admin (button "Genereaza factura")
   invoiceSeries     String?
   invoiceNumber     String?
@@ -318,9 +330,90 @@ model Order {
   invoiceError      String?
   // Bea marked the order as finished (for example shipped)
   completedAt       DateTime?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  // COURIER by default; PICKUP = collected by the customer (the address fields then hold
+  // the studio's address as a placeholder)
+  deliveryMethod    DeliveryMethod      @default(COURIER)
+  // when the "ready for pickup" e-mail was sent to the customer
+  pickupReadyAt     DateTime?
+  // discount code used (free shipping) and the amount of shipping it waived
+  discountCode      String?
+  discountCents     Int                 @default(0)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
   items             OrderItem[]
+  changes           OrderChange[]
+  redemption        DiscountRedemption?
+}
+
+// One edit made to an order from the admin (products added or removed, quantities
+// changed). The list is shown in the edit window, so every change can be seen.
+model OrderChange {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  adminUserId   String?
+  username      String
+  summary       String
+  oldTotalCents Int
+  newTotalCents Int
+  createdAt     DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// A discount code the customer types at the end of the order (for example LIVRARE0).
+// Managed in the admin, page "Coduri".
+model DiscountCode {
+  id                String               @id @default(cuid())
+  // always stored in capitals
+  code              String               @unique
+  isActive          Boolean              @default(true)
+  kind              DiscountKind         @default(FREE_SHIPPING)
+  // also waive the cash-on-delivery fee
+  removesCodFee     Boolean              @default(true)
+  minSubtotalCents  Int                  @default(0)
+  validFrom         DateTime?
+  validUntil        DateTime?
+  // total number of orders that may use the code (null = no limit)
+  maxUses           Int?
+  // one use per IP address, name, account and address
+  oneUsePerCustomer Boolean              @default(true)
+  note              String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  redemptions       DiscountRedemption[]
+  flags             DiscountFlag[]
+}
+
+// An order that used a code. Only keyed hashes of IP, name and address are kept, to
+// recognise a second use.
+model DiscountRedemption {
+  id         String       @id @default(cuid())
+  codeId     String
+  code       DiscountCode @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  orderId    String       @unique
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ipHash     String
+  nameKey    String
+  addressKey String
+  customerId String?
+  createdAt  DateTime     @default(now())
+
+  @@index([codeId])
+}
+
+// A second use that was stopped: why, and which earlier orders it matched.
+model DiscountFlag {
+  id              String       @id @default(cuid())
+  codeId          String
+  code            DiscountCode @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  reasons         String[]
+  matchedOrderIds String[]
+  attemptName     String
+  attemptEmail    String
+  createdAt       DateTime     @default(now())
+
+  @@index([codeId, createdAt])
 }
 
 model Customer {

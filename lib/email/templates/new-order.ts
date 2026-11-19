@@ -1,6 +1,7 @@
 import { baseEmailHtml } from "./base";
 import { escapeHtml } from "../html";
 import { formatPrice } from "@/lib/format";
+import { PICKUP_STREET, isPickupPlaceholder } from "@/lib/pickup";
 
 type NewOrderEmailInput = {
   orderId: string;
@@ -26,6 +27,11 @@ type NewOrderEmailInput = {
   shippingCents: number;
   codFeeCents: number;
   paymentMethod: "CARD" | "COD";
+  // collected by the customer (no shipping, no address)
+  pickup?: boolean;
+  // free-shipping code used, and how much it waived
+  discountCode?: string | null;
+  discountCents?: number;
   totalCents: number;
   currency: string;
 };
@@ -40,9 +46,10 @@ function row(label: string, value: string): string {
 export function newOrderBusinessEmail(order: NewOrderEmailInput) {
   const shortId = order.orderId.slice(0, 8);
   const isCod = order.paymentMethod === "COD";
+  const pickup = order.pickup === true;
   const subject = isCod
     ? `Comandă nouă RAMBURS #${shortId} — de încasat ${formatPrice(order.totalCents, order.currency, "ro")}`
-    : `Comandă nouă plătită #${shortId} — ${formatPrice(order.totalCents, order.currency, "ro")}`;
+    : `Comandă nouă plătită${pickup ? " (RIDICARE PERSONALĂ)" : ""} #${shortId} — ${formatPrice(order.totalCents, order.currency, "ro")}`;
 
   const itemRows = order.items
     .map(
@@ -55,21 +62,26 @@ export function newOrderBusinessEmail(order: NewOrderEmailInput) {
     <p style="margin:0 0 16px;">Comanda <strong>#${shortId}</strong> ${isCod ? `se plătește <strong>ramburs, la livrare</strong>. De încasat de la client prin curier: <strong>${formatPrice(order.totalCents, order.currency, "ro")}</strong>.` : "a fost plătită cu cardul."}</p>
     <h2 style="font-size:15px;color:#3D332E;margin:16px 0 6px;">Produse</h2>
     <ul style="margin:0;padding-left:18px;">${itemRows}</ul>
-    <p style="margin:8px 0 0;">Livrare: ${order.shippingCents === 0 ? "gratuită" : formatPrice(order.shippingCents, order.currency, "ro")}${order.codFeeCents > 0 ? `<br>Taxă ramburs: ${formatPrice(order.codFeeCents, order.currency, "ro")}` : ""}<br><strong>Total: ${formatPrice(order.totalCents, order.currency, "ro")}</strong></p>
+    <p style="margin:8px 0 0;">${pickup ? "Ridicare personală (fără transport)" : `Livrare: ${order.shippingCents === 0 ? "gratuită" : formatPrice(order.shippingCents, order.currency, "ro")}`}${order.discountCode ? `<br>Cod folosit: <strong>${escapeHtml(order.discountCode)}</strong>${order.discountCents ? ` (a scăzut ${formatPrice(order.discountCents, order.currency, "ro")})` : ""}` : ""}${order.codFeeCents > 0 ? `<br>Taxă ramburs: ${formatPrice(order.codFeeCents, order.currency, "ro")}` : ""}<br><strong>Total: ${formatPrice(order.totalCents, order.currency, "ro")}</strong></p>
+    ${
+      pickup
+        ? `<p style="margin:16px 0 0;padding:10px 12px;background:#E8F3E8;border:1px solid #B9D9B9;border-radius:8px;color:#2D5A2D;font-size:14px;"><strong>Ridicare personală</strong> de la ${escapeHtml(PICKUP_STREET)}. Nu se trimite colet. Când comanda e gata, apasă „Gata de ridicare” în admin: clientul primește email.</p>`
+        : ""
+    }
     ${
       order.addressUnverified
         ? `<p style="margin:16px 0 0;padding:10px 12px;background:#FFF4DB;border:1px solid #F0D58A;border-radius:8px;color:#7A5200;font-size:14px;"><strong>Verifică adresa înainte să trimiți coletul:</strong> localitatea „${escapeHtml(order.city)}” nu e în lista oficială (poate fi scrisă greșit sau e o localitate nouă). Sună clientul dacă ai dubii.</p>`
         : ""
     }
-    <h2 style="font-size:15px;color:#3D332E;margin:20px 0 6px;">Client și livrare</h2>
+    <h2 style="font-size:15px;color:#3D332E;margin:20px 0 6px;">${pickup ? "Client" : "Client și livrare"}</h2>
     <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;">
       ${row("Nume", `${order.firstName} ${order.lastName}`)}
       ${row("Email", order.customerEmail)}
       ${row("Telefon", order.phone)}
-      ${row("Adresă", order.addressLine)}
+      ${pickup && isPickupPlaceholder(order.addressLine) ? "" : `${row(pickup ? "Adresă de facturare" : "Adresă", order.addressLine)}
       ${row("Oraș", order.city)}
       ${row("Județ", order.county)}
-      ${order.postalCode ? row("Cod poștal", order.postalCode) : ""}
+      ${order.postalCode ? row("Cod poștal", order.postalCode) : ""}`}
       ${order.notes ? row("Observații", order.notes) : ""}
     </table>
     ${

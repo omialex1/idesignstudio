@@ -1,3 +1,11 @@
+// "Questions? Call or write to us", with the phone number and the e-mail address, for the
+// e-mails a customer gets about an order.
+export function contactHtml(isRo: boolean): string {
+  return `<p style="margin:20px 0 0;padding:12px 14px;background:#FDFAF5;border:1px solid #EFE4D0;border-radius:10px;font-size:13px;color:#6B5D54;">${
+    isRo ? "Ai întrebări despre comandă? Ne poți suna sau scrie:" : "Questions about your order? Call or write to us:"
+  }<br><a href="tel:+40755462190" style="color:#C33F16;font-weight:600;">+40 755 462 190</a> &middot; <a href="mailto:contact@idesignstudio.ro" style="color:#C33F16;font-weight:600;">contact@idesignstudio.ro</a></p>`;
+}
+
 export function baseEmailHtml(bodyHtml: string): string {
   return `<!DOCTYPE html>
 <html lang="ro">
@@ -18,7 +26,7 @@ export function baseEmailHtml(bodyHtml: string): string {
           </tr>
           <tr>
             <td style="padding:20px 32px;border-top:1px solid #EFE4D0;color:#9C8F85;font-size:12px;">
-              iDesignStudio.ro &middot; <a href="mailto:contact@idesignstudio.ro" style="color:#9C8F85;">contact@idesignstudio.ro</a>
+              iDesignStudio.ro &middot; <a href="tel:+40755462190" style="color:#9C8F85;">+40 755 462 190</a> &middot; <a href="mailto:contact@idesignstudio.ro" style="color:#9C8F85;">contact@idesignstudio.ro</a>
             </td>
           </tr>
         </table>

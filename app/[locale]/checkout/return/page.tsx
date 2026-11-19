@@ -31,6 +31,7 @@ export default async function CheckoutReturnPage({
       currency: true,
       paymentMethod: true,
       ntpId: true,
+      deliveryMethod: true,
     },
   });
   if (!order) notFound();
@@ -59,7 +60,11 @@ export default async function CheckoutReturnPage({
         <h1 className="font-display text-2xl text-taupe-800">
           {t(`return${state}Title`)}
         </h1>
-        <p className="mt-3 text-sm text-taupe-600">{t(`return${state}Body`)}</p>
+        <p className="mt-3 text-sm text-taupe-600">
+          {state === "Paid" && order.deliveryMethod === "PICKUP"
+            ? t("returnPaidPickupBody")
+            : t(`return${state}Body`)}
+        </p>
 
         <p className="mt-6 text-sm text-taupe-500">
           {t("orderNumber")}:{" "}

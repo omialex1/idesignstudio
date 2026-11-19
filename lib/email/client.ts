@@ -29,7 +29,7 @@ export async function sendEmail({
   html,
   replyTo,
 }: {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;

@@ -3,8 +3,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { getCurrentCustomerId } from "@/lib/customer/auth";
 import { startNetopiaPayment } from "@/lib/netopia";
-import { sendOrderEmails } from "@/lib/orders/emails";
-import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
+import { sendDiscountFlagEmail, sendOrderEmails } from "@/lib/orders/emails";
+import { orderCharges } from "@/lib/shipping";
+import {
+  PICKUP_ADDRESS_LINE,
+  PICKUP_CITY,
+  PICKUP_COUNTY,
+} from "@/lib/pickup";
+import {
+  addressKey,
+  checkCode,
+  findDuplicate,
+  ipHash,
+  lockCode,
+  nameKey,
+  normalizeCode,
+  REASON_LABELS_RO,
+  type CodeError,
+  type Duplicate,
+} from "@/lib/discount-codes";
 import { activeDiscounts } from "@/lib/discounts";
 import { discountedCents } from "@/lib/discount-math";
 import { finalPriceCents, variantPricing } from "@/lib/pricing";
@@ -40,6 +57,20 @@ const MAX_DISTINCT_ITEMS = 50;
 class OutOfStockError extends Error {
   constructor(public productId: string) {
     super("out_of_stock");
+  }
+}
+
+// A discount code that this person (by IP, name, account or address) already used.
+// The code stopped being usable between the first check and saving the order.
+class CodeStoppedError extends Error {
+  constructor(public reason: CodeError) {
+    super("code_stopped");
+  }
+}
+
+class CodeReusedError extends Error {
+  constructor(public duplicate: Duplicate) {
+    super("code_reused");
   }
 }
 
@@ -97,6 +128,11 @@ export async function POST(request: NextRequest) {
   }
 
   const locale = body.locale === "en" ? "en" : "ro";
+  // collected from the studio: no address, no shipping, card only
+  const pickup = body.deliveryMethod === "pickup";
+  if (pickup && body.paymentMethod === "cod") {
+    return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+  }
 
   const customer = {
     firstName: clean(body.customer?.firstName, 80),
@@ -147,13 +183,20 @@ export async function POST(request: NextRequest) {
   customer.city = checked.city;
   const addressUnverified = checked.unverified;
 
+  // a pickup needs no address (a company still needs its billing address for the invoice)
+  const needsAddress = !pickup || company !== null;
+  if (pickup && !company) {
+    customer.addressLine = PICKUP_ADDRESS_LINE;
+    customer.city = PICKUP_CITY;
+    customer.county = PICKUP_COUNTY;
+    customer.postalCode = "";
+  }
   if (
     !customer.firstName ||
     !customer.lastName ||
     !customer.phone ||
-    !customer.addressLine ||
-    !customer.city ||
-    !customer.county ||
+    (needsAddress &&
+      (!customer.addressLine || !customer.city || !customer.county)) ||
     !EMAIL_PATTERN.test(customer.email) ||
     body.termsAccepted !== true
   ) {
@@ -456,11 +499,36 @@ export async function POST(request: NextRequest) {
     0,
   );
   const isCod = body.paymentMethod === "cod";
-  const shippingCents = calculateShippingCents(subtotalCents);
-  const codFeeCents = isCod ? COD_FEE_CENTS : 0;
-  const totalCents = subtotalCents + shippingCents + codFeeCents;
 
   const customerId = await getCurrentCustomerId().catch(() => null);
+
+  // Discount code (free shipping): checked here, never trusted from the browser. Not for pickups.
+  const rawCode = normalizeCode(body.discountCode);
+  let codeRow: Awaited<ReturnType<typeof checkCode>> | null = null;
+  if (rawCode) {
+    if (pickup) {
+      return NextResponse.json({ error: "code_not_for_pickup" }, { status: 400 });
+    }
+    codeRow = await checkCode(prisma, rawCode, subtotalCents);
+    if (!codeRow.ok) {
+      return NextResponse.json(
+        {
+          error: `code_${codeRow.error}`,
+          minSubtotalCents: codeRow.minSubtotalCents,
+        },
+        { status: 400 },
+      );
+    }
+  }
+  const code = codeRow?.ok ? codeRow.code : null;
+
+  const charges = orderCharges({
+    subtotalCents,
+    pickup,
+    cod: isCod,
+    code,
+  });
+  const { shippingCents, codFeeCents, discountCents, totalCents } = charges;
 
   const orderData = {
     customerEmail: customer.email,
@@ -478,6 +546,9 @@ export async function POST(request: NextRequest) {
     companyCui: company?.cui ?? null,
     paymentMethod: isCod ? ("COD" as const) : ("CARD" as const),
     status: isCod ? ("COD" as const) : ("PENDING" as const),
+    deliveryMethod: pickup ? ("PICKUP" as const) : ("COURIER" as const),
+    discountCode: code?.code ?? null,
+    discountCents,
     subtotalCents,
     shippingCents,
     codFeeCents,
@@ -499,9 +570,28 @@ export async function POST(request: NextRequest) {
     },
   };
 
-  if (isCod) {
-    try {
-      const order = await prisma.$transaction(async (tx) => {
+  const who = {
+    ipHash: ipHash(clientIp(request)),
+    nameKey: nameKey(customer.firstName, customer.lastName),
+    addressKey: addressKey(customer.addressLine, customer.city, customer.county),
+    customerId,
+  };
+
+  // One transaction for the order, its stock (cash on delivery) and its code use. With a code,
+  // the code is locked while the checks run, so two orders at once cannot both pass.
+  async function saveOrder() {
+    return prisma.$transaction(async (tx) => {
+      if (code) {
+        await lockCode(tx, code.code);
+        // the code can have been used up or switched off since the first check
+        const again = await checkCode(tx, code.code, subtotalCents);
+        if (!again.ok) throw new CodeStoppedError(again.error);
+        if (code.oneUsePerCustomer) {
+          const duplicate = await findDuplicate(tx, code.id, who);
+          if (duplicate) throw new CodeReusedError(duplicate);
+        }
+      }
+      if (isCod) {
         for (const line of lines) {
           const result = await tx.inventory.updateMany({
             where: {
@@ -512,24 +602,66 @@ export async function POST(request: NextRequest) {
           });
           if (result.count === 0) throw new OutOfStockError(line.productId);
         }
-        return tx.order.create({ data: orderData, include: { items: true } });
-      });
-      await sendOrderEmails(order);
-      return NextResponse.json({
-        redirectUrl: `/${locale}/checkout/return?order=${order.id}`,
-      });
-    } catch (err) {
-      if (err instanceof OutOfStockError) {
-        return NextResponse.json(
-          { error: "out_of_stock", productId: err.productId },
-          { status: 409 },
-        );
       }
-      throw err;
-    }
+      const created = await tx.order.create({
+        data: orderData,
+        include: { items: true },
+      });
+      if (code) {
+        await tx.discountRedemption.create({
+          data: { codeId: code.id, orderId: created.id, ...who },
+        });
+      }
+      return created;
+    });
   }
 
-  const order = await prisma.order.create({ data: orderData });
+  let order;
+  try {
+    order = await saveOrder();
+  } catch (err) {
+    if (err instanceof OutOfStockError) {
+      return NextResponse.json(
+        { error: "out_of_stock", productId: err.productId },
+        { status: 409 },
+      );
+    }
+    if (err instanceof CodeStoppedError) {
+      return NextResponse.json({ error: `code_${err.reason}` }, { status: 400 });
+    }
+    if (err instanceof CodeReusedError && code) {
+      // stopped, recorded, and the studio is told
+      const reasons = err.duplicate.reasons;
+      await prisma.discountFlag
+        .create({
+          data: {
+            codeId: code.id,
+            reasons,
+            matchedOrderIds: err.duplicate.matchedOrderIds,
+            attemptName: `${customer.firstName} ${customer.lastName}`,
+            attemptEmail: customer.email,
+          },
+        })
+        .catch((e) => console.error("Could not save the code flag", e));
+      await sendDiscountFlagEmail({
+        code: code.code,
+        reasons: reasons.map((r) => REASON_LABELS_RO[r]),
+        matchedOrderIds: err.duplicate.matchedOrderIds,
+        name: `${customer.firstName} ${customer.lastName}`,
+        email: customer.email,
+        phone: customer.phone,
+      });
+      return NextResponse.json({ error: "code_reused", reasons }, { status: 409 });
+    }
+    throw err;
+  }
+
+  if (isCod) {
+    await sendOrderEmails(order);
+    return NextResponse.json({
+      redirectUrl: `/${locale}/checkout/return?order=${order.id}`,
+    });
+  }
 
   try {
     const paymentLines = lines.map((line) => ({
@@ -588,11 +720,8 @@ export async function POST(request: NextRequest) {
         "Verifică în Netopia că punctul de vânzare e activ și că cheia din Vercel (NETOPIA_API_KEY) e cea corectă.",
       ],
     });
-    // a short technical reason (no secrets are ever part of these messages), so a
-    // failed payment can be diagnosed from what the customer sees
-    const detail = err instanceof Error ? err.message.slice(0, 180) : "";
     return NextResponse.json(
-      { error: "payment_unavailable", detail },
+      { error: "payment_unavailable", detail: reason },
       { status: 502 },
     );
   }

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import { createInvoice, type OblioInvoiceRequest } from "@/lib/oblio";
 import { sendAlert } from "@/lib/alerts";
+import { isPickupPlaceholder } from "@/lib/pickup";
 import type { Order, OrderItem } from "@/lib/generated/prisma";
 
 export type OrderWithItems = Order & { items: OrderItem[] };
@@ -17,6 +18,9 @@ export function buildInvoiceRequest(
 ): OblioInvoiceRequest {
   const en = order.locale === "en";
   const company = order.companyName && order.companyCui;
+  // a pickup by a private person has no address to put on the invoice
+  const noAddress =
+    order.deliveryMethod === "PICKUP" && isPickupPlaceholder(order.addressLine);
 
   const products: OblioInvoiceRequest["products"] = order.items.map((item) => ({
     name: item.productNameSnapshot,
@@ -64,9 +68,13 @@ export function buildInvoiceRequest(
               : (0 as const),
           }
         : {}),
-      address: order.addressLine,
-      state: order.county,
-      city: order.city,
+      ...(noAddress
+        ? {}
+        : {
+            address: order.addressLine,
+            state: order.county,
+            city: order.city,
+          }),
       country: "Romania",
       email: order.customerEmail,
       phone: order.phone,

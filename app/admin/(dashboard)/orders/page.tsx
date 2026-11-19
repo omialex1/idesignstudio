@@ -16,6 +16,12 @@ import {
   romanianDate,
 } from "@/lib/admin/order-stage";
 import { canInvoice } from "@/lib/orders/invoice";
+import EditOrderButton from "@/components/admin/EditOrderButton";
+import ContactButton from "@/components/admin/ContactButton";
+import PickupReadyButton from "@/components/admin/PickupReadyButton";
+import { editBlockReason } from "@/lib/orders/edit";
+import { isPickupPlaceholder } from "@/lib/pickup";
+import { prisma } from "@/lib/db/client";
 
 const MONTHS = [
   "ianuarie",
@@ -63,7 +69,9 @@ function invoiceSummary(
   return [
     `Comanda #${o.id.slice(0, 8)} (${o.paymentMethod === "COD" ? "ramburs" : "card, plătită"})`,
     `Client: ${client}`,
-    `Adresă: ${o.addressLine}, ${o.city}, ${o.county}`,
+    o.deliveryMethod === "PICKUP" && isPickupPlaceholder(o.addressLine)
+      ? "Ridicare personală (fără adresă)"
+      : `Adresă: ${o.addressLine}, ${o.city}, ${o.county}`,
     `Produse:\n${lines}`,
     `Transport: ${formatPrice(o.shippingCents, o.currency, "ro")}${o.codFeeCents > 0 ? `, taxă ramburs: ${formatPrice(o.codFeeCents, o.currency, "ro")}` : ""}`,
     `Total: ${formatPrice(o.totalCents, o.currency, "ro")}`,
@@ -88,6 +96,11 @@ export default async function AdminOrdersPage({
   const isUnfinished = isUnfinishedOrder;
   const unfinishedCount = everything.filter(isUnfinished).length;
   const orders = filterOrders(everything, filter);
+  // does a discount code also waive the cash-on-delivery fee (needed when an order is edited)
+  const codeRows = await prisma.discountCode.findMany({
+    select: { code: true, removesCodFee: true },
+  });
+  const removesFee = new Map(codeRows.map((c) => [c.code, c.removesCodFee]));
 
   // years that have orders, plus the current one
   const thisYear = romanianDate(new Date()).y;
@@ -255,9 +268,28 @@ export default async function AdminOrdersPage({
                   <div className="text-xs text-taupe-600">
                     {o.customerEmail} · {o.phone}
                   </div>
-                  <div className="text-xs text-taupe-600">
-                    {o.addressLine}, {o.city}, {o.county} {o.postalCode}
-                  </div>
+                  {!(
+                    o.deliveryMethod === "PICKUP" &&
+                    isPickupPlaceholder(o.addressLine)
+                  ) && (
+                    <div className="text-xs text-taupe-600">
+                      {o.deliveryMethod === "PICKUP" ? "Facturare: " : ""}
+                      {o.addressLine}, {o.city}, {o.county} {o.postalCode}
+                    </div>
+                  )}
+                  {o.deliveryMethod === "PICKUP" && (
+                    <div className="mt-1 w-fit rounded-md bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                      Ridicare personală
+                    </div>
+                  )}
+                  {o.discountCode && (
+                    <div className="mt-1 w-fit rounded-md bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">
+                      Cod {o.discountCode}
+                      {o.discountCents > 0
+                        ? ` (−${formatPrice(o.discountCents, o.currency, "ro")})`
+                        : ""}
+                    </div>
+                  )}
                   {o.addressUnverified && (
                     <div className="mt-1 w-fit rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
                       Adresă de verificat: localitatea nu e în lista oficială
@@ -307,6 +339,11 @@ export default async function AdminOrdersPage({
                       Finalizată
                     </div>
                   )}
+                  {o.changes.length > 0 && (
+                    <div className="mt-1 w-fit rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                      Modificată ({o.changes.length})
+                    </div>
+                  )}
                   {o.invoiceNumber && (
                     <div className="mt-1 text-xs">
                       {o.invoiceUrl ? (
@@ -328,6 +365,12 @@ export default async function AdminOrdersPage({
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-col items-start gap-2">
+                    <ContactButton
+                      name={`${o.firstName} ${o.lastName}`}
+                      phone={o.phone}
+                      email={o.customerEmail}
+                      orderRef={o.id.slice(0, 8)}
+                    />
                     {canInvoice(o) && (
                       <InvoiceButton
                         orderId={o.id}
@@ -335,6 +378,51 @@ export default async function AdminOrdersPage({
                         previousError={o.invoiceError}
                       />
                     )}
+                    {o.deliveryMethod === "PICKUP" &&
+                      (o.status === "COD" || o.status === "PAID") && (
+                        <PickupReadyButton
+                          orderId={o.id}
+                          sentAt={
+                            o.pickupReadyAt ? timeFormat.format(o.pickupReadyAt) : null
+                          }
+                        />
+                      )}
+                    <EditOrderButton
+                      order={{
+                        id: o.id,
+                        status: o.status,
+                        paymentMethod: o.paymentMethod,
+                        deliveryMethod: o.deliveryMethod,
+                        currency: o.currency,
+                        totalCents: o.totalCents,
+                        paidCents:
+                          o.status === "PAID" && o.paymentMethod === "CARD"
+                            ? o.changes.length > 0
+                              ? o.changes[o.changes.length - 1].oldTotalCents
+                              : o.totalCents
+                            : null,
+                        discountCode: o.discountCode,
+                        codeRemovesCodFee: o.discountCode
+                          ? (removesFee.get(o.discountCode) ?? false)
+                          : false,
+                        items: o.items.map((item) => ({
+                          id: item.id,
+                          name: item.productNameSnapshot,
+                          details: itemDetails(item, "ro"),
+                          unitPriceCents: item.unitPriceCents,
+                          quantity: item.quantity,
+                        })),
+                        changes: o.changes.map((c) => ({
+                          id: c.id,
+                          summary: c.summary,
+                          username: c.username,
+                          at: timeFormat.format(c.createdAt),
+                          oldTotalCents: c.oldTotalCents,
+                          newTotalCents: c.newTotalCents,
+                        })),
+                      }}
+                      blockReason={editBlockReason(o)}
+                    />
                     {(o.status === "COD" || o.status === "PAID") && (
                       <CompleteOrderButton
                         orderId={o.id}

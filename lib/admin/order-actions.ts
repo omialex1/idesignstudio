@@ -6,6 +6,16 @@ import { logAdminAction } from "@/lib/admin/log";
 import { cancelOrder } from "@/lib/orders/cancel";
 import { prisma } from "@/lib/db/client";
 import { generateInvoice } from "@/lib/orders/invoice";
+import bcrypt from "bcryptjs";
+import {
+  editOrderItems,
+  getEditCatalog,
+  type CatalogProduct,
+  type EditLine,
+} from "@/lib/orders/edit";
+import { sendOrderUpdatedEmail, sendPickupReadyEmail } from "@/lib/orders/emails";
+import { MINUTE, checkRateLimits } from "@/lib/security/rate-limit";
+import { formatPrice } from "@/lib/format";
 
 export async function cancelOrderAction(
   orderId: string,
@@ -95,4 +105,117 @@ export async function setOrderCompletedAction(
   return {
     message: done ? "Comanda a fost marcată finalizată." : "Comanda a fost redeschisă.",
   };
+}
+
+// ---- editing an order ----
+
+// The products the admin can add to an order.
+export async function getEditCatalogAction(): Promise<CatalogProduct[]> {
+  await requireAdmin();
+  return getEditCatalog();
+}
+
+export type EditOrderOutcome = {
+  ok: boolean;
+  message: string;
+};
+
+// Saves the new products/quantities of an order. Asks for the admin's password again, so a
+// change is never an accident; every change is written in the order's history and the log.
+export async function editOrderAction(
+  orderId: string,
+  lines: EditLine[],
+  password: string,
+  notifyCustomer: boolean,
+): Promise<EditOrderOutcome> {
+  const admin = await requireAdmin();
+
+  const wait = await checkRateLimits([
+    { action: "admin-order-edit-pw", id: admin.id, limit: 8, windowMs: 15 * MINUTE },
+  ]);
+  if (wait) {
+    return {
+      ok: false,
+      message: "Prea multe încercări. Așteaptă câteva minute și încearcă din nou.",
+    };
+  }
+  const user = await prisma.adminUser.findUnique({ where: { id: admin.id } });
+  const valid =
+    !!user?.passwordHash &&
+    typeof password === "string" &&
+    password.length > 0 &&
+    (await bcrypt.compare(password, user.passwordHash));
+  if (!valid) {
+    await logAdminAction(admin, "Modificare comandă refuzată", "parolă greșită");
+    return { ok: false, message: "Parola nu este corectă." };
+  }
+
+  const result = await editOrderItems(orderId, lines, admin);
+  revalidatePath("/admin/orders");
+  revalidatePath("/admin");
+  if (!result.ok) return { ok: false, message: result.message };
+  if (!result.changed) {
+    return { ok: true, message: "Nu ai schimbat nimic la comandă." };
+  }
+
+  await logAdminAction(
+    admin,
+    "Comandă modificată",
+    `#${orderId.slice(0, 8)}: ${result.summary}`,
+  );
+
+  const parts = [
+    `Comanda a fost modificată. Total nou: ${formatPrice(result.newTotalCents, result.order.currency, "ro")}.`,
+  ];
+  const diff = result.newTotalCents - result.oldTotalCents;
+  if (diff !== 0 && result.order.status === "PAID") {
+    parts.push(
+      diff < 0
+        ? `Clientul a plătit deja cu cardul: rambursează ${formatPrice(-diff, result.order.currency, "ro")} din Netopia.`
+        : `Clientul a plătit deja cu cardul: mai are de plătit ${formatPrice(diff, result.order.currency, "ro")} (de exemplu ramburs sau o plată separată).`,
+    );
+  }
+  if (notifyCustomer) {
+    parts.push(
+      (await sendOrderUpdatedEmail(result.order))
+        ? "Clientul a primit email cu comanda modificată."
+        : "Emailul către client NU s-a trimis, anunț-l tu.",
+    );
+  }
+  return { ok: true, message: parts.join(" ") };
+}
+
+// "Gata de ridicare": tells the customer by email that a pickup order can be collected.
+export async function markPickupReadyAction(
+  orderId: string,
+): Promise<{ message: string; error?: boolean }> {
+  const admin = await requireAdmin();
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (
+    !order ||
+    order.deliveryMethod !== "PICKUP" ||
+    (order.status !== "PAID" && order.status !== "COD")
+  ) {
+    return {
+      error: true,
+      message: "Comanda nu este o ridicare personală plătită.",
+    };
+  }
+  if (!(await sendPickupReadyEmail(order))) {
+    return {
+      error: true,
+      message: "Emailul NU s-a trimis. Încearcă din nou sau anunță clientul tu.",
+    };
+  }
+  await prisma.order.update({
+    where: { id: order.id },
+    data: { pickupReadyAt: new Date() },
+  });
+  revalidatePath("/admin/orders");
+  await logAdminAction(
+    admin,
+    "Ridicare anunțată",
+    `#${orderId.slice(0, 8)}, clientul a primit email`,
+  );
+  return { message: "Clientul a primit email că poate ridica comanda." };
 }

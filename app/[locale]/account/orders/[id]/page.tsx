@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { formatDateTime } from "@/lib/format-date";
 import { itemDetails } from "@/lib/orders/item-details";
 import OrderStatusBadge from "@/components/admin/OrderStatusBadge";
+import { PICKUP_CITY, PICKUP_STREET, isPickupPlaceholder } from "@/lib/pickup";
 
 export default async function AccountOrderDetailPage({
   params,
@@ -22,6 +23,7 @@ export default async function AccountOrderDetailPage({
 
   const t = await getTranslations("Account");
   const money = (cents: number) => formatPrice(cents, order.currency, locale);
+  const pickup = order.deliveryMethod === "PICKUP";
 
   return (
     <div className="flex flex-1 flex-col px-6 py-24">
@@ -81,14 +83,16 @@ export default async function AccountOrderDetailPage({
           </ul>
 
           <dl className="mt-3 flex flex-col gap-1 border-t border-cream-200 pt-3 text-sm text-taupe-600">
-            <div className="flex justify-between">
-              <dt>{t("orderShipping")}</dt>
-              <dd>
-                {order.shippingCents === 0
-                  ? t("orderShippingFree")
-                  : money(order.shippingCents)}
-              </dd>
-            </div>
+            {!pickup && (
+              <div className="flex justify-between">
+                <dt>{t("orderShipping")}</dt>
+                <dd>
+                  {order.shippingCents === 0
+                    ? t("orderShippingFree")
+                    : money(order.shippingCents)}
+                </dd>
+              </div>
+            )}
             {order.codFeeCents > 0 && (
               <div className="flex justify-between">
                 <dt>{t("orderCodFee")}</dt>
@@ -105,15 +109,24 @@ export default async function AccountOrderDetailPage({
         <section className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-cream-200 bg-white p-6 text-sm text-taupe-600">
             <h2 className="font-display text-lg text-taupe-800">
-              {t("orderDeliveryTo")}
+              {pickup ? t("orderPickupAt") : t("orderDeliveryTo")}
             </h2>
             <p className="mt-2 text-taupe-800">
               {order.firstName} {order.lastName}
             </p>
-            <p>{order.addressLine}</p>
-            <p>
-              {order.city}, {order.county} {order.postalCode}
-            </p>
+            {pickup && (
+              <p>
+                {PICKUP_STREET}, {PICKUP_CITY}
+              </p>
+            )}
+            {(!pickup || !isPickupPlaceholder(order.addressLine)) && (
+              <>
+                <p>{order.addressLine}</p>
+                <p>
+                  {order.city}, {order.county} {order.postalCode}
+                </p>
+              </>
+            )}
             <p>{order.phone}</p>
           </div>
           <div className="rounded-2xl border border-cream-200 bg-white p-6 text-sm text-taupe-600">

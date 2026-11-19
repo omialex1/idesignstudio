@@ -7,7 +7,8 @@ import { PENDING_ORDER_KEY } from "@/lib/cart/pending-order";
 import { useCartStore } from "@/lib/cart/store";
 import { itemDetails } from "@/lib/orders/item-details";
 import { formatPrice } from "@/lib/format";
-import { COD_FEE_CENTS, calculateShippingCents } from "@/lib/shipping";
+import { COD_FEE_CENTS, orderCharges } from "@/lib/shipping";
+import { PICKUP_CITY, PICKUP_STREET } from "@/lib/pickup";
 import { maxQuantityFor, rangeLabel } from "@/lib/tiers";
 import QuantityControl from "@/components/cart/QuantityControl";
 import FreeShippingProgress from "@/components/cart/FreeShippingProgress";
@@ -42,6 +43,17 @@ export default function CheckoutPage() {
   const [form, setForm] = useState(emptyForm);
   const [isCompany, setIsCompany] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cod">("card");
+  const [deliveryMethod, setDeliveryMethod] = useState<"courier" | "pickup">(
+    "courier",
+  );
+  // discount code ("Ai un cod?")
+  const [codeInput, setCodeInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState<{
+    code: string;
+    removesCodFee: boolean;
+  } | null>(null);
+  const [codeMessage, setCodeMessage] = useState<string | null>(null);
+  const [codeChecking, setCodeChecking] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,9 +129,91 @@ export default function CheckoutPage() {
     (sum, item) => sum + item.priceCents * item.quantity,
     0,
   );
-  const shipping = calculateShippingCents(subtotal);
-  const codFee = paymentMethod === "cod" ? COD_FEE_CENTS : 0;
-  const total = subtotal + shipping + codFee;
+  const pickup = deliveryMethod === "pickup";
+  // a pickup is paid by card only
+  const payBy: "card" | "cod" = pickup ? "card" : paymentMethod;
+  // a pickup needs no address; a company still gives its address for the invoice
+  const needsAddress = !pickup || isCompany;
+  const {
+    shippingCents: shipping,
+    codFeeCents: codFee,
+    discountCents: discount,
+    totalCents: total,
+  } = orderCharges({
+    subtotalCents: subtotal,
+    pickup,
+    cod: payBy === "cod",
+    code: appliedCode,
+  });
+  const reasonText = (reasons: unknown) =>
+    (Array.isArray(reasons) ? reasons : [])
+      .map((r) =>
+        r === "ip"
+          ? t("reasonIp")
+          : r === "name"
+            ? t("reasonName")
+            : r === "account"
+              ? t("reasonAccount")
+              : r === "address"
+                ? t("reasonAddress")
+                : "",
+      )
+      .filter(Boolean)
+      .join(", ");
+  // the message for an error of the discount code
+  function codeError(data: {
+    error?: string;
+    reasons?: unknown;
+    minSubtotalCents?: number;
+  }): string {
+    switch (data.error) {
+      case "code_not_started":
+        return t("errorCodeNotStarted");
+      case "code_expired":
+        return t("errorCodeExpired");
+      case "code_min_subtotal":
+        return t("errorCodeMin", {
+          amount: formatPrice(data.minSubtotalCents ?? 0, currency, locale),
+        });
+      case "code_limit_reached":
+        return t("errorCodeLimit");
+      case "code_not_for_pickup":
+        return t("errorCodeNotForPickup");
+      case "code_reused":
+        return t("errorCodeReused", { reasons: reasonText(data.reasons) });
+      default:
+        return t("errorCodeInvalid");
+    }
+  }
+
+  async function applyCode() {
+    const value = codeInput.trim();
+    if (!value) return;
+    setCodeChecking(true);
+    setCodeMessage(null);
+    try {
+      const res = await fetch("/api/discount/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: value, subtotalCents: subtotal }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) {
+        setAppliedCode({
+          code: String(data.code),
+          removesCodFee: data.removesCodFee === true,
+        });
+        setCodeInput("");
+      } else if (res.status === 429) {
+        setCodeMessage(t("errorTooMany"));
+      } else {
+        setCodeMessage(codeError(data ?? {}));
+      }
+    } catch {
+      setCodeMessage(t("errorGeneric"));
+    }
+    setCodeChecking(false);
+  }
 
   const errorMessages: Record<string, string> = {
     out_of_stock: t("errorOutOfStock"),
@@ -145,7 +239,9 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           locale,
           termsAccepted,
-          paymentMethod,
+          paymentMethod: payBy,
+          deliveryMethod,
+          discountCode: !pickup && appliedCode ? appliedCode.code : "",
           captchaToken,
           customer: { ...form, isCompany },
           items: items.map((item) => ({
@@ -171,7 +267,12 @@ export default function CheckoutPage() {
         window.location.href = data.paymentUrl ?? data.redirectUrl;
         return;
       }
-      setError(errorMessages[data?.error] ?? t("errorGeneric"));
+      if (typeof data?.error === "string" && data.error.startsWith("code_")) {
+        setError(codeError(data));
+        if (data.error !== "code_reused") setAppliedCode(null);
+      } else {
+        setError(errorMessages[data?.error] ?? t("errorGeneric"));
+      }
       setErrorDetail(
         typeof data?.detail === "string" && data.detail ? data.detail : null,
       );
@@ -292,10 +393,54 @@ export default function CheckoutPage() {
               )}
             </section>
 
+            <section className="flex flex-col gap-3 rounded-2xl border border-cream-200 bg-white p-6">
+              <h2 className="font-display text-xl text-taupe-800">
+                {t("deliveryMethodHeading")}
+              </h2>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-cream-200 p-4 text-sm text-taupe-700">
+                <input
+                  type="radio"
+                  name="deliveryMethod"
+                  checked={!pickup}
+                  onChange={() => setDeliveryMethod("courier")}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-medium">{t("deliveryCourier")}</span>
+                  <span className="block text-xs text-taupe-500">
+                    {t("deliveryCourierNote")}
+                  </span>
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-cream-200 p-4 text-sm text-taupe-700">
+                <input
+                  type="radio"
+                  name="deliveryMethod"
+                  checked={pickup}
+                  onChange={() => setDeliveryMethod("pickup")}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-medium">{t("deliveryPickup")}</span>
+                  <span className="block text-xs text-taupe-500">
+                    {t("deliveryPickupNote", {
+                      address: `${PICKUP_STREET}, ${PICKUP_CITY}`,
+                    })}
+                  </span>
+                </span>
+              </label>
+            </section>
+
             <section className="flex flex-col gap-4 rounded-2xl border border-cream-200 bg-white p-6">
               <h2 className="font-display text-xl text-taupe-800">
-                {t("deliveryHeading")}
+                {needsAddress
+                  ? pickup
+                    ? t("billingHeading")
+                    : t("deliveryHeading")
+                  : t("notesHeading")}
               </h2>
+              {needsAddress && (
+                <>
               <Field label={t("addressLine")}>
                 <input
                   required
@@ -362,6 +507,8 @@ export default function CheckoutPage() {
                   )}
                 </Field>
               </div>
+                </>
+              )}
               <Field label={t("notes")}>
                 <textarea
                   rows={3}
@@ -381,7 +528,7 @@ export default function CheckoutPage() {
                 <input
                   type="radio"
                   name="paymentMethod"
-                  checked={paymentMethod === "card"}
+                  checked={payBy === "card"}
                   onChange={() => setPaymentMethod("card")}
                   className="mt-1"
                 />
@@ -392,6 +539,7 @@ export default function CheckoutPage() {
                   </span>
                 </span>
               </label>
+              {!pickup && (
               <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-cream-200 p-4 text-sm text-taupe-700">
                 <input
                   type="radio"
@@ -410,6 +558,7 @@ export default function CheckoutPage() {
                   </span>
                 </span>
               </label>
+              )}
             </section>
           </div>
 
@@ -471,15 +620,26 @@ export default function CheckoutPage() {
                 <span>{t("subtotal")}</span>
                 <span>{formatPrice(subtotal, currency, locale)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>{t("shipping")}</span>
-                <span>
-                  {shipping === 0
-                    ? t("shippingFree")
-                    : formatPrice(shipping, currency, locale)}
-                </span>
-              </div>
-              {shipping > 0 && (
+              {!pickup && (
+                <div className="flex justify-between">
+                  <span>{t("shipping")}</span>
+                  <span>
+                    {shipping === 0
+                      ? t("shippingFree")
+                      : formatPrice(shipping, currency, locale)}
+                  </span>
+                </div>
+              )}
+              {appliedCode && !pickup && discount > 0 && (
+                <div className="flex justify-between text-green-700">
+                  <span>{t("discountLine", { code: appliedCode.code })}</span>
+                  <span>
+                    {"\u2212"}
+                    {formatPrice(discount, currency, locale)}
+                  </span>
+                </div>
+              )}
+              {!pickup && shipping > 0 && (
                 <FreeShippingProgress
                   subtotalCents={subtotal}
                   currency={currency}
@@ -498,6 +658,61 @@ export default function CheckoutPage() {
                 <span>{formatPrice(total, currency, locale)}</span>
               </div>
             </div>
+
+            {!pickup && (
+              <div className="flex flex-col gap-2 border-t border-cream-200 pt-3 text-sm">
+                {appliedCode ? (
+                  <div className="flex items-center justify-between gap-2 rounded-lg bg-green-50 px-3 py-2 text-green-800">
+                    <span>{t("codeApplied", { code: appliedCode.code })}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAppliedCode(null)}
+                      className="text-xs font-medium underline"
+                    >
+                      {t("codeRemove")}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <label
+                      htmlFor="discount-code"
+                      className="font-medium text-taupe-700"
+                    >
+                      {t("codeHeading")}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="discount-code"
+                        value={codeInput}
+                        maxLength={40}
+                        autoComplete="off"
+                        autoCapitalize="characters"
+                        onChange={(e) => setCodeInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            applyCode();
+                          }
+                        }}
+                        placeholder={t("codePlaceholder")}
+                        className={`${inputClass} min-w-0 flex-1 uppercase placeholder:normal-case`}
+                      />
+                      <button
+                        type="button"
+                        onClick={applyCode}
+                        disabled={codeChecking || !codeInput.trim()}
+                        className="rounded-full border border-cream-300 bg-cream-200 px-4 py-2 text-sm font-semibold text-taupe-800 transition-colors hover:bg-cream-300 disabled:opacity-60"
+                      >
+                        {t("codeApply")}
+                      </button>
+                    </div>
+                  </>
+                )}
+                {codeMessage && (
+                  <p className="text-xs text-salamander-600">{codeMessage}</p>
+                )}
+              </div>
+            )}
 
             <label className="flex items-start gap-2 text-sm text-taupe-600">
               <input
@@ -544,11 +759,11 @@ export default function CheckoutPage() {
             >
               {submitting
                 ? t("redirecting")
-                : paymentMethod === "cod"
+                : payBy === "cod"
                   ? t("placeOrderCod")
                   : t("payButton")}
             </button>
-            {paymentMethod === "card" && (
+            {payBy === "card" && (
               <p className="text-xs text-taupe-400">{t("secureNote")}</p>
             )}
             <Link

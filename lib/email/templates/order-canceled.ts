@@ -1,4 +1,4 @@
-import { baseEmailHtml } from "./base";
+import { baseEmailHtml, contactHtml } from "./base";
 import { formatPrice } from "@/lib/format";
 
 type OrderCanceledInput = {
@@ -40,14 +40,10 @@ export function orderCanceledEmail(input: OrderCanceledInput) {
       ? `Ai plătit ${amount} cu cardul. Îți returnăm suma pe același card. Cât durează până apare în cont depinde de banca ta, de obicei câteva zile lucrătoare.`
       : `You paid ${amount} by card. We will return the amount to the same card. How long it takes to appear depends on your bank, usually a few working days.`;
 
-  const contact = isRo
-    ? 'Dacă ai întrebări, scrie-ne la <a href="mailto:contact@idesignstudio.ro" style="color:#C33F16;">contact@idesignstudio.ro</a>.'
-    : 'If you have questions, write to us at <a href="mailto:contact@idesignstudio.ro" style="color:#C33F16;">contact@idesignstudio.ro</a>.';
-
   const body = `<h1 style="font-size:20px;color:#3D332E;margin:0 0 12px;">${heading}</h1>
        <p style="margin:0 0 16px;">${intro}</p>
        <p style="margin:0 0 16px;">${money}</p>
-       <p style="margin:20px 0 0;font-size:13px;color:#6B5D54;">${contact}</p>`;
+       ${contactHtml(isRo)}`;
 
   return { subject, html: baseEmailHtml(body) };
 }

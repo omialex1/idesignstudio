@@ -131,7 +131,10 @@ export async function getColorMainIds(): Promise<string[]> {
 
 export async function getOrdersForAdmin() {
   return prisma.order.findMany({
-    include: { items: true },
+    include: {
+      items: true,
+      changes: { orderBy: { createdAt: "desc" } },
+    },
     orderBy: { createdAt: "desc" },
   });
 }

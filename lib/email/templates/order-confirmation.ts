@@ -1,6 +1,7 @@
-import { baseEmailHtml } from "./base";
+import { baseEmailHtml, contactHtml } from "./base";
 import { escapeHtml } from "../html";
 import { formatPrice } from "@/lib/format";
+import { PICKUP_STREET, PICKUP_CITY } from "@/lib/pickup";
 
 type OrderConfirmationInput = {
   locale: string;
@@ -16,6 +17,10 @@ type OrderConfirmationInput = {
   totalCents: number;
   currency: string;
   paymentMethod: "CARD" | "COD";
+  // collected from the studio instead of delivered
+  pickup?: boolean;
+  // a discount code that waived the shipping (and maybe the cash-on-delivery fee)
+  discountCode?: string | null;
   // link to this order in the customer's account (only for logged-in orders)
   orderUrl?: string;
 };
@@ -47,20 +52,36 @@ export function orderConfirmationEmail(input: OrderConfirmationInput) {
     )
     .join("");
 
-  const shippingLabel = isRo ? "Livrare" : "Shipping";
+  const pickup = input.pickup === true;
+  const shippingLabel = pickup
+    ? isRo
+      ? "Ridicare personală"
+      : "Personal pickup"
+    : isRo
+      ? "Livrare"
+      : "Shipping";
   const shippingValue =
     shippingCents === 0 ? (isRo ? "Gratuit" : "Free") : money(shippingCents);
+  const codeNote = input.discountCode
+    ? `<tr><td colspan="2" style="padding:0 0 8px;font-size:12px;color:#85766A;">${isRo ? "Cod folosit" : "Code used"}: ${escapeHtml(input.discountCode)}</td></tr>`
+    : "";
   const codRow =
     codFeeCents > 0
       ? `<tr><td style="padding:8px 0;">${isRo ? "Taxă ramburs" : "Cash on delivery fee"}</td><td style="padding:8px 0;text-align:right;">${money(codFeeCents)}</td></tr>`
       : "";
 
   const tableBody = `${rows}
-         <tr><td style="padding:8px 0;">${shippingLabel}</td><td style="padding:8px 0;text-align:right;">${shippingValue}</td></tr>
+         ${pickup ? "" : `<tr><td style="padding:8px 0;">${shippingLabel}</td><td style="padding:8px 0;text-align:right;">${shippingValue}</td></tr>`}
+         ${codeNote}
          ${codRow}
          <tr><td style="padding-top:12px;font-weight:600;">Total</td><td style="padding-top:12px;font-weight:600;text-align:right;">${money(totalCents)}</td></tr>`;
 
-  const intro = isRo
+  const place = `${PICKUP_STREET}, ${PICKUP_CITY}`;
+  const intro = pickup
+    ? isRo
+      ? `Comanda #${shortId} a fost confirmată. O ridici personal de la ${place}. Produsele sunt făcute la comandă; îți scriem un email când sunt gata de ridicat.`
+      : `Order #${shortId} is confirmed. You collect it in person at ${place}. Items are made to order; we will email you when it is ready for pickup.`
+    : isRo
     ? isCod
       ? `Comanda #${shortId} a fost înregistrată. Plătești curierului, în numerar, ${money(totalCents)} la primirea coletului. Produsele sunt făcute la comandă; te vom anunța când pleacă spre tine.`
       : `Comanda #${shortId} a fost confirmată. Produsele sunt făcute la comandă; te vom anunța când pleacă spre tine.`
@@ -89,6 +110,7 @@ export function orderConfirmationEmail(input: OrderConfirmationInput) {
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">${tableBody}
        </table>
        ${accountLink}
+       ${contactHtml(isRo)}
        <p style="margin:20px 0 0;font-size:13px;color:#6B5D54;">${withdrawalNote}</p>`;
 
   return { subject, html: baseEmailHtml(body) };
